@@ -14,7 +14,10 @@
   "author": "Pierre Vigier <pierre.vigier@ymail.com>",
   "license": "GPL",
   "devDependencies": {
-    "electron": "^3.0.11"
+    "electron": "^3.0.11",
+    "electron-rebuild": "^1.8.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "nodegit": "^0.23.0"
+  }
 }

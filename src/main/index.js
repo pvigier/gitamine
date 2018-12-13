@@ -20,3 +20,6 @@ app.on('ready', () => {
   
 });
 
+// Menu
+
+require('./menu')

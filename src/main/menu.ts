@@ -1,6 +1,6 @@
 import { Menu, dialog } from 'electron';
 
-export function setMenu(): void {
+export function setMenu(mainWindow: Electron.BrowserWindow): void {
   const template = [
     {
       label: 'File',
@@ -11,6 +11,7 @@ export function setMenu(): void {
           click: function() {
             let paths = dialog.showOpenDialog({properties: ['openDirectory']});
             if (paths) {
+              mainWindow.webContents.send('open-repo', paths[0]);
             }
           }
         },

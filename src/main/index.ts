@@ -21,7 +21,7 @@ const createWindow = async () => {
   });
 
   // Set the menu
-  setMenu();
+  setMenu(mainWindow);
 
   // Load the index.html of the app
   mainWindow.loadURL(`file://${__dirname}/../renderer/index.html`);

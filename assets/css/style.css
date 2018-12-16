@@ -28,3 +28,34 @@ div.graph-viewer {
   height: calc(100% - 50px);
   overflow-y: scroll;
 }
+
+div.commit-graph {
+  width: 50%;
+  display: inline-block;
+}
+
+div.commit-graph canvas {
+  display: block;
+  float: right;
+}
+
+div.commit-list {
+  width: 50%;
+  display: inline-block;
+}
+
+div.commit-list ul {
+  margin: 0px;
+  padding-left: 20px;
+  list-style: none;
+  line-height: 22px;
+}
+
+div.commit-list li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 22px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}

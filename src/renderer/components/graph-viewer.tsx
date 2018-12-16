@@ -41,8 +41,12 @@ export class GraphViewer extends React.Component<GraphViewerProps, GraphViewerSt
     ));
     return (
       <div className='graph-viewer'>
-        <GraphCanvas commits={this.state.commits} />
-        <ul>{items}</ul>
+        <div className='commit-graph'>
+          <GraphCanvas commits={this.state.commits} />
+        </div>
+        <div className='commit-list'>
+          <ul>{items}</ul>
+        </div>
       </div>
     );
   }

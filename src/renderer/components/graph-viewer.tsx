@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { CommitItem } from './commit-item';
+import { GraphCanvas } from './graph-canvas';
 
 export interface GraphViewerProps { repo: Git.Repository; }
 export interface GraphViewerState { commits: Git.Commit[]; }
@@ -14,7 +15,7 @@ export class GraphViewer extends React.Component<GraphViewerProps, GraphViewerSt
     this.getAllCommitsOnMaster();
   }
 
-  getAllCommitsOnMaster(): void {
+  getAllCommitsOnMaster() {
     this.props.repo.getMasterCommit()
       .then((firstCommitOnMaster: Git.Commit) => {
         let commits = [];
@@ -40,6 +41,7 @@ export class GraphViewer extends React.Component<GraphViewerProps, GraphViewerSt
     ));
     return (
       <div className='graph-viewer'>
+        <GraphCanvas commits={this.state.commits} />
         <ul>{items}</ul>
       </div>
     );

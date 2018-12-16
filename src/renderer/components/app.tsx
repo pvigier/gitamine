@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { RepoDashboard } from './repo-dashboard'
+import { RepoDashboard } from './repo-dashboard';
 
 export interface AppState { repos: Git.Repository[]; }
 
@@ -24,7 +24,7 @@ export class App extends React.Component<{}, AppState> {
   }
 
   render() {
-    let repoDashboards = this.state.repos.map((repo: Git.Repository) => <RepoDashboard repo={repo} key={repo.path()} />);
+    const repoDashboards = this.state.repos.map((repo: Git.Repository) => <RepoDashboard repo={repo} key={repo.path()} />);
     return (
       <div id='app'>
         {repoDashboards}

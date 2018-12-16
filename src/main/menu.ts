@@ -1,6 +1,6 @@
 import { Menu, dialog } from 'electron';
 
-export function setMenu(mainWindow: Electron.BrowserWindow): void {
+export function setMenu(mainWindow: Electron.BrowserWindow) {
   const template = [
     {
       label: 'File',

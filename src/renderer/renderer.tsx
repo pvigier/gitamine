@@ -5,9 +5,9 @@ import * as Git from 'nodegit';
 import { AppContainer } from 'react-hot-loader';
 import { App } from './components/app';
 
-let render = () => {
+function render() {
   ReactDOM.render(<AppContainer><App /></AppContainer>, document.getElementById('container'));
-};
+}
 
 render();
 if (module.hot) { module.hot.accept(render); }
@@ -15,7 +15,6 @@ if (module.hot) { module.hot.accept(render); }
 // Events
 
 ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
-  console.log(event, path);
   Git.Repository.open(path)
     .then(function(repo: Git.Repository) {
       if (App.instance) {

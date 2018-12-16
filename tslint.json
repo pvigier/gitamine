@@ -4,7 +4,7 @@
     "eofline": false,
     "align": [true, "parameters"],
     "class-name": true,
-    "indent": [true, "spaces"],
+    "indent": [true, "spaces", 2],
     "max-line-length": [true, 150],
     "no-consecutive-blank-lines": [true],
     "no-trailing-whitespace": true,
@@ -35,6 +35,6 @@
       "check-decl",
       "check-operator",
       "check-separator",
-      "check-type"]
+      "check-type"],
   }
 }

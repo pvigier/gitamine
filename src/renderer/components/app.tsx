@@ -26,8 +26,7 @@ export class App extends React.Component<{}, AppState> {
   render() {
     let repoDashboards = this.state.repos.map((repo: Git.Repository) => <RepoDashboard repo={repo} key={repo.path()} />);
     return (
-      <div>
-        <h2>Welcome to gitamine!</h2>
+      <div id='app'>
         {repoDashboards}
       </div>
     );

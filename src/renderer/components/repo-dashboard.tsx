@@ -7,8 +7,10 @@ export interface RepoDashboardProps { repo: Git.Repository; }
 export class RepoDashboard extends React.Component<RepoDashboardProps, {}> {
   render() {
     return (
-      <div>
-        <h1>{this.props.repo.path()}</h1>
+      <div className='repo-dashboard'>
+        <div className='repo-header'>
+          <h1>{this.props.repo.path()}</h1>
+        </div>
         <GraphViewer repo={this.props.repo}/>
       </div>
     );

@@ -38,6 +38,10 @@ export class GraphViewer extends React.Component<GraphViewerProps, GraphViewerSt
     const items = this.state.commits.map((commit: Git.Commit) => (
       <CommitItem commit={commit} key={commit.sha()} />
     ));
-    return <ul>{items}</ul>;
+    return (
+      <div className='graph-viewer'>
+        <ul>{items}</ul>
+      </div>
+    );
   }
 }

@@ -6,7 +6,7 @@ import { AppContainer } from 'react-hot-loader';
 import { App } from './components/app';
 
 let render = () => {
-  ReactDOM.render(<AppContainer><App /></AppContainer>, document.getElementById('app'));
+  ReactDOM.render(<AppContainer><App /></AppContainer>, document.getElementById('container'));
 };
 
 render();

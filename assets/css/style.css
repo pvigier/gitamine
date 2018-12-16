@@ -7,3 +7,24 @@ div#container {
   height: 100vh;
   width: 100vw;
 } 
+
+div#app {
+  height: 100%;
+}
+
+div.repo-dashboard {
+  height: 100%;
+}
+
+div.repo-header {
+  height: 50px;
+}
+
+div.repo-header h1 {
+  margin: 0px;
+}
+
+div.graph-viewer {
+  height: calc(100% - 50px);
+  overflow-y: scroll;
+}

@@ -9,7 +9,7 @@ export function setMenu(mainWindow: Electron.BrowserWindow): void {
           label: 'Open repo',
           accelerator: 'CmdOrCtrl+O',
           click: function() {
-            let paths = dialog.showOpenDialog({properties: ['openDirectory']});
+            let paths = dialog.showOpenDialog(mainWindow, {properties: ['openDirectory']});
             if (paths) {
               mainWindow.webContents.send('open-repo', paths[0]);
             }

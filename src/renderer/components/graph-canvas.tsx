@@ -2,6 +2,9 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 
 enum ChildrenType {Commit, Merge}
+const RADIUS = 11;
+const OFFSET_X = 2 * RADIUS;
+const OFFSET_Y = 28;
 
 export interface GraphCanvasProps { commits: Git.Commit[]; }
 
@@ -83,7 +86,7 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
       let j = -1;
       const commitSha = commit.sha();
       //console.log('commit: ', commitSha);
-      const children = this.children.get(commit.sha()) as string[];
+      const children = this.children.get(commit.sha()) as [string, ChildrenType][];
       //console.log('children: ', children);
       // Find a commit to replace
       let commitToReplace: string | null = null;
@@ -112,28 +115,31 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
       //console.log('branches: ', branches);
       ++i;
     }
-    this.width = branches.length * 22;
-    this.height = this.props.commits.length * 28;
+    this.width = branches.length * OFFSET_X;
+    this.height = this.props.commits.length * OFFSET_Y;
+  }
+
+  computeNodeCenterCoordinates(i: number, j: number) {
+    return [j * OFFSET_X + RADIUS, 3 + i * OFFSET_Y + RADIUS]
   }
 
   drawNodes(ctx: CanvasRenderingContext2D) {
     for (let [commitSha, [i, j]] of this.positions) {
+      const [x, y] = this.computeNodeCenterCoordinates(i, j);
       ctx.fillStyle = 'green';
       ctx.beginPath();
-      ctx.arc(j * 22 + 11, 3 + i * 28 + 11, 11, 0, Math.PI * 2, true);
+      ctx.arc(x, y, RADIUS, 0, 2 * Math.PI, true);
       ctx.fill();
     }
   }
 
   drawEdges(ctx: CanvasRenderingContext2D) {
     for (let [commitSha, [i0, j0]] of this.positions) {
-      const x0 = j0 * 22 + 11;
-      const y0 = 3 + i0 * 28 + 11;
+      const [x0, y0] = this.computeNodeCenterCoordinates(i0, j0);
       ctx.beginPath();
       for (let [childSha, type] of this.children.get(commitSha) as [string, ChildrenType][]) {
         const [i1, j1] = this.positions.get(childSha) as [number, number];
-        const x1 = j1 * 22 + 11;
-        const y1 = 3 + i1 * 28 + 11;
+        const [x1, y1] = this.computeNodeCenterCoordinates(i1, j1);
         if (type === ChildrenType.Commit) {
           ctx.moveTo(x0, y0);
           ctx.lineTo(x1, y0);

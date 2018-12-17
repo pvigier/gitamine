@@ -140,15 +140,25 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
       for (let [childSha, type] of this.children.get(commitSha) as [string, ChildrenType][]) {
         const [i1, j1] = this.positions.get(childSha) as [number, number];
         const [x1, y1] = this.computeNodeCenterCoordinates(i1, j1);
+        ctx.moveTo(x0, y0);
         if (type === ChildrenType.Commit) {
-          ctx.moveTo(x0, y0);
-          ctx.lineTo(x1, y0);
-          ctx.lineTo(x1, y1);
+          if (x0 < x1) {
+            ctx.lineTo(x1 - RADIUS, y0);
+            ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
+          } else {
+            ctx.lineTo(x1 + RADIUS, y0);
+            ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
+          }
         } else {
-          ctx.moveTo(x0, y0);
-          ctx.lineTo(x0, y1);
-          ctx.lineTo(x1, y1);
+          if (x0 < x1) {
+            ctx.lineTo(x0, y1 + RADIUS);
+            ctx.quadraticCurveTo(x0, y1, x0 + RADIUS, y1);
+          } else {
+            ctx.lineTo(x0, y1 + RADIUS);
+            ctx.quadraticCurveTo(x0, y1, x0 - RADIUS, y1);
+          }
         }
+        ctx.lineTo(x1, y1);
       }
       ctx.stroke();
     }

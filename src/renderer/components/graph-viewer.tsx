@@ -18,7 +18,7 @@ export class GraphViewer extends React.Component<GraphViewerProps, GraphViewerSt
 
   getAllCommits(references: Map<string, Git.Commit>) {
     const walker = Git.Revwalk.create(this.props.repo);
-    //walker.sorting(Git.Revwalk.SORT.TIME);
+    walker.sorting(Git.Revwalk.SORT.TOPOLOGICAL);
     for (let name of references.keys()) {
       walker.pushRef(name); 
     }

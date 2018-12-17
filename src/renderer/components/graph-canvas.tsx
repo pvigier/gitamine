@@ -1,12 +1,14 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 
+enum ChildrenType {Commit, Merge}
+
 export interface GraphCanvasProps { commits: Git.Commit[]; }
 
 export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
   canvas: HTMLCanvasElement | null;
   parents: Map<string, string[]>;
-  children: Map<string, string[]>;
+  children: Map<string, [string, ChildrenType][]>;
   positions: Map<string, [number, number]>
   width: number;
   height: number;
@@ -25,13 +27,11 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
 
   componentDidUpdate() {
     this.parents = new Map<string, string[]>();
-    this.children = new Map<string, string[]>();
+    this.children = new Map<string, [string, ChildrenType][]>();
     this.positions = new Map<string, [number, number]>();
     this.getParents()
       .then(() => {
-        console.log(this.parents);
         this.updateChildren();
-        console.log(this.children);
         this.computePositions();
         this.drawGraph();
       });
@@ -40,7 +40,6 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
   getParents() {
     const promises = this.props.commits.map((commit) => {
       return commit.getParents(Infinity).then((parents) => {
-        console.log(commit, parents);
         this.parents.set(commit.sha(), parents.map(commit => commit.sha()));
       })
     });
@@ -53,7 +52,11 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
     }
     for (let [child, parents] of this.parents) {
       for (let parent of parents) {
-        this.children.get(parent)!.push(child);
+        if (parents.length == 1) {
+          this.children.get(parent)!.push([child, ChildrenType.Commit]);
+        } else {
+          this.children.get(parent)!.push([child, ChildrenType.Merge]);
+        }
       }
     }
   }
@@ -80,7 +83,7 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
       //console.log('children: ', children);
       // Find a commit to replace
       let commitToReplace: string | null = null;
-      for (let childSha of children) {
+      for (let [childSha, type] of children) {
         if (this.parents.get(childSha)![0] === commitSha) {
           commitToReplace = childSha;
           break;
@@ -94,7 +97,7 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
         j = insertCommit(commitSha);
       }
       // Remove children from active branches
-      for (let childSha of children) {
+      for (let [childSha, type] of children) {
         if (childSha != commitToReplace && this.parents.get(childSha)![0] === commitSha) {
           branches[branches.indexOf(childSha)] = null;
         }
@@ -123,16 +126,22 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
     for (let [commitSha, [i0, j0]] of this.positions) {
       const x0 = j0 * 22 + 11;
       const y0 = 3 + i0 * 28 + 11;
-      for (let childSha of this.children.get(commitSha) as string[]) {
+      ctx.beginPath();
+      for (let [childSha, type] of this.children.get(commitSha) as [string, ChildrenType][]) {
         const [i1, j1] = this.positions.get(childSha) as [number, number];
         const x1 = j1 * 22 + 11;
         const y1 = 3 + i1 * 28 + 11;
-        ctx.beginPath();
-        ctx.moveTo(x0, y0);
-        ctx.lineTo(x1, y0);
-        ctx.lineTo(x1, y1);
-        ctx.stroke();
+        if (type === ChildrenType.Commit) {
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x1, y0);
+          ctx.lineTo(x1, y1);
+        } else {
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x0, y1);
+          ctx.lineTo(x1, y1);
+        }
       }
+      ctx.stroke();
     }
   }
 

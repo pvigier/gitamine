@@ -63,12 +63,16 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
 
   computePositions() {
     function insertCommit(commit: string) {
+      // Try to insert next to an active branch
       for (let i = 0; i < branches.length; ++i) {
-        if (branches[i] === null) {
-          branches[i] = commit;
-          return i;
-        }
+        if (branches[i] === null &&
+          ((i > 0 && branches[i - 1] !== null) ||
+          (i < branches.length - 1 && branches[i + 1] !== null))) {
+            branches[i] = commit;
+            return i;
+          }
       }
+      // If it is not possible, make the graph wider
       branches.push(commit);
       return branches.length - 1;
     }
@@ -106,10 +110,9 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
       this.positions.set(commit.sha(), [i, j]);
       //console.log('j: ', j);
       //console.log('branches: ', branches);
-      this.width = Math.max(this.width, j);
       ++i;
     }
-    this.width = (this.width + 1) * 22;
+    this.width = branches.length * 22;
     this.height = this.props.commits.length * 28;
   }
 

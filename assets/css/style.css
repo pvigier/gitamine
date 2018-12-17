@@ -27,11 +27,13 @@ div.repo-header h1 {
 div.graph-viewer {
   height: calc(100% - 50px);
   overflow-y: scroll;
+  position: relative;
 }
 
 div.commit-graph {
   width: 50%;
-  display: inline-block;
+  position: absolute;
+  z-index: 2;
 }
 
 div.commit-graph canvas {
@@ -40,13 +42,15 @@ div.commit-graph canvas {
 }
 
 div.commit-list {
-  width: 50%;
-  display: inline-block;
+  width: 100%;
+  position: absolute;
+  left: 0px;
+  z-index: 1;
 }
 
 div.commit-list ul {
   margin: 0px;
-  padding-left: 20px;
+  padding-left: 0px;
   list-style: none;
   line-height: 22px;
 }
@@ -56,6 +60,11 @@ div.commit-list li {
   overflow: hidden;
   text-overflow: ellipsis;
   height: 22px;
+  padding-left: calc(50% + 20px);
   padding-top: 3px;
   padding-bottom: 3px;
+}
+
+div.commit-list li:hover {
+  background: #eee;
 }

@@ -14,11 +14,11 @@ export class CommitViewer extends React.Component<CommitViewerProps, {}> {
           <p>{commit.sha()}</p>
           <p>Authored {authoredDate.toString()} by {commit.author().name()}</p>
           <p>Last modified {commit.date().toString()}</p>
-          <p>Parents: {commit.parents().toString()}</p>
+          <p>Parents: {commit.parents().map((sha) => sha.tostrS().substr(0, 8)).toString()}</p>
         </div>
       );
     } else {
-      return <div className='commit-viewer'><p>Commit</p></div>;
+      return <div className='commit-viewer'></div>;
     }
   }
 }

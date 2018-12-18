@@ -5,6 +5,26 @@ const RADIUS = 11;
 const OFFSET_X = 2 * RADIUS;
 const OFFSET_Y = 28;
 
+const COLORS = [
+  'DarkBlue', 
+  'DarkCyan', 
+  'DarkGoldenRod', 
+  'DarkGrey', 
+  'DarkGreen', 
+  'DarkKhaki', 
+  'DarkMagenta', 
+  'DarkOliveGreen', 
+  'DarkOrange', 
+  'DarkOrchid', 
+  'DarkRed', 
+  'DarkSalmon', 
+  'DarkSeaGreen', 
+  'DarkSlateBlue', 
+  'DarkSlateGrey', 
+  'DarkTurquoise', 
+  'DarkViolet', 
+]
+
 export interface GraphCanvasProps { repo: Repository; }
 
 export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
@@ -70,8 +90,8 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
         branches[j] = commitSha;
       } else {
         if (children.length > 0) {
-          const [childSha, type] = children[0];
-          const [iChild, jChild] = this.positions.get(childSha)!;
+          const childSha = children[0][0];
+          const jChild = this.positions.get(childSha)![1];
           j = insertCommit(commitSha, jChild);
         } else {
           // TODO: Find a better value for i
@@ -99,7 +119,7 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
   drawNodes(ctx: CanvasRenderingContext2D) {
     for (let [commitSha, [i, j]] of this.positions) {
       const [x, y] = this.computeNodeCenterCoordinates(i, j);
-      ctx.fillStyle = 'green';
+      ctx.fillStyle = COLORS[j % COLORS.length];
       ctx.beginPath();
       ctx.arc(x, y, RADIUS, 0, 2 * Math.PI, true);
       ctx.fill();

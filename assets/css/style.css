@@ -25,15 +25,18 @@ div.repo-header h1 {
 }
 
 div.graph-viewer {
+  width: calc(100% - 300px);
   height: calc(100% - 50px);
   overflow-y: scroll;
   position: relative;
+  float: left;
 }
 
 div.commit-graph {
   width: 50%;
   position: absolute;
   z-index: 2;
+  pointer-events: none;
 }
 
 div.commit-graph canvas {
@@ -67,4 +70,9 @@ div.commit-list li {
 
 div.commit-list li:hover {
   background: #eee;
+}
+
+div.commit-viewer {
+  width: 300px;
+  float: right;
 }

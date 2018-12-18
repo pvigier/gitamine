@@ -6,13 +6,13 @@ import { Repository } from '../repository';
 
 export interface GraphViewerProps { 
   repo: Repository;
-
+  onCommitSelect: (commit: Git.Commit) => void;
 }
 
 export class GraphViewer extends React.Component<GraphViewerProps, {}> {
   render() {
     const items = this.props.repo.commits.map((commit: Git.Commit) => (
-      <CommitItem commit={commit} key={commit.sha()} />
+      <CommitItem commit={commit} onCommitSelect={this.props.onCommitSelect} key={commit.sha()} />
     ));
     return (
       <div className='graph-viewer'>

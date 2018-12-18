@@ -36,6 +36,7 @@ export class Repository {
             this.getAllCommits().then(() => {
               this.getParents().then(() => {
                 this.updateChildren();
+                this.topologicalSort();
                 onReady();
               });
             });
@@ -56,6 +57,26 @@ export class Repository {
           this.shaToCommit.set(commit.sha(), commit);
         }
       });
+  }
+
+  topologicalSort() {
+    const dfs = (commit: Git.Commit) => {
+      if (alreadySeen.get(commit.sha())) {
+        return;
+      }
+      alreadySeen.set(commit.sha(), true);
+      for (let [childSha, type] of this.children.get(commit.sha())!) {
+        dfs(this.shaToCommit.get(childSha)!);
+      }
+      sortedCommits.push(commit);
+    }
+
+    const sortedCommits: Git.Commit[] = [];
+    const alreadySeen = new Map<string, boolean>();
+    for (let commit of this.commits) {
+      dfs(commit);
+    }
+    this.commits = sortedCommits;
   }
 
   getParents() {

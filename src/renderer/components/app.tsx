@@ -1,8 +1,8 @@
 import * as React from 'react';
-import * as Git from 'nodegit';
 import { RepoDashboard } from './repo-dashboard';
+import { Repository } from '../repository';
 
-export interface AppState { repos: Git.Repository[]; }
+export interface AppState { repos: Repository[]; }
 
 export class App extends React.Component<{}, AppState> {
   static instance: App | null = null;
@@ -17,14 +17,14 @@ export class App extends React.Component<{}, AppState> {
     App.instance = this;
   }
 
-  addRepo(repo: Git.Repository) {
+  addRepo(repo: Repository) {
     this.setState((state: AppState): AppState => ({
       repos: state.repos.concat([repo])
     }));
   }
 
   render() {
-    const repoDashboards = this.state.repos.map((repo: Git.Repository) => <RepoDashboard repo={repo} key={repo.path()} />);
+    const repoDashboards = this.state.repos.map((repo: Repository) => <RepoDashboard repo={repo} key={repo.repo.path()} />);
     return (
       <div id='app'>
         {repoDashboards}

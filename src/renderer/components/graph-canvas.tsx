@@ -1,17 +1,14 @@
 import * as React from 'react';
-import * as Git from 'nodegit';
+import { Repository, ChildrenType } from '../repository';
 
-enum ChildrenType {Commit, Merge}
 const RADIUS = 11;
 const OFFSET_X = 2 * RADIUS;
 const OFFSET_Y = 28;
 
-export interface GraphCanvasProps { commits: Git.Commit[]; }
+export interface GraphCanvasProps { repo: Repository; }
 
 export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
   canvas: HTMLCanvasElement | null;
-  parents: Map<string, string[]>;
-  children: Map<string, [string, ChildrenType][]>;
   positions: Map<string, [number, number]>
   width: number;
   height: number;
@@ -25,42 +22,9 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
 
     this.setCanvasRef = (element: HTMLCanvasElement) => {
       this.canvas = element;
-    }
-  }
-
-  componentDidUpdate() {
-    this.parents = new Map<string, string[]>();
-    this.children = new Map<string, [string, ChildrenType][]>();
-    this.positions = new Map<string, [number, number]>();
-    this.getParents()
-      .then(() => {
-        this.updateChildren();
-        this.computePositions();
-        this.drawGraph();
-      });
-  }
-
-  getParents() {
-    const promises = this.props.commits.map((commit) => {
-      return commit.getParents(Infinity).then((parents) => {
-        this.parents.set(commit.sha(), parents.map(commit => commit.sha()));
-      })
-    });
-    return Promise.all(promises)
-  }
-
-  updateChildren() {
-    for (let commit of this.props.commits) {
-      this.children.set(commit.sha(), []);
-    }
-    for (let [child, parents] of this.parents) {
-      for (let parent of parents) {
-        if (parents.length == 1) {
-          this.children.get(parent)!.push([child, ChildrenType.Commit]);
-        } else {
-          this.children.get(parent)!.push([child, ChildrenType.Merge]);
-        }
-      }
+      this.positions = new Map<string, [number, number]>();
+      this.computePositions();
+      this.drawGraph();
     }
   }
 
@@ -80,18 +44,19 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
       return branches.length - 1;
     }
 
+    const repo = this.props.repo;
     let i = 0;
     const branches: (string | null)[] = [];
-    for (let commit of this.props.commits) {
+    for (let commit of repo.commits) {
       let j = -1;
       const commitSha = commit.sha();
-      //console.log('commit: ', commitSha);
-      const children = this.children.get(commit.sha()) as [string, ChildrenType][];
+      //console.log('commit: ', commitSha, ' ', commit.date());
+      const children = repo.children.get(commit.sha()) as [string, ChildrenType][];
       //console.log('children: ', children);
       // Find a commit to replace
       let commitToReplace: string | null = null;
       for (let [childSha, type] of children) {
-        if (this.parents.get(childSha)![0] === commitSha) {
+        if (repo.parents.get(childSha)![0] === commitSha) {
           commitToReplace = childSha;
           break;
         }
@@ -105,18 +70,16 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
       }
       // Remove children from active branches
       for (let [childSha, type] of children) {
-        if (childSha != commitToReplace && this.parents.get(childSha)![0] === commitSha) {
+        if (childSha != commitToReplace && repo.parents.get(childSha)![0] === commitSha) {
           branches[branches.indexOf(childSha)] = null;
         }
       }
-      // TO DO: remove extra nulls at the end of the list
       this.positions.set(commit.sha(), [i, j]);
-      //console.log('j: ', j);
       //console.log('branches: ', branches);
       ++i;
     }
     this.width = branches.length * OFFSET_X;
-    this.height = this.props.commits.length * OFFSET_Y;
+    this.height = repo.commits.length * OFFSET_Y;
   }
 
   computeNodeCenterCoordinates(i: number, j: number) {
@@ -134,10 +97,11 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
   }
 
   drawEdges(ctx: CanvasRenderingContext2D) {
+    const repo = this.props.repo;
     for (let [commitSha, [i0, j0]] of this.positions) {
       const [x0, y0] = this.computeNodeCenterCoordinates(i0, j0);
       ctx.beginPath();
-      for (let [childSha, type] of this.children.get(commitSha) as [string, ChildrenType][]) {
+      for (let [childSha, type] of repo.children.get(commitSha) as [string, ChildrenType][]) {
         const [i1, j1] = this.positions.get(childSha) as [number, number];
         const [x1, y1] = this.computeNodeCenterCoordinates(i1, j1);
         ctx.moveTo(x0, y0);

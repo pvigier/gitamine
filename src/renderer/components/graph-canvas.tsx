@@ -29,17 +29,20 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
   }
 
   computePositions() {
-    function insertCommit(commit: string) {
-      // Try to insert next to an active branch
-      for (let i = 0; i < branches.length; ++i) {
-        if (branches[i] === null &&
-          ((i > 0 && branches[i - 1] !== null) ||
-          (i < branches.length - 1 && branches[i + 1] !== null))) {
-            branches[i] = commit;
-            return i;
-          }
+    function insertCommit(commit: string, i: number) {
+      // Try to insert as close as possible to i
+      let di = 1;
+      while (i - di >= 0 || i + di < branches.length) {
+        if (i + di < branches.length && branches[i + di] === null) {
+          branches[i + di] = commit;
+          return i + di;
+        } else if (i - di >= 0 && branches[i - di] === null) {
+          branches[i - di] = commit;
+          return i - di;
+        }
+        ++di;
       }
-      // If it is not possible, make the graph wider
+      // If it is not possible to find an available position, insert at the end
       branches.push(commit);
       return branches.length - 1;
     }
@@ -66,7 +69,14 @@ export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
         j = branches.indexOf(commitToReplace);
         branches[j] = commitSha;
       } else {
-        j = insertCommit(commitSha);
+        if (children.length > 0) {
+          const [childSha, type] = children[0];
+          const [iChild, jChild] = this.positions.get(childSha)!;
+          j = insertCommit(commitSha, jChild);
+        } else {
+          // TODO: Find a better value for i
+          j = insertCommit(commitSha, 0);
+        }
       }
       // Remove children from active branches
       for (let [childSha, type] of children) {

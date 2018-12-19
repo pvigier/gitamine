@@ -2,10 +2,10 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { CommitItem } from './commit-item';
 import { GraphCanvas } from './graph-canvas';
-import { Repository } from '../repository';
+import { RepoState } from "../repo-state";
 
 export interface GraphViewerProps { 
-  repo: Repository;
+  repo: RepoState;
   onCommitSelect: (commit: Git.Commit) => void;
 }
 

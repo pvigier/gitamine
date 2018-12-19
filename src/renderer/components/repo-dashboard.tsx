@@ -2,9 +2,9 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { GraphViewer } from './graph-viewer';
 import { CommitViewer } from './commit-viewer';
-import { Repository } from '../repository';
+import { RepoState } from "../repo-state";
 
-export interface RepoDashboardProps { repo: Repository; }
+export interface RepoDashboardProps { repo: RepoState; }
 export interface RepoDashboardState { selectedCommit: Git.Commit | null; }
 
 export class RepoDashboard extends React.Component<RepoDashboardProps, RepoDashboardState> {

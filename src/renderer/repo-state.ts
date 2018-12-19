@@ -2,7 +2,7 @@ import * as Git from 'nodegit';
 
 export enum ChildrenType {Commit, Merge}
 
-export class Repository {
+export class RepoState {
   repo: Git.Repository;
   commits: Git.Commit[];
   shaToCommit: Map<string, Git.Commit>;

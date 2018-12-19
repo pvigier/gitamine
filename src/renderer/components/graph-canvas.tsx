@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Repository, ChildrenType } from '../repository';
+import { RepoState, ChildrenType } from '../repo-state';
 
 const RADIUS = 11;
 const OFFSET_X = 2 * RADIUS;
@@ -25,7 +25,7 @@ const COLORS = [
   'DarkViolet', 
 ]
 
-export interface GraphCanvasProps { repo: Repository; }
+export interface GraphCanvasProps { repo: RepoState; }
 
 export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
   canvas: HTMLCanvasElement | null;

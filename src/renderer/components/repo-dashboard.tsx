@@ -26,7 +26,7 @@ export class RepoDashboard extends React.Component<RepoDashboardProps, RepoDashb
     return (
       <div className='repo-dashboard'>
         <div className='repo-header'>
-          <h1>{this.props.repo.repo.path()}</h1>
+          <h1>{this.props.repo.name}</h1>
         </div>
         <GraphViewer repo={this.props.repo} onCommitSelect={this.handleCommitSelect} />
         <CommitViewer commit={this.state.selectedCommit} />

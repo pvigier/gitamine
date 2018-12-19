@@ -24,7 +24,7 @@ export class App extends React.Component<{}, AppState> {
   }
 
   render() {
-    const repoDashboards = this.state.repos.map((repo: RepoState) => <RepoDashboard repo={repo} key={repo.repo.path()} />);
+    const repoDashboards = this.state.repos.map((repo: RepoState) => <RepoDashboard repo={repo} key={repo.path} />);
     return (
       <div id='app'>
         {repoDashboards}

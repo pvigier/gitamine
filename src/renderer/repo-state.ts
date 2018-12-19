@@ -3,6 +3,8 @@ import * as Git from 'nodegit';
 export enum ChildrenType {Commit, Merge}
 
 export class RepoState {
+  path: string;
+  name: string;
   repo: Git.Repository;
   commits: Git.Commit[];
   shaToCommit: Map<string, Git.Commit>;
@@ -10,38 +12,41 @@ export class RepoState {
   parents: Map<string, string[]>;
   children: Map<string, [string, ChildrenType][]>;
 
-  constructor(repo: Git.Repository, onReady: () => void) {
-    this.repo = repo;
-    this.commits = []
+  constructor(path: string, onReady: () => void) {
+    this.path = path;
+    this.name = path.substr(path.lastIndexOf('/') + 1);
+    this.commits = [];
     this.shaToCommit = new Map<string, Git.Commit>();
     this.references = new Map<string, Git.Commit>();
     this.parents = new Map<string, string[]>();
     this.children = new Map<string, [string, ChildrenType][]>();
 
-    this.load(onReady);
+    this.load(path, onReady);
   }
 
-  load(onReady: () => void) {
-    // Retrieve all the references
-    return this.repo.getReferenceNames(Git.Reference.TYPE.OID)
-      .then((names) => {
-        const promises = names.map((name) => {
-          return this.repo.getReferenceCommit(name)
-            .then((commit) => {
-              this.references.set(name, commit);
-            });
-        });
-        return Promise.all(promises)
-          .then(() => {
-            this.getAllCommits().then(() => {
-              this.getParents().then(() => {
-                this.updateChildren();
-                this.topologicalSort();
-                onReady();
-              });
-            });
-          });
+  load(path: string, onReady: () => void) {
+    console.log(path);
+    // Load the repository
+    Git.Repository.open(path)
+      .then((repo) => { this.repo = repo; })
+      .then(() => this.repo.getReferenceNames(Git.Reference.TYPE.OID))
+      .then((names) => this.getReferenceCommits(names))
+      .then(() => this.getAllCommits())
+      .then(() => this.getParents())
+      .then(() => {
+        this.updateChildren();
+        this.topologicalSort();
+        onReady();
       });
+  }
+
+  getReferenceCommits(names: string[]) {
+    return Promise.all(names.map((name) => {
+      return this.repo.getReferenceCommit(name)
+        .then((commit) => { 
+          this.references.set(name, commit) 
+        });
+    }))
   }
 
   getAllCommits() {
@@ -57,26 +62,6 @@ export class RepoState {
           this.shaToCommit.set(commit.sha(), commit);
         }
       });
-  }
-
-  topologicalSort() {
-    const dfs = (commit: Git.Commit) => {
-      if (alreadySeen.get(commit.sha())) {
-        return;
-      }
-      alreadySeen.set(commit.sha(), true);
-      for (let [childSha, type] of this.children.get(commit.sha())!) {
-        dfs(this.shaToCommit.get(childSha)!);
-      }
-      sortedCommits.push(commit);
-    }
-
-    const sortedCommits: Git.Commit[] = [];
-    const alreadySeen = new Map<string, boolean>();
-    for (let commit of this.commits) {
-      dfs(commit);
-    }
-    this.commits = sortedCommits;
   }
 
   getParents() {
@@ -101,5 +86,25 @@ export class RepoState {
         }
       }
     }
+  }
+
+  topologicalSort() {
+    const dfs = (commit: Git.Commit) => {
+      if (alreadySeen.get(commit.sha())) {
+        return;
+      }
+      alreadySeen.set(commit.sha(), true);
+      for (let [childSha, type] of this.children.get(commit.sha())!) {
+        dfs(this.shaToCommit.get(childSha)!);
+      }
+      sortedCommits.push(commit);
+    }
+
+    const sortedCommits: Git.Commit[] = [];
+    const alreadySeen = new Map<string, boolean>();
+    for (let commit of this.commits) {
+      dfs(commit);
+    }
+    this.commits = sortedCommits;
   }
 }

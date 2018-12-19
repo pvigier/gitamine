@@ -18,6 +18,7 @@ div.repo-dashboard {
 
 div.repo-header {
   height: 50px;
+  text-align: center;
 }
 
 div.repo-header h1 {

@@ -5,7 +5,7 @@ import { PatchItem } from './patch-item';
 export interface CommitViewerProps { commit: Git.Commit | null; }
 export interface CommitViewerState { patches: Git.ConvenientPatch[]; }
 
-export class CommitViewer extends React.Component<CommitViewerProps, CommitViewerState> {
+export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitViewerState> {
   commit: Git.Commit | null;
   constructor(props: CommitViewerProps) {
     super(props);

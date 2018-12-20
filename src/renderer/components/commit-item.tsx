@@ -6,7 +6,7 @@ export interface CommitItemProps {
   onCommitSelect: (commit: Git.Commit) => void;
 }
 
-export class CommitItem extends React.Component<CommitItemProps, {}> {
+export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
   constructor(props: CommitItemProps) {
     super(props);
     this.handleClick = this.handleClick.bind(this);

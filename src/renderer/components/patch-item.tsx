@@ -6,7 +6,7 @@ export interface PatchItemProps {
   onPatchSelect: (patch: Git.ConvenientPatch) => void;
 }
 
-export class PatchItem extends React.Component<PatchItemProps, {}> {
+export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
   constructor(props: PatchItemProps) {
     super(props);
     this.handleClick = this.handleClick.bind(this);

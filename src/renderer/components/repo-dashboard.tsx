@@ -7,7 +7,7 @@ import { RepoState } from "../repo-state";
 export interface RepoDashboardProps { repo: RepoState; }
 export interface RepoDashboardState { selectedCommit: Git.Commit | null; }
 
-export class RepoDashboard extends React.Component<RepoDashboardProps, RepoDashboardState> {
+export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
   constructor(props: RepoDashboardProps) {
     super(props);
     this.handleCommitSelect = this.handleCommitSelect.bind(this);

@@ -4,7 +4,7 @@ import { RepoState } from "../repo-state";
 
 export interface AppState { repos: RepoState[]; }
 
-export class App extends React.Component<{}, AppState> {
+export class App extends React.PureComponent<{}, AppState> {
   state: AppState;
 
   constructor(props: {}) {

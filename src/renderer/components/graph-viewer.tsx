@@ -9,7 +9,7 @@ export interface GraphViewerProps {
   onCommitSelect: (commit: Git.Commit) => void;
 }
 
-export class GraphViewer extends React.Component<GraphViewerProps, {}> {
+export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
   render() {
     const items = this.props.repo.commits.map((commit: Git.Commit) => (
       <CommitItem commit={commit} onCommitSelect={this.props.onCommitSelect} key={commit.sha()} />

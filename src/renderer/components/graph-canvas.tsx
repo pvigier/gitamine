@@ -27,7 +27,7 @@ const COLORS = [
 
 export interface GraphCanvasProps { repo: RepoState; }
 
-export class GraphCanvas extends React.Component<GraphCanvasProps, {}> {
+export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   canvas: HTMLCanvasElement | null;
   positions: Map<string, [number, number]>
   width: number;

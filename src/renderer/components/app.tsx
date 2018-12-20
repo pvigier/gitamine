@@ -5,7 +5,6 @@ import { RepoState } from "../repo-state";
 export interface AppState { repos: RepoState[]; }
 
 export class App extends React.Component<{}, AppState> {
-  static instance: App | null = null;
   state: AppState;
 
   constructor(props: {}) {
@@ -13,8 +12,6 @@ export class App extends React.Component<{}, AppState> {
     this.state = {
       repos: []
     };
-    // Set singleton
-    App.instance = this;
   }
 
   addRepo(repo: RepoState) {

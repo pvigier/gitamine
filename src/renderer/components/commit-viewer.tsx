@@ -2,7 +2,11 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchItem } from './patch-item';
 
-export interface CommitViewerProps { commit: Git.Commit | null; }
+export interface CommitViewerProps { 
+  commit: Git.Commit | null;
+  onPatchSelect: (patch: Git.ConvenientPatch) => void;
+}
+
 export interface CommitViewerState { patches: Git.ConvenientPatch[]; }
 
 export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitViewerState> {
@@ -41,7 +45,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
       } else {
         patchesItems = patches.map((patch) => {
           const path = patch.newFile().path();
-          return <PatchItem onPatchSelect={() => {}} patch={patch} key={path} />
+          return <PatchItem onPatchSelect={this.props.onPatchSelect} patch={patch} key={path} />
         })
       }
 
@@ -53,9 +57,11 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
           <p>Authored {authoredDate.toString()} by {commit.author().name()}</p>
           <p>Last modified {commit.date().toString()}</p>
           <p>Parents: {commit.parents().map((sha) => sha.tostrS().substr(0, 8)).toString()}</p>
-          <ul>
-            {patchesItems}
-          </ul>
+          <div className='patch-list'>
+            <ul>
+              {patchesItems}
+            </ul>
+          </div>
         </div>
       );
     } else {

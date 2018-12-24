@@ -1,3 +1,5 @@
+/* Body */
+
 html, body {
   margin: 0;
   overflow: hidden;
@@ -12,9 +14,13 @@ div#app {
   height: 100%;
 }
 
+/* Repo dashboard */
+
 div.repo-dashboard {
   height: 100%;
 }
+
+/* Repo header */ 
 
 div.repo-header {
   height: 50px;
@@ -25,6 +31,8 @@ div.repo-header h1 {
   margin: 0px;
 }
 
+/* Graph viewer */
+
 div.graph-viewer {
   width: calc(100% - 300px);
   height: calc(100% - 50px);
@@ -32,6 +40,8 @@ div.graph-viewer {
   position: relative;
   float: left;
 }
+
+/* Commit graph */
 
 div.commit-graph {
   width: 50%;
@@ -44,6 +54,8 @@ div.commit-graph canvas {
   display: block;
   float: right;
 }
+
+/* Commit list */
 
 div.commit-list {
   width: 100%;
@@ -73,7 +85,28 @@ div.commit-list li:hover {
   background: #eee;
 }
 
+/* Commit viewer */
+
 div.commit-viewer {
   width: 300px;
   float: right;
+}
+
+/* Patch list */
+
+div.patch-list ul {
+  margin: 0px;
+  padding-left: 0px;
+  list-style: none;
+}
+
+div.patch-list li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 40px;
+}
+
+div.patch-list li:hover {
+  background: #eee;
 }

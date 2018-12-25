@@ -110,3 +110,11 @@ div.patch-list li {
 div.patch-list li:hover {
   background: #eee;
 }
+/* Patch viewer */
+
+div.patch-viewer {
+  width: calc(100% - 300px);
+  height: calc(100% - 50px);
+  position: relative;
+  float: left;
+}

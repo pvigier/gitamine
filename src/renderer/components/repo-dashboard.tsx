@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { GraphViewer } from './graph-viewer';
 import { CommitViewer } from './commit-viewer';
+import { PatchViewer } from './patch-viewer';
 import { RepoState } from "../repo-state";
 
 export interface RepoDashboardProps { repo: RepoState; }
@@ -35,12 +36,18 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   }
 
   render() {
+    let viewer; 
+    if (this.state.selectedCommit && this.state.selectedPatch) {
+      viewer = <PatchViewer commit={this.state.selectedCommit!} patch={this.state.selectedPatch!} /> 
+    } else {
+      viewer = <GraphViewer repo={this.props.repo} onCommitSelect={this.handleCommitSelect} />
+    }
     return (
       <div className='repo-dashboard'>
         <div className='repo-header'>
           <h1>{this.props.repo.name}</h1>
         </div>
-        <GraphViewer repo={this.props.repo} onCommitSelect={this.handleCommitSelect} />
+        {viewer}
         <CommitViewer commit={this.state.selectedCommit} onPatchSelect={this.handlePatchSelect} />
       </div>
     );

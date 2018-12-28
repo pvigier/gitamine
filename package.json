@@ -57,6 +57,7 @@
     "electron-compile": "^6.4.3",
     "electron-devtools-installer": "^2.2.4",
     "electron-squirrel-startup": "^1.0.0",
+    "monaco-loader": "^0.14.0",
     "nodegit": "^0.23.0",
     "react": "^15.6.2",
     "react-dom": "^15.6.2",

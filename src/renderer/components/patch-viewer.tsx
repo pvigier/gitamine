@@ -39,11 +39,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
 
   constructor(props: PatchViewerProps) {
     super(props);
-    // Load new and old blob
-    const parentSha = this.props.commit.parentId(0).tostrS();
-    const parentCommit = this.props.repo.shaToCommit.get(parentSha)!;
-    const oldPromise = getContentByPath(parentCommit, this.props.patch.oldFile().path());
-    const newPromise = getContentByPath(this.props.commit, this.props.patch.newFile().path());
+    this.editor = null;
     // Get a DOM ref on the div that will contain monaco
     this.setDivRef = (element: HTMLDivElement) => {
       const options = {
@@ -51,25 +47,35 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
         automaticLayout: true
       }
       this.editor = monaco.editor.createDiffEditor(element, options)
-      Promise.all([oldPromise, newPromise])
-        .then((strings) => this.setModels(strings[0], strings[1]));
     };
   }
 
-  setModels(oldString: string, newString: string) {
-    const originalModel = monaco.editor.createModel(oldString);
-    const modifiedModel = monaco.editor.createModel(newString);
+  setModels(oldPath: string, oldString: string, newPath: string, newString: string) {
+    const originalModel = monaco.editor.createModel(oldString, undefined, monaco.Uri.parse('old/' + oldPath));
+    const modifiedModel = monaco.editor.createModel(newString, undefined, monaco.Uri.parse('new/' + newPath));
     this.editor.setModel({
       original: originalModel, 
       modified: modifiedModel
     });
   }
 
+  updateEditor() {
+    // Load new and old blob
+    const parentSha = this.props.commit.parentId(0).tostrS();
+    const parentCommit = this.props.repo.shaToCommit.get(parentSha)!;
+    const oldPath = this.props.patch.oldFile().path();
+    const newPath = this.props.patch.newFile().path();
+    const oldPromise = getContentByPath(parentCommit, oldPath);
+    const newPromise = getContentByPath(this.props.commit, newPath);
+    Promise.all([oldPromise, newPromise])
+      .then((strings) => this.setModels(oldPath, strings[0], newPath, strings[1]));
+  }
+
   render() {
-    const patch = this.props.patch;
+    this.updateEditor();
     return (
       <div className='patch-viewer' ref={this.setDivRef}>
-        <h1>{patch.newFile().path()}</h1>
+        <h1>{this.props.patch.newFile().path()}</h1>
       </div>
     );
   }

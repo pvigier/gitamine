@@ -38,7 +38,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   render() {
     let viewer; 
     if (this.state.selectedCommit && this.state.selectedPatch) {
-      viewer = <PatchViewer commit={this.state.selectedCommit!} patch={this.state.selectedPatch!} /> 
+      viewer = <PatchViewer repo={this.props.repo} commit={this.state.selectedCommit!} patch={this.state.selectedPatch!} /> 
     } else {
       viewer = <GraphViewer repo={this.props.repo} onCommitSelect={this.handleCommitSelect} />
     }

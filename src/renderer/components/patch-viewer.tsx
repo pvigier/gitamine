@@ -1,28 +1,68 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
+import { RepoState } from '../repo-state'
+
+// Load Monaco
+
+const loadMonaco = require('monaco-loader')
+let monaco: any;
+loadMonaco().then((m: any) => {
+  monaco = m;
+});
+
+// Util functions
+ 
+function getBlobByPath(tree: Git.Tree, components: string[]): Promise<Git.Blob> {
+  if (components.length == 1) {
+    return tree.entryByName(components[0]).getBlob();
+  } else {
+    return tree.entryByName(components[0]).getTree()
+      .then((tree) => getBlobByPath(tree, components.slice(1)));
+  }
+}
+
+function getContentByPath(commit: Git.Commit, path: string) {
+  return commit.getTree()
+    .then((tree) => getBlobByPath(tree, path.split('/')))
+    .then((blob) => blob.toString());
+}
 
 export interface PatchViewerProps { 
+  repo: RepoState,
   commit: Git.Commit,
   patch: Git.ConvenientPatch
 }
 
 export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   setDivRef: (element: HTMLDivElement) => void;
+  editor: any;
 
   constructor(props: PatchViewerProps) {
     super(props);
+    // Load new and old blob
+    const parentSha = this.props.commit.parentId(0).tostrS();
+    const parentCommit = this.props.repo.shaToCommit.get(parentSha)!;
+    const oldPromise = getContentByPath(parentCommit, this.props.patch.oldFile().path());
+    const newPromise = getContentByPath(this.props.commit, this.props.patch.newFile().path());
+    // Get a DOM ref on the div that will contain monaco
     this.setDivRef = (element: HTMLDivElement) => {
-      const loadMonaco = require('monaco-loader')
-
-      loadMonaco().then((monaco: any) => {
-        const options = {
-          theme: 'vs-dark',
-          automaticLayout: true
-        }
-
-        const editor = monaco.editor.create(element, options)
-      })
+      const options = {
+        theme: 'vs-dark',
+        automaticLayout: true
+      }
+      this.editor = monaco.editor.createDiffEditor(element, options)
+      Promise.all([oldPromise, newPromise])
+        .then((strings) => this.setModels(strings[0], strings[1]));
     };
+  }
+
+  setModels(oldString: string, newString: string) {
+    const originalModel = monaco.editor.createModel(oldString);
+    const modifiedModel = monaco.editor.createModel(newString);
+    this.editor.setModel({
+      original: originalModel, 
+      modified: modifiedModel
+    });
   }
 
   render() {

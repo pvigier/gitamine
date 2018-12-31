@@ -17,6 +17,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     super(props);
     this.handleCommitSelect = this.handleCommitSelect.bind(this);
     this.handlePatchSelect = this.handlePatchSelect.bind(this);
+    this.exitPatchViewer = this.exitPatchViewer.bind(this);
     this.state = {
       selectedCommit: null,
       selectedPatch: null
@@ -35,10 +36,19 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     } as RepoDashboardState);
   }
 
+  exitPatchViewer() {
+    this.setState({
+      selectedPatch: null
+    } as RepoDashboardState);
+  }
+
   render() {
     let viewer; 
     if (this.state.selectedCommit && this.state.selectedPatch) {
-      viewer = <PatchViewer repo={this.props.repo} commit={this.state.selectedCommit!} patch={this.state.selectedPatch!} /> 
+      viewer = <PatchViewer repo={this.props.repo} 
+        commit={this.state.selectedCommit!} 
+        patch={this.state.selectedPatch!} 
+        onEscapePressed={this.exitPatchViewer} /> 
     } else {
       viewer = <GraphViewer repo={this.props.repo} onCommitSelect={this.handleCommitSelect} />
     }

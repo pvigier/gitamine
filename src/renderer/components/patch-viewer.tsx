@@ -30,7 +30,8 @@ function getContentByPath(commit: Git.Commit, path: string) {
 export interface PatchViewerProps { 
   repo: RepoState,
   commit: Git.Commit,
-  patch: Git.ConvenientPatch
+  patch: Git.ConvenientPatch,
+  onEscapePressed: () => void
 }
 
 export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
@@ -42,12 +43,21 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.editor = null;
     // Get a DOM ref on the div that will contain monaco
     this.setDivRef = (element: HTMLDivElement) => {
-      const options = {
-        theme: 'vs-dark',
-        automaticLayout: true
+      if (element) {
+        const options = {
+          theme: 'vs-dark',
+          automaticLayout: true
+        }
+        this.editor = monaco.editor.createDiffEditor(element, options)
       }
-      this.editor = monaco.editor.createDiffEditor(element, options)
     };
+    this.handleKeyUp = this.handleKeyUp.bind(this);
+  }
+
+  handleKeyUp(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.keyCode === 27) {
+      this.props.onEscapePressed();
+    }
   }
 
   setModels(oldPath: string, oldString: string, newPath: string, newString: string) {
@@ -74,7 +84,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   render() {
     this.updateEditor();
     return (
-      <div className='patch-viewer' ref={this.setDivRef}>
+      <div className='patch-viewer' ref={this.setDivRef} onKeyUp={this.handleKeyUp}>
         <h1>{this.props.patch.newFile().path()}</h1>
       </div>
     );

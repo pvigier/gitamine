@@ -61,8 +61,16 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   setModels(oldPath: string, oldString: string, newPath: string, newString: string) {
-    const originalModel = monaco.editor.createModel(oldString, undefined, monaco.Uri.parse('old/' + oldPath));
-    const modifiedModel = monaco.editor.createModel(newString, undefined, monaco.Uri.parse('new/' + newPath));
+    function updateOrCreateModel(path: string, value: string) {
+      const uri = monaco.Uri.parse(path);
+      let model = monaco.editor.getModel(uri);
+      if (!model)
+        model = monaco.editor.createModel(value, undefined, uri);
+      return model;
+    }
+
+    const originalModel = updateOrCreateModel(oldPath, oldString);
+    const modifiedModel = updateOrCreateModel(newPath, newString);
     this.editor.setModel({
       original: originalModel, 
       modified: modifiedModel
@@ -78,7 +86,8 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     const oldPromise = getContentByPath(parentCommit, oldPath);
     const newPromise = getContentByPath(this.props.commit, newPath);
     Promise.all([oldPromise, newPromise])
-      .then((strings) => this.setModels(oldPath, strings[0], newPath, strings[1]));
+      .then((strings) => this.setModels(parentSha + '/' + oldPath, strings[0], 
+        this.props.commit.sha() + '/' + newPath, strings[1]));
   }
 
   render() {

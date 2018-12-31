@@ -78,13 +78,26 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   updateEditor() {
-    // Load new and old blob
-    const parentSha = this.props.commit.parentId(0).tostrS();
-    const parentCommit = this.props.repo.shaToCommit.get(parentSha)!;
+    // Load old blob
+    let oldPromise: Promise<string>;
     const oldPath = this.props.patch.oldFile().path();
+    let parentSha = '';
+    if (this.props.patch.isAdded()) {
+      oldPromise = Promise.resolve('');
+    } else {
+      parentSha = this.props.commit.parentId(0).tostrS();
+      const parentCommit = this.props.repo.shaToCommit.get(parentSha)!;
+      oldPromise = getContentByPath(parentCommit, oldPath);
+    }
+    // Load new blob
+    let newPromise: Promise<string>;
     const newPath = this.props.patch.newFile().path();
-    const oldPromise = getContentByPath(parentCommit, oldPath);
-    const newPromise = getContentByPath(this.props.commit, newPath);
+    if (this.props.patch.isDeleted()) {
+      newPromise = Promise.resolve('');
+    } else {
+      newPromise = getContentByPath(this.props.commit, newPath);
+    }
+    // Update the models
     Promise.all([oldPromise, newPromise])
       .then((strings) => this.setModels(parentSha + '/' + oldPath, strings[0], 
         this.props.commit.sha() + '/' + newPath, strings[1]));

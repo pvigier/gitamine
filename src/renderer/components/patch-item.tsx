@@ -6,6 +6,20 @@ export interface PatchItemProps {
   onPatchSelect: (patch: Git.ConvenientPatch) => void;
 }
 
+function getPatchIcon(patch: Git.ConvenientPatch) {
+  if (patch.isAdded()) {
+    return 'a';
+  } else if (patch.isDeleted()) {
+    return 'd';
+  } else if (patch.isModified()) {
+    return 'm';
+  } else if (patch.isRenamed()) {
+    return 'r';
+  } else {
+    return 'u';
+  }
+}
+
 export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
   constructor(props: PatchItemProps) {
     super(props);
@@ -18,6 +32,6 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
 
   render() {
     const path = this.props.patch.newFile().path();
-    return <li onClick={this.handleClick}>{path}</li>;
+    return <li onClick={this.handleClick}>{getPatchIcon(this.props.patch)} {path}</li>;
   }
 }

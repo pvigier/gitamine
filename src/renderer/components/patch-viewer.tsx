@@ -46,7 +46,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       if (element) {
         const options = {
           theme: 'vs-dark',
-          automaticLayout: true
+          automaticLayout: true,
+          renderSideBySide: false,
+          readOnly: true
         }
         this.editor = monaco.editor.createDiffEditor(element, options)
       }
@@ -106,8 +108,11 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   render() {
     this.updateEditor();
     return (
-      <div className='patch-viewer' ref={this.setDivRef} onKeyUp={this.handleKeyUp}>
-        <h1>{this.props.patch.newFile().path()}</h1>
+      <div className='patch-viewer' onKeyUp={this.handleKeyUp}>
+        <div className='patch-header'>
+          <h1>{this.props.patch.newFile().path()}</h1>
+        </div>
+        <div className='patch-editor' ref={this.setDivRef} />
       </div>
     );
   }

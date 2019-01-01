@@ -118,3 +118,15 @@ div.patch-viewer {
   position: relative;
   float: left;
 }
+
+div.patch-header {
+  height: 50px;
+}
+
+div.patch-header h1 {
+  margin: 0px;
+}
+
+div.patch-editor {
+  height: calc(100% - 50px);
+}

@@ -27,6 +27,14 @@ function getContentByPath(commit: Git.Commit, path: string) {
     .then((blob) => blob.toString());
 }
 
+// PatchViewer
+
+enum ViewMode {
+  Hunk,
+  Inline,
+  Split
+}
+
 export interface PatchViewerProps { 
   repo: RepoState,
   commit: Git.Commit,
@@ -34,18 +42,25 @@ export interface PatchViewerProps {
   onEscapePressed: () => void
 }
 
-export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
+export interface PatchViewerState {
+  viewMode: ViewMode
+}
+
+export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchViewerState> {
   setDivRef: (element: HTMLDivElement) => void;
   editor: any;
 
   constructor(props: PatchViewerProps) {
     super(props);
+    this.state = {
+      viewMode: ViewMode.Hunk
+    }
     this.editor = null;
     // Get a DOM ref on the div that will contain monaco
     this.setDivRef = (element: HTMLDivElement) => {
       if (element) {
         const options = {
-          theme: 'vs-dark',
+          //theme: 'vs-dark',
           automaticLayout: true,
           renderSideBySide: false,
           readOnly: true
@@ -79,6 +94,65 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     });
   }
 
+  setHunkModels(oldPath: string, oldString: string, newPath: string, newString: string, 
+    hunks: Git.ConvenientHunk[])
+  {
+    function generateLineNumbers(starts: number[], offsets: number[]) {
+      return (i: number) => {
+        let j = 0;
+        while (i >= starts[j + 1]) {
+          ++j;
+        }
+        return i + offsets[j];
+      }
+    }
+
+    // Extract hunks from files
+    const oldLines = oldString.split('\n');
+    const oldHunks: string[] = [];
+    const oldOffsets: number[] = [];
+    const oldStarts = [1];
+    const newLines = newString.split('\n');
+    const newHunks: string[] = [];
+    const newOffsets: number[] = [];
+    const newStarts = [1];
+    for (let hunk of hunks) {
+      const oldStart = hunk.oldStart();
+      const oldLength = hunk.oldLines();
+      oldHunks.push(oldLines.slice(oldStart - 1, oldStart - 1 + oldLength).join('\n'));
+      oldOffsets.push(oldStart - oldStarts[oldStarts.length - 1]);
+      oldStarts.push(oldStarts[oldStarts.length - 1] + oldLength);
+      const newStart = hunk.newStart();
+      const newLength = hunk.newLines();
+      newHunks.push(newLines.slice(newStart - 1, newStart - 1 + newLength).join('\n'));
+      newOffsets.push(newStart - newStarts[newStarts.length - 1]);
+      newStarts.push(newStarts[newStarts.length - 1] + newLength);
+    }
+    // Set models
+    this.setModels(oldPath, oldHunks.join('\n'), newPath, newHunks.join('\n'));
+    // Set line numbers
+    this.editor.getOriginalEditor().updateOptions({
+      lineNumbers: generateLineNumbers(oldStarts, oldOffsets)
+    });
+    this.editor.getModifiedEditor().updateOptions({
+      lineNumbers: generateLineNumbers(newStarts, newOffsets)
+    });
+    // Add view zones
+    const editor = this.editor.getModifiedEditor();
+    editor.changeViewZones(function(changeAccessor: any) {
+        for (let i = 0; i < hunks.length; ++i) {
+          const hunk = hunks[i];
+          const domNode = document.createElement('div');
+          domNode.innerHTML = `@@ -${hunk.oldStart()},${hunk.oldLines()} +${hunk.newStart()},${hunk.newLines()}`;
+          changeAccessor.addZone({
+                afterLineNumber: newStarts[i] - 1,
+                heightInLines: 1,
+                domNode: domNode
+          });
+        }
+    });
+  }
+
   updateEditor() {
     // Load old blob
     let oldPromise: Promise<string>;
@@ -100,9 +174,15 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       newPromise = getContentByPath(this.props.commit, newPath);
     }
     // Update the models
-    Promise.all([oldPromise, newPromise])
-      .then((strings) => this.setModels(parentSha + '/' + oldPath, strings[0], 
-        this.props.commit.sha() + '/' + newPath, strings[1]));
+    if (this.state.viewMode !== ViewMode.Hunk) {
+      Promise.all([oldPromise, newPromise])
+        .then(([oldString, newString]) => this.setModels(parentSha + '/' + oldPath, oldString, 
+          this.props.commit.sha() + '/' + newPath, newString));
+    } else {
+      Promise.all([oldPromise, newPromise, this.props.patch.hunks()])
+        .then(([oldString, newString, hunks]) => this.setHunkModels(parentSha + '/' + oldPath, oldString, 
+          this.props.commit.sha() + '/' + newPath, newString, hunks));
+    }
   }
 
   render() {

@@ -45,7 +45,9 @@ div.graph-viewer {
 
 div.commit-graph {
   width: 50%;
-  position: absolute;
+  height: 100%;
+  position: sticky;
+  top: 0px;
   z-index: 2;
   pointer-events: none;
 }
@@ -61,6 +63,7 @@ div.commit-list {
   width: 100%;
   position: absolute;
   left: 0px;
+  top: 0px;
   z-index: 1;
 }
 

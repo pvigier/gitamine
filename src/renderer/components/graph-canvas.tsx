@@ -31,20 +31,38 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   canvas: HTMLCanvasElement | null;
   positions: Map<string, [number, number]>
   width: number;
-  height: number;
+  offset: number;
   setCanvasRef: (element: HTMLCanvasElement) => void;
+  resizeObserver: any;
 
   constructor(props: GraphCanvasProps) {
     super(props);
     this.canvas = null;
+    this.positions = new Map<string, [number, number]>();
     this.width = 0;
-    this.height = 0;
+    this.offset = 0;
+    this.computePositions();
 
     this.setCanvasRef = (element: HTMLCanvasElement) => {
       this.canvas = element;
-      this.positions = new Map<string, [number, number]>();
-      this.computePositions();
-      this.drawGraph();
+      if (this.canvas) {
+        const parent = this.canvas.parentElement!;
+        this.canvas.height = parent.clientHeight;
+        this.drawGraph();
+        // Rerender on resize
+        const handleResize = () => {
+          if (this.canvas && this.canvas.height != parent.clientHeight) {
+            this.canvas.height = parent.clientHeight;
+            this.drawGraph();
+          }
+        };
+        this.resizeObserver = new ResizeObserver(handleResize).observe(parent);
+        // Rerender on scroll
+        parent.parentElement!.onscroll = (event) => {
+          this.offset = event.target!.scrollTop;
+          this.drawGraph();
+        };
+      }
     }
   }
 
@@ -109,11 +127,10 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
       ++i;
     }
     this.width = branches.length * OFFSET_X;
-    this.height = repo.commits.length * OFFSET_Y;
   }
 
   computeNodeCenterCoordinates(i: number, j: number) {
-    return [j * OFFSET_X + RADIUS, 3 + i * OFFSET_Y + RADIUS]
+    return [j * OFFSET_X + RADIUS, 3 + i * OFFSET_Y + RADIUS - this.offset]
   }
 
   drawNodes(ctx: CanvasRenderingContext2D) {
@@ -161,7 +178,6 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   drawGraph() {
     if (this.canvas) {
       this.canvas.width = this.width;
-      this.canvas.height = this.height;
       const ctx = this.canvas.getContext('2d');
       if (ctx) {
         this.drawEdges(ctx);

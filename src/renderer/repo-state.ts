@@ -9,6 +9,7 @@ export class RepoState {
   commits: Git.Commit[];
   shaToCommit: Map<string, Git.Commit>;
   references: Map<string, Git.Commit>;
+  shaToReferences: Map<string, string[]>;
   parents: Map<string, string[]>;
   children: Map<string, [string, ChildrenType][]>;
 
@@ -18,6 +19,7 @@ export class RepoState {
     this.commits = [];
     this.shaToCommit = new Map<string, Git.Commit>();
     this.references = new Map<string, Git.Commit>();
+    this.shaToReferences = new Map<string, string[]>();
     this.parents = new Map<string, string[]>();
     this.children = new Map<string, [string, ChildrenType][]>();
 
@@ -25,7 +27,6 @@ export class RepoState {
   }
 
   load(path: string, onReady: () => void) {
-    console.log(path);
     // Load the repository
     Git.Repository.open(path)
       .then((repo) => { this.repo = repo; })
@@ -44,8 +45,12 @@ export class RepoState {
     return Promise.all(names.map((name) => {
       return this.repo.getReferenceCommit(name)
         .then((commit) => { 
-          this.references.set(name, commit) 
-        });
+          this.references.set(name, commit);
+          if (!this.shaToReferences.has(commit.sha())) {
+            this.shaToReferences.set(commit.sha(), []);
+          }
+          this.shaToReferences.get(commit.sha())!.push(name);
+        }, () => { console.log('failed'); });
     }))
   }
 

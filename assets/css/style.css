@@ -36,7 +36,6 @@ div.repo-header h1 {
 div.graph-viewer {
   width: calc(100% - 300px);
   height: calc(100% - 50px);
-  overflow-y: scroll;
   position: relative;
   float: left;
 }
@@ -46,25 +45,26 @@ div.graph-viewer {
 div.commit-graph {
   width: 50%;
   height: 100%;
-  position: sticky;
-  top: 0px;
-  z-index: 2;
-  pointer-events: none;
+  text-align: right;
+  overflow-x: scroll;
+  overflow-y: hidden;
 }
 
 div.commit-graph canvas {
-  display: block;
-  float: right;
+  position: sticky;
+  z-index: 2;
+  pointer-events: none;
 }
 
 /* Commit list */
 
 div.commit-list {
   width: 100%;
+  height: calc(100% - 15px);
   position: absolute;
-  left: 0px;
   top: 0px;
   z-index: 1;
+  overflow-y: scroll;
 }
 
 div.commit-list ul {

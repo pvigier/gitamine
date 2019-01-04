@@ -58,10 +58,10 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
         };
         this.resizeObserver = new ResizeObserver(handleResize).observe(parent);
         // Rerender on scroll
-        parent.parentElement!.onscroll = (event) => {
+        this.canvas.nextElementSibling!.addEventListener('scroll', (event) => {
           this.offset = event.target!.scrollTop;
           this.drawGraph();
-        };
+        });
       }
     }
   }

@@ -18,9 +18,9 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
       <div className='graph-viewer'>
         <div className='commit-graph'>
           <GraphCanvas repo={this.props.repo} />
-        </div>
-        <div className='commit-list'>
-          <ul>{items}</ul>
+          <div className='commit-list'>
+            <ul>{items}</ul>
+          </div>
         </div>
       </div>
     );

@@ -42,32 +42,24 @@ export interface PatchViewerProps {
   onEscapePressed: () => void
 }
 
-export interface PatchViewerState {
-  viewMode: ViewMode
-}
-
-export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchViewerState> {
-  setDivRef: (element: HTMLDivElement) => void;
+export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   editor: any;
+  viewMode: ViewMode;
+  viewZoneIds: number[];
+  oldPath: string;
+  oldBlob: string;
+  newPath: string;
+  newBlob: string;
+  hunks: Git.ConvenientHunk[];
+  parentSha: string;
+  loadingPromise: Promise<void>;
 
   constructor(props: PatchViewerProps) {
     super(props);
-    this.state = {
-      viewMode: ViewMode.Hunk
-    }
     this.editor = null;
-    // Get a DOM ref on the div that will contain monaco
-    this.setDivRef = (element: HTMLDivElement) => {
-      if (element) {
-        const options = {
-          //theme: 'vs-dark',
-          automaticLayout: true,
-          renderSideBySide: false,
-          readOnly: true
-        }
-        this.editor = monaco.editor.createDiffEditor(element, options)
-      }
-    };
+    this.viewMode = ViewMode.Hunk;
+    this.viewZoneIds = [];
+    this.setUpEditor = this.setUpEditor.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
   }
 
@@ -77,25 +69,77 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
     }
   }
 
-  setModels(oldPath: string, oldString: string, newPath: string, newString: string) {
-    function updateOrCreateModel(path: string, value: string) {
-      const uri = monaco.Uri.parse(path);
-      let model = monaco.editor.getModel(uri);
-      if (!model)
-        model = monaco.editor.createModel(value, undefined, uri);
-      return model;
+  handleViewModeChange(viewMode: ViewMode) {
+    if (viewMode !== this.viewMode) {
+      this.viewMode = viewMode;
+      if (this.editor) {
+        this.updateEditor();
+      }
     }
-
-    const originalModel = updateOrCreateModel(oldPath, oldString);
-    const modifiedModel = updateOrCreateModel(newPath, newString);
-    this.editor.setModel({
-      original: originalModel, 
-      modified: modifiedModel
-    });
   }
 
-  setHunkModels(oldPath: string, oldString: string, newPath: string, newString: string, 
-    hunks: Git.ConvenientHunk[])
+  loadData() {
+    // Load old blob
+    let oldPromise: Promise<string>;
+    if (this.props.patch.isAdded()) {
+      oldPromise = Promise.resolve('');
+    } else {
+      this.parentSha = this.props.commit.parentId(0).tostrS();
+      const parentCommit = this.props.repo.shaToCommit.get(this.parentSha)!;
+      oldPromise = getContentByPath(parentCommit, this.oldPath);
+    }
+    // Load new blob
+    let newPromise: Promise<string>;
+    if (this.props.patch.isDeleted()) {
+      newPromise = Promise.resolve('');
+    } else {
+      newPromise = getContentByPath(this.props.commit, this.newPath);
+    }
+    // Load hunks
+    this.loadingPromise = Promise.all([oldPromise, newPromise, this.props.patch.hunks()])
+      .then(([oldBlob, newBlob, hunks]) => {
+        this.oldBlob = oldBlob;
+        this.newBlob = newBlob;
+        this.hunks = hunks;
+      });
+  }
+
+  setUpEditor(element: HTMLDivElement) {
+    // Get a DOM ref on the div that will contain monaco
+    if (element) {
+      const options = {
+        //theme: 'vs-dark',
+        automaticLayout: true,
+        renderSideBySide: false,
+        readOnly: true
+      }
+      this.editor = monaco.editor.createDiffEditor(element, options)
+      this.loadingPromise.then(() => this.updateEditor());
+    }
+  }
+
+  updateEditor() {
+    // Update editor options
+    this.editor.updateOptions({
+      renderSideBySide: this.viewMode === ViewMode.Split
+    });
+    // Reset view zones
+    this.editor.getModifiedEditor().changeViewZones((changeAccessor: any) => {
+      for (let viewZoneId of this.viewZoneIds) {
+        changeAccessor.removeZone(viewZoneId);
+      }
+    });
+    // Reset line numbers
+    this.setLineNumbers((i: number) => i, (i: number) => i); 
+    // Update models
+    if (this.viewMode === ViewMode.Hunk) {
+      this.setHunkModels(); 
+    } else {
+      this.setBlobModels();
+    }
+  }
+
+  setHunkModels()
   {
     function generateLineNumbers(starts: number[], offsets: number[]) {
       return (i: number) => {
@@ -108,15 +152,15 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
     }
 
     // Extract hunks from files
-    const oldLines = oldString.split('\n');
+    const oldLines = this.oldBlob.split('\n');
     const oldHunks: string[] = [];
     const oldOffsets: number[] = [];
     const oldStarts = [1];
-    const newLines = newString.split('\n');
+    const newLines = this.newBlob.split('\n');
     const newHunks: string[] = [];
     const newOffsets: number[] = [];
     const newStarts = [1];
-    for (let hunk of hunks) {
+    for (let hunk of this.hunks) {
       const oldStart = hunk.oldStart();
       const oldLength = hunk.oldLines();
       oldHunks.push(oldLines.slice(oldStart - 1, oldStart - 1 + oldLength).join('\n'));
@@ -129,70 +173,96 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
       newStarts.push(newStarts[newStarts.length - 1] + newLength);
     }
     // Set models
-    this.setModels(oldPath, oldHunks.join('\n'), newPath, newHunks.join('\n'));
+    this.setModels(oldHunks.join('\n'), newHunks.join('\n'));
     // Set line numbers
-    this.editor.getOriginalEditor().updateOptions({
-      lineNumbers: generateLineNumbers(oldStarts, oldOffsets)
-    });
-    this.editor.getModifiedEditor().updateOptions({
-      lineNumbers: generateLineNumbers(newStarts, newOffsets)
-    });
+    this.setLineNumbers(generateLineNumbers(oldStarts, oldOffsets), 
+      generateLineNumbers(newStarts, newOffsets));
     // Add view zones
     const editor = this.editor.getModifiedEditor();
-    editor.changeViewZones(function(changeAccessor: any) {
-        for (let i = 0; i < hunks.length; ++i) {
-          const hunk = hunks[i];
+    editor.changeViewZones((changeAccessor: any) => {
+        for (let i = 0; i < this.hunks.length; ++i) {
+          const hunk = this.hunks[i];
           const domNode = document.createElement('div');
           domNode.innerHTML = `@@ -${hunk.oldStart()},${hunk.oldLines()} +${hunk.newStart()},${hunk.newLines()}`;
-          changeAccessor.addZone({
+          this.viewZoneIds.push(changeAccessor.addZone({
                 afterLineNumber: newStarts[i] - 1,
                 heightInLines: 1,
                 domNode: domNode
-          });
+          }));
         }
     });
   }
 
-  updateEditor() {
-    // Load old blob
-    let oldPromise: Promise<string>;
-    const oldPath = this.props.patch.oldFile().path();
-    let parentSha = '';
-    if (this.props.patch.isAdded()) {
-      oldPromise = Promise.resolve('');
-    } else {
-      parentSha = this.props.commit.parentId(0).tostrS();
-      const parentCommit = this.props.repo.shaToCommit.get(parentSha)!;
-      oldPromise = getContentByPath(parentCommit, oldPath);
+  setBlobModels() {
+    this.setModels(this.oldBlob, this.newBlob);
+  }
+
+  setModels(oldString: string, newString: string) {
+    function updateOrCreateModel(path: string, value: string) {
+      const uri = monaco.Uri.parse(path);
+      let model = monaco.editor.getModel(uri);
+      if (model) {
+        model.setValue(value);
+      } else {
+        model = monaco.editor.createModel(value, undefined, uri);
+      }
+      return model;
     }
-    // Load new blob
-    let newPromise: Promise<string>;
-    const newPath = this.props.patch.newFile().path();
-    if (this.props.patch.isDeleted()) {
-      newPromise = Promise.resolve('');
-    } else {
-      newPromise = getContentByPath(this.props.commit, newPath);
-    }
-    // Update the models
-    if (this.state.viewMode !== ViewMode.Hunk) {
-      Promise.all([oldPromise, newPromise])
-        .then(([oldString, newString]) => this.setModels(parentSha + '/' + oldPath, oldString, 
-          this.props.commit.sha() + '/' + newPath, newString));
-    } else {
-      Promise.all([oldPromise, newPromise, this.props.patch.hunks()])
-        .then(([oldString, newString, hunks]) => this.setHunkModels(parentSha + '/' + oldPath, oldString, 
-          this.props.commit.sha() + '/' + newPath, newString, hunks));
-    }
+    
+    const oldPath = this.parentSha + '/' + this.oldPath;
+    const originalModel = updateOrCreateModel(oldPath, oldString);
+    const newPath = this.props.commit.sha() + '/' + this.newPath
+    const modifiedModel = updateOrCreateModel(newPath, newString);
+    this.editor.setModel({
+      original: originalModel, 
+      modified: modifiedModel
+    });
+  }
+
+  setLineNumbers(oldLineNumbers: (i: number) => number, newLineNumbers: (i: number) => number) {
+    this.editor.getOriginalEditor().updateOptions({
+      lineNumbers: oldLineNumbers
+    });
+    this.editor.getModifiedEditor().updateOptions({
+      lineNumbers: newLineNumbers
+    });
   }
 
   render() {
-    this.updateEditor();
+    // Set up editor
+    this.oldPath = this.props.patch.oldFile().path();
+    this.oldBlob = '';
+    this.newPath = this.props.patch.newFile().path();
+    this.newBlob = '';
+    this.hunks = [];
+    this.parentSha = '';
+    this.loadData();
+
+    // Update the models if the editor is already created
+    if (this.editor) {
+      this.loadingPromise.then(() => this.updateEditor());
+    }
+
     return (
       <div className='patch-viewer' onKeyUp={this.handleKeyUp}>
         <div className='patch-header'>
           <h2>{this.props.patch.newFile().path()}</h2>
         </div>
-        <div className='patch-editor' ref={this.setDivRef} />
+        <div className="view-mode-selector">
+          <input type="radio" id="hunk-mode" name="view-mode-selector" 
+            defaultChecked={this.viewMode === ViewMode.Hunk}
+            onInput={this.handleViewModeChange.bind(this, ViewMode.Hunk)} />
+          <label htmlFor="hunk-mode">Hunk</label >
+          <input type="radio" id="inline-mode" name="view-mode-selector" 
+            defaultChecked={this.viewMode === ViewMode.Inline}
+            onInput={this.handleViewModeChange.bind(this, ViewMode.Inline)} />
+          <label htmlFor="inline-mode">Inline</label>
+          <input type="radio" id="split-mode" name="view-mode-selector"
+            defaultChecked={this.viewMode === ViewMode.Split}
+            onInput={this.handleViewModeChange.bind(this, ViewMode.Split)} />
+          <label htmlFor="split-mode">Split</label>
+        </div>
+        <div className='patch-editor' ref={this.setUpEditor} />
       </div>
     );
   }

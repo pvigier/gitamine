@@ -107,27 +107,54 @@ div.commit-list li span.reference {
 
 div.commit-viewer {
   width: 300px;
+  height: calc(100% - 50px);
   float: right;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+div.commit-viewer h3 {
+    margin: 4px 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: normal;
+}
+
+div.commit-viewer h2 {
+    margin: 8px;
+    font-size: 16px;
+}
+
+div.commit-viewer p {
+  margin: 4px 8px;
 }
 
 /* Patch list */
 
-div.patch-list ul {
-  margin: 0px;
+ul.patch-list {
+  flex: 1;
+  margin: 8px;
+  border: 1px;
+  border-style: solid;
   padding-left: 0px;
   list-style: none;
+  overflow-y: auto;
 }
 
-div.patch-list li {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-left: 40px;
+ul.patch-list li {
+  padding: 2px;
+  user-select: none;
 }
 
-div.patch-list li:hover {
+ul.patch-list li:hover {
   background: #eee;
 }
+
+ul.patch-list li.selected-patch {
+  background: #ccc;
+}
+
 /* Patch viewer */
 
 div.patch-viewer {
@@ -147,4 +174,17 @@ div.patch-header h1 {
 
 div.patch-editor {
   height: calc(100% - 50px);
+}
+
+/* Ellipsis middle */
+
+.ellipsis-middle:before {
+  float: right;
+  content: attr(data-tail);
+}
+
+.ellipsis-middle {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }

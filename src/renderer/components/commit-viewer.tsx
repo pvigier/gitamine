@@ -2,8 +2,17 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchItem } from './patch-item';
 
+function shortenSha(sha: string) {
+  return sha.substr(0, 6);
+}
+
+function formatDate(date: Date) {
+  return `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
+}
+
 export interface CommitViewerProps { 
   commit: Git.Commit | null;
+  selectedPatch: Git.ConvenientPatch | null;
   onPatchSelect: (patch: Git.ConvenientPatch) => void;
 }
 
@@ -30,38 +39,43 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
   }
 
   render() {
+    // Update dirtiness
     let patchesDirty = false;
     if (this.commit !== this.props.commit) {
       this.commit = this.props.commit; 
       patchesDirty = true;
     }
     const commit = this.commit;
+
     if (commit) {
       // Patches
       const patches = this.state.patches;
-      let patchesItems: JSX.Element[] = [];
+      let patchItems: JSX.Element[] = [];
       if (patchesDirty) {
         this.updatePatches(commit);
       } else {
-        patchesItems = patches.map((patch) => {
+        patchItems = patches.map((patch) => {
           const path = patch.newFile().path();
-          return <PatchItem onPatchSelect={this.props.onPatchSelect} patch={patch} key={path} />
+          return <PatchItem patch={patch} 
+            selected={patch === this.props.selectedPatch} 
+            onPatchSelect={this.props.onPatchSelect} 
+            key={path} />
         })
       }
 
-      const authoredDate = new Date(commit.author().when().time() * 1000);
+      const author = commit.author();
+      const authoredDate = new Date(author.when().time() * 1000);
       return (
         <div className='commit-viewer'>
+          <h3>Commit: {shortenSha(commit.sha())}</h3>
           <h2>{commit.message()}</h2>
-          <p>{commit.sha()}</p>
-          <p>Authored {authoredDate.toString()} by {commit.author().name()}</p>
-          <p>Last modified {commit.date().toString()}</p>
-          <p>Parents: {commit.parents().map((sha) => sha.tostrS().substr(0, 8)).toString()}</p>
-          <div className='patch-list'>
-            <ul>
-              {patchesItems}
-            </ul>
-          </div>
+          <p>By {author.name()} &lt;<a href={`mailto:${author.email()}`}>{author.email()}</a>&gt;</p>
+          <p>Authored {formatDate(authoredDate)}</p>
+          <p>Last modified {formatDate(commit.date())}</p>
+          <p>Parents: {commit.parents().map((sha) => shortenSha(sha.tostrS())).join(' ')}</p>
+          <ul className='patch-list'>
+            {patchItems}
+          </ul>
         </div>
       );
     } else {

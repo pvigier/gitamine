@@ -24,12 +24,17 @@ div.repo-dashboard {
 /* Repo header */ 
 
 div.repo-header {
+  width: 100%;
   height: 50px;
+  display: table;
   text-align: center;
 }
 
 div.repo-header h1 {
+  display: table-cell;
+  vertical-align: middle;
   margin: 0px;
+  font-size: 20px;
 }
 
 /* Graph viewer */

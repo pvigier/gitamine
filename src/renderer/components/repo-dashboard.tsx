@@ -50,7 +50,9 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         patch={this.state.selectedPatch!} 
         onEscapePressed={this.exitPatchViewer} /> 
     } else {
-      viewer = <GraphViewer repo={this.props.repo} onCommitSelect={this.handleCommitSelect} />
+      viewer = <GraphViewer repo={this.props.repo} 
+        selectedCommit={this.state.selectedCommit} 
+        onCommitSelect={this.handleCommitSelect} />
     }
     return (
       <div className='repo-dashboard'>

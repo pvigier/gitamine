@@ -3,6 +3,7 @@
 html, body {
   margin: 0;
   overflow: hidden;
+  font-family: Arial, sans-serif;
 }
 
 div#container {
@@ -65,6 +66,7 @@ div.commit-list {
   top: 0px;
   z-index: 1;
   overflow-y: scroll;
+  text-align: left;
 }
 
 div.commit-list ul {
@@ -82,10 +84,23 @@ div.commit-list li {
   padding-left: calc(50% + 20px);
   padding-top: 3px;
   padding-bottom: 3px;
+  font-size: 13px;
 }
 
 div.commit-list li:hover {
   background: #eee;
+}
+
+div.commit-list li.selected-commit {
+  background: #ccc;
+}
+
+div.commit-list li span.reference {
+  border-radius: 5px;
+  border: solid 1px #000;
+  background-color: #acf;
+  padding: 1px;
+  margin-right: 2px;
 }
 
 /* Commit viewer */

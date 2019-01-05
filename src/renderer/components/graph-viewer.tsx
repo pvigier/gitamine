@@ -6,13 +6,19 @@ import { RepoState } from "../repo-state";
 
 export interface GraphViewerProps { 
   repo: RepoState;
+  selectedCommit: Git.Commit | null;
   onCommitSelect: (commit: Git.Commit) => void;
 }
 
 export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
   render() {
     const items = this.props.repo.commits.map((commit: Git.Commit) => (
-      <CommitItem repo={this.props.repo} commit={commit} onCommitSelect={this.props.onCommitSelect} key={commit.sha()} />
+      <CommitItem 
+        repo={this.props.repo} 
+        commit={commit} 
+        selected={this.props.selectedCommit === commit} 
+        onCommitSelect={this.props.onCommitSelect} 
+        key={commit.sha()} />
     ));
     return (
       <div className='graph-viewer'>

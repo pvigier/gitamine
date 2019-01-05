@@ -9,6 +9,7 @@ function removeBranchPrefix(name: string) {
 export interface CommitItemProps { 
   repo: RepoState;
   commit: Git.Commit;
+  selected: boolean;
   onCommitSelect: (commit: Git.Commit) => void;
 }
 
@@ -23,8 +24,13 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
   }
 
   render() {
-    let references = this.props.repo.shaToReferences.get(this.props.commit.sha()) || [];
-    references = references.map((reference) => `[${removeBranchPrefix(reference)}]`);
-    return <li onClick={this.handleClick}>{references.join(' ')} {this.props.commit.message()}</li>;
+    const references = this.props.repo.shaToReferences.get(this.props.commit.sha()) || [];
+    const spans = references.map((reference) => 
+      <span key={reference} className='reference'>{removeBranchPrefix(reference)}</span>);
+    return (
+      <li className={this.props.selected ? 'selected-commit' : ''} onClick={this.handleClick}>
+        {spans}{this.props.commit.message()}
+      </li>
+    );
   }
 }

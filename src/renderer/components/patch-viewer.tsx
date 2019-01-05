@@ -190,7 +190,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
     return (
       <div className='patch-viewer' onKeyUp={this.handleKeyUp}>
         <div className='patch-header'>
-          <h1>{this.props.patch.newFile().path()}</h1>
+          <h2>{this.props.patch.newFile().path()}</h2>
         </div>
         <div className='patch-editor' ref={this.setDivRef} />
       </div>

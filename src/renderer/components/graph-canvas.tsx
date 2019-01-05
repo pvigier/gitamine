@@ -32,7 +32,6 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   positions: Map<string, [number, number]>
   width: number;
   offset: number;
-  setCanvasRef: (element: HTMLCanvasElement) => void;
   resizeObserver: any;
 
   constructor(props: GraphCanvasProps) {
@@ -41,28 +40,29 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
     this.positions = new Map<string, [number, number]>();
     this.width = 0;
     this.offset = 0;
+    this.setCanvasRef = this.setCanvasRef.bind(this);
     this.computePositions();
+  }
 
-    this.setCanvasRef = (element: HTMLCanvasElement) => {
-      this.canvas = element;
-      if (this.canvas) {
-        const parent = this.canvas.parentElement!;
-        this.canvas.height = parent.clientHeight;
-        this.drawGraph();
-        // Rerender on resize
-        const handleResize = () => {
-          if (this.canvas && this.canvas.height != parent.clientHeight) {
-            this.canvas.height = parent.clientHeight;
-            this.drawGraph();
-          }
-        };
-        this.resizeObserver = new ResizeObserver(handleResize).observe(parent);
-        // Rerender on scroll
-        this.canvas.nextElementSibling!.addEventListener('scroll', (event) => {
-          this.offset = event.target!.scrollTop;
+  setCanvasRef (element: HTMLCanvasElement) {
+    this.canvas = element;
+    if (this.canvas) {
+      const parent = this.canvas.parentElement!;
+      this.canvas.height = parent.clientHeight;
+      this.drawGraph();
+      // Rerender on resize
+      const handleResize = () => {
+        if (this.canvas && this.canvas.height != parent.clientHeight) {
+          this.canvas.height = parent.clientHeight;
           this.drawGraph();
-        });
-      }
+        }
+      };
+      this.resizeObserver = new ResizeObserver(handleResize).observe(parent);
+      // Rerender on scroll
+      this.canvas.nextElementSibling!.addEventListener('scroll', (event) => {
+        this.offset = event.target!.scrollTop;
+        this.drawGraph();
+      });
     }
   }
 

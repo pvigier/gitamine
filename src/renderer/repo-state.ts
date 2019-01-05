@@ -1,3 +1,4 @@
+import { basename } from 'path';
 import * as Git from 'nodegit';
 
 export enum ChildrenType {Commit, Merge}
@@ -15,7 +16,7 @@ export class RepoState {
 
   constructor(path: string, onReady: () => void) {
     this.path = path;
-    this.name = path.substr(path.lastIndexOf('/') + 1);
+    this.name = basename(path);
     this.commits = [];
     this.shaToCommit = new Map<string, Git.Commit>();
     this.references = new Map<string, Git.Commit>();

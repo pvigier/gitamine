@@ -22,20 +22,36 @@ function getPatchIcon(patch: Git.ConvenientPatch) {
 }
 
 export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
+  li: HTMLLIElement | null;
+  resizeObserver: any;
+
   constructor(props: PatchItemProps) {
     super(props);
     this.setLiRef = this.setLiRef.bind(this);
+    this.updateEllipsis = this.updateEllipsis.bind(this);
     this.handleClick = this.handleClick.bind(this);
   }
 
   setLiRef(element: HTMLLIElement) {
-    if (element && element.offsetWidth < element.scrollWidth){
-      const path = this.props.patch.newFile().path();
-      element.setAttribute('data-tail', path.substr(path.lastIndexOf('/')));
+    this.li = element;
+    if (this.li) {
+      this.updateEllipsis();
+      this.resizeObserver = new ResizeObserver(this.updateEllipsis).observe(this.li);
     }
   }
 
-  handleClick(e: React.MouseEvent<HTMLLIElement>) {
+  updateEllipsis() {
+    if (this.li) {
+      if (this.li.offsetWidth < this.li.scrollWidth){
+        const path = this.props.patch.newFile().path();
+        this.li.setAttribute('data-tail', path.substr(path.lastIndexOf('/')));
+      } else {
+        this.li.setAttribute('data-tail', '');
+      }
+    }
+  }
+
+  handleClick(event: React.MouseEvent<HTMLLIElement>) {
     this.props.onPatchSelect(this.props.patch);
   }
 

@@ -119,6 +119,7 @@ div.commit-list li span.reference {
 
 div.patch-viewer {
   flex: 1;
+  z-index: 1;
 }
 
 div.patch-header {
@@ -154,6 +155,8 @@ div.commit-viewer {
   display: flex;
   flex-direction: column;
   font-size: 14px;
+  background: white;
+  z-index: 2;
 }
 
 div.commit-viewer h3 {

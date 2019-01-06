@@ -138,6 +138,14 @@ div.patch-editor {
   height: calc(100% - 50px);
 }
 
+/* Splitter */
+
+div.splitter {
+  width: 4px;
+  background: #ccc;
+  cursor: col-resize;
+}
+
 /* Commit viewer */
 
 div.commit-viewer {

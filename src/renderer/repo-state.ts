@@ -1,5 +1,6 @@
 import { basename } from 'path';
 import * as Git from 'nodegit';
+import { CommitGraph } from './commit-graph';
 
 export enum ChildrenType {Commit, Merge}
 
@@ -13,6 +14,7 @@ export class RepoState {
   shaToReferences: Map<string, string[]>;
   parents: Map<string, string[]>;
   children: Map<string, [string, ChildrenType][]>;
+  graph: CommitGraph;
 
   constructor(path: string, onReady: () => void) {
     this.path = path;
@@ -38,6 +40,7 @@ export class RepoState {
       .then(() => {
         this.updateChildren();
         this.topologicalSort();
+        this.graph = new CommitGraph(this);
         onReady();
       });
   }

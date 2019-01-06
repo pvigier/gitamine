@@ -6,7 +6,7 @@ export class Splitter extends React.PureComponent<SplitterProps, {}> {
   dragging: boolean; 
   anchorX: number;
 
-  constructor(props: {}) {
+  constructor(props: SplitterProps) {
     super(props);
     this.dragging = false;
     this.startDragging = this.startDragging.bind(this);
@@ -27,6 +27,8 @@ export class Splitter extends React.PureComponent<SplitterProps, {}> {
   startDragging(event: React.MouseEvent<HTMLDivElement>) {
     this.dragging = true;
     this.anchorX = event.clientX;
+    document.documentElement.style.cursor = 'col-resize';
+    document.documentElement.style.userSelect = 'none';
   }
 
   handleMouseMove(event: MouseEvent) {
@@ -39,6 +41,8 @@ export class Splitter extends React.PureComponent<SplitterProps, {}> {
 
   endDragging() {
     this.dragging = false;
+    document.documentElement.style.removeProperty('cursor')
+    document.documentElement.style.removeProperty('user-select');
   }
 
   render() {

@@ -44,7 +44,15 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
 
   updatePatches(commit: Git.Commit) {
     commit.getDiff()
-      .then((diffs) => diffs.length > 0 ? diffs[0].patches() : [])
+      .then((diffs) => {
+        if (diffs.length > 0) {
+          const diff = diffs[0];
+          return diff.findSimilar({})
+            .then(() => diff.patches());
+        } else {
+          return [];
+        }
+      })
       .then((patches) => {
         this.setState({
           patches: patches

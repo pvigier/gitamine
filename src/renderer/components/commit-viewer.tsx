@@ -20,25 +20,20 @@ export interface CommitViewerState { patches: Git.ConvenientPatch[]; }
 
 export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitViewerState> {
   commit: Git.Commit | null;
-  div: HTMLDivElement | null;
+  div: React.RefObject<HTMLDivElement>;
 
   constructor(props: CommitViewerProps) {
     super(props);
     this.commit = this.props.commit;
-    this.div = null;
+    this.div = React.createRef<HTMLDivElement>();
     this.state = {
       patches: []
     }
-    this.setDivRef = this.setDivRef.bind(this);
-  }
-
-  setDivRef(element: HTMLDivElement) {
-    this.div = element;
   }
 
   resize(offset: number) {
-    if (this.div) {
-      this.div.style.width = `${this.div.clientWidth + offset}px`;
+    if (this.div.current) {
+      this.div.current.style.width = `${this.div.current.clientWidth + offset}px`;
     }
   }
 
@@ -88,7 +83,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
       const author = commit.author();
       const authoredDate = new Date(author.when().time() * 1000);
       return (
-        <div className='commit-viewer' ref={this.setDivRef}>
+        <div className='commit-viewer' ref={this.div}>
           <h3>Commit: {shortenSha(commit.sha())}</h3>
           <h2>{commit.message()}</h2>
           <p>By {author.name()} &lt;<a href={`mailto:${author.email()}`}>{author.email()}</a>&gt;</p>
@@ -101,7 +96,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
         </div>
       );
     } else {
-      return <div className='commit-viewer' ref={this.setDivRef}></div>;
+      return <div className='commit-viewer' ref={this.div}></div>;
     }
   }
 }

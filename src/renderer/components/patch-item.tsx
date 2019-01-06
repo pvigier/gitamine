@@ -22,31 +22,31 @@ function getPatchIcon(patch: Git.ConvenientPatch) {
 }
 
 export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
-  li: HTMLLIElement | null;
+  li: React.RefObject<HTMLLIElement>;
   resizeObserver: any;
 
   constructor(props: PatchItemProps) {
     super(props);
-    this.setLiRef = this.setLiRef.bind(this);
+    this.li = React.createRef();
     this.updateEllipsis = this.updateEllipsis.bind(this);
     this.handleClick = this.handleClick.bind(this);
   }
 
-  setLiRef(element: HTMLLIElement) {
-    this.li = element;
-    if (this.li) {
+  componentDidMount() {
+    if (this.li.current) {
       this.updateEllipsis();
-      this.resizeObserver = new ResizeObserver(this.updateEllipsis).observe(this.li);
+      this.resizeObserver = new ResizeObserver(this.updateEllipsis).observe(this.li.current);
     }
   }
 
   updateEllipsis() {
-    if (this.li) {
-      if (this.li.offsetWidth < this.li.scrollWidth){
+    if (this.li.current) {
+      const li = this.li.current;
+      if (li.offsetWidth < li.scrollWidth){
         const path = this.props.patch.newFile().path();
-        this.li.setAttribute('data-tail', path.substr(path.lastIndexOf('/')));
+        li.setAttribute('data-tail', path.substr(path.lastIndexOf('/')));
       } else {
-        this.li.setAttribute('data-tail', '');
+        li.setAttribute('data-tail', '');
       }
     }
   }
@@ -58,7 +58,7 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
   render() {
     const classNames =['ellipsis-middle', this.props.selected ? 'selected-patch' : ''];
     return (
-      <li className={classNames.join(' ')} onClick={this.handleClick} ref={this.setLiRef}>
+      <li className={classNames.join(' ')} onClick={this.handleClick} ref={this.li}>
         {getPatchIcon(this.props.patch)} {this.props.patch.newFile().path()}
       </li>
     );

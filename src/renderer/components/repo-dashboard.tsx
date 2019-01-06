@@ -14,12 +14,11 @@ export interface RepoDashboardState {
 }
 
 export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
-  commitViewer: CommitViewer | null;
+  commitViewer: React.RefObject<CommitViewer>;
 
   constructor(props: RepoDashboardProps) {
     super(props);
-    this.commitViewer = null;
-    this.setCommitViewerRef = this.setCommitViewerRef.bind(this);
+    this.commitViewer = React.createRef();
     this.handleCommitSelect = this.handleCommitSelect.bind(this);
     this.handlePatchSelect = this.handlePatchSelect.bind(this);
     this.exitPatchViewer = this.exitPatchViewer.bind(this);
@@ -28,10 +27,6 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       selectedCommit: null,
       selectedPatch: null
     };
-  }
-
-  setCommitViewerRef(commitViewer: CommitViewer) {
-    this.commitViewer = commitViewer;
   }
 
   handleCommitSelect(commit: Git.Commit) {
@@ -53,8 +48,8 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   }
 
   handlePanelResize(offset: number) {
-    if (this.commitViewer) {
-      this.commitViewer.resize(offset);
+    if (this.commitViewer.current) {
+      this.commitViewer.current.resize(offset);
     }
   }
 
@@ -81,7 +76,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
           <CommitViewer commit={this.state.selectedCommit} 
             selectedPatch={this.state.selectedPatch} 
             onPatchSelect={this.handlePatchSelect} 
-            ref={this.setCommitViewerRef} />
+            ref={this.commitViewer} />
         </div>
       </div>
     );

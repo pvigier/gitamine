@@ -20,6 +20,7 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
         onCommitSelect={this.props.onCommitSelect} 
         key={commit.sha()} />
     ));
+
     return (
       <div className='graph-viewer'>
         <div className='commit-graph'>

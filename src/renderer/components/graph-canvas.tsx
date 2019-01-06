@@ -9,41 +9,47 @@ const OFFSET_Y = 28;
 export interface GraphCanvasProps { repo: RepoState; }
 
 export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
-  canvas: HTMLCanvasElement | null;
+  canvas: React.RefObject<HTMLCanvasElement>;
   offset: number;
   resizeObserver: any;
 
   constructor(props: GraphCanvasProps) {
     super(props);
-    this.canvas = null;
+    this.canvas = React.createRef<HTMLCanvasElement>();
     this.offset = 0;
-    this.setCanvasRef = this.setCanvasRef.bind(this);
   }
 
-  setCanvasRef (element: HTMLCanvasElement) {
-    this.canvas = element;
-    if (this.canvas) {
-      const parent = this.canvas.parentElement!;
-      this.canvas.height = parent.clientHeight;
+  componentDidMount() {
+    if (this.canvas.current) {
+      const canvas = this.canvas.current;
+      const parent = canvas.parentElement!;
+      canvas.height = parent.clientHeight;
       this.drawGraph();
       // Rerender on resize
       const handleResize = () => {
-        if (this.canvas && this.canvas.height != parent.clientHeight) {
-          this.canvas.height = parent.clientHeight;
+        if (canvas.height != parent.clientHeight) {
+          canvas.height = parent.clientHeight;
           this.drawGraph();
         }
       };
       this.resizeObserver = new ResizeObserver(handleResize).observe(parent);
       // Rerender on scroll
-      this.canvas.nextElementSibling!.addEventListener('scroll', (event) => {
+      canvas.nextElementSibling!.addEventListener('scroll', (event) => {
         this.offset = event.target!.scrollTop;
         this.drawGraph();
       });
     }
   }
 
-  computeNodeCenterCoordinates(i: number, j: number) {
-    return [j * OFFSET_X + RADIUS, 3 + i * OFFSET_Y + RADIUS - this.offset]
+  drawGraph() {
+    if (this.canvas.current) {
+      this.canvas.current.width = this.props.repo.graph.width * OFFSET_X;
+      const ctx = this.canvas.current.getContext('2d');
+      if (ctx) {
+        this.drawEdges(ctx);
+        this.drawNodes(ctx);
+      }
+    }
   }
 
   drawNodes(ctx: CanvasRenderingContext2D) {
@@ -89,20 +95,13 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
     }
   }
 
-  drawGraph() {
-    if (this.canvas) {
-      this.canvas.width = this.props.repo.graph.width * OFFSET_X;
-      const ctx = this.canvas.getContext('2d');
-      if (ctx) {
-        this.drawEdges(ctx);
-        this.drawNodes(ctx);
-      }
-    }
+  computeNodeCenterCoordinates(i: number, j: number) {
+    return [j * OFFSET_X + RADIUS, 3 + i * OFFSET_Y + RADIUS - this.offset]
   }
 
   render() {
     return (
-      <canvas ref={this.setCanvasRef} />
+      <canvas ref={this.canvas} />
     );
   }
 }

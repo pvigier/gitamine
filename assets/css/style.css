@@ -19,12 +19,13 @@ div#app {
 
 div.repo-dashboard {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Repo header */ 
 
 div.repo-header {
-  width: 100%;
   height: 50px;
   display: table;
   text-align: center;
@@ -37,13 +38,18 @@ div.repo-header h1 {
   font-size: 20px;
 }
 
+/* Repo content */
+
+div.repo-content {
+  flex: 1;
+  display: flex;
+}
+
 /* Graph viewer */
 
 div.graph-viewer {
-  width: calc(100% - 300px);
-  height: calc(100% - 50px);
+  flex: 1;
   position: relative;
-  float: left;
 }
 
 /* Commit graph */
@@ -51,13 +57,14 @@ div.graph-viewer {
 div.commit-graph {
   width: 50%;
   height: 100%;
-  text-align: right;
   overflow-x: scroll;
   overflow-y: hidden;
 }
 
 div.commit-graph canvas {
-  position: sticky;
+  position: absolute;
+  right: 50%;
+  display: block;
   z-index: 2;
   pointer-events: none;
 }
@@ -108,12 +115,34 @@ div.commit-list li span.reference {
   margin-right: 2px;
 }
 
+/* Patch viewer */
+
+div.patch-viewer {
+  flex: 1;
+}
+
+div.patch-header {
+  height: 30px;
+  display: table;
+}
+
+div.patch-header h2 {
+  margin: 0px;
+  padding: 0px 8px;
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 16px;
+}
+
+div.patch-editor {
+  height: calc(100% - 50px);
+}
+
 /* Commit viewer */
 
 div.commit-viewer {
   width: 300px;
-  height: calc(100% - 50px);
-  float: right;
+  min-width: 300px;
   display: flex;
   flex-direction: column;
   font-size: 14px;
@@ -158,32 +187,6 @@ ul.patch-list li:hover {
 
 ul.patch-list li.selected-patch {
   background: #ccc;
-}
-
-/* Patch viewer */
-
-div.patch-viewer {
-  width: calc(100% - 300px);
-  height: calc(100% - 50px);
-  position: relative;
-  float: left;
-}
-
-div.patch-header {
-  height: 30px;
-  display: table;
-}
-
-div.patch-header h2 {
-  margin: 0px;
-  padding: 0px 8px;
-  display: table-cell;
-  vertical-align: middle;
-  font-size: 16px;
-}
-
-div.patch-editor {
-  height: calc(100% - 30px);
 }
 
 /* Ellipsis middle */

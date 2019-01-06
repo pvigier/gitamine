@@ -59,10 +59,11 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         <div className='repo-header'>
           <h1>{this.props.repo.name}</h1>
         </div>
-        {viewer}
-        <CommitViewer commit={this.state.selectedCommit} 
-          selectedPatch={this.state.selectedPatch} 
-          onPatchSelect={this.handlePatchSelect} />
+        <div className='repo-content'>
+          {viewer}
+          <CommitViewer commit={this.state.selectedCommit} 
+            selectedPatch={this.state.selectedPatch} 
+            onPatchSelect={this.handlePatchSelect} 
       </div>
     );
   }

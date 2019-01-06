@@ -62,8 +62,8 @@ div.commit-graph {
 }
 
 div.commit-graph canvas {
-  position: absolute;
-  right: 50%;
+  position: sticky;
+  margin-left: auto;
   display: block;
   z-index: 2;
   pointer-events: none;

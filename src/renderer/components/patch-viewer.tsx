@@ -63,7 +63,15 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.handleKeyUp = this.handleKeyUp.bind(this);
   }
 
-  handleKeyUp(event: React.KeyboardEvent<HTMLDivElement>) {
+  componentDidMount() {
+    window.addEventListener('keyup', this.handleKeyUp);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keyup', this.handleKeyUp);
+  }
+
+  handleKeyUp(event: KeyboardEvent) {
     if (event.keyCode === 27) {
       this.props.onEscapePressed();
     }
@@ -242,7 +250,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     }
 
     return (
-      <div className='patch-viewer' onKeyUp={this.handleKeyUp}>
+      <div className='patch-viewer'>
         <div className='patch-header'>
           <h2>{this.props.patch.newFile().path()}</h2>
         </div>

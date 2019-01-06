@@ -3,7 +3,7 @@
 html, body {
   margin: 0;
   overflow: hidden;
-  font-family: Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 div#container {
@@ -188,7 +188,7 @@ ul.patch-list {
 }
 
 ul.patch-list li {
-  padding: 2px;
+  padding: 2px 4px;
   user-select: none;
 }
 
@@ -198,6 +198,36 @@ ul.patch-list li:hover {
 
 ul.patch-list li.selected-patch {
   background: #ccc;
+}
+
+/* Patch icons */
+
+span.patch-add::before {
+  content: '+';
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  color: green;
+}
+
+span.patch-delete::before {
+  content: '-';
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  color: red;
+}
+
+span.patch-modify::before {
+  content: '\2026';
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  color: orange;
+}
+
+span.patch-rename::before {
+  content: '/';
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  color: dodgerblue;
 }
 
 /* Ellipsis middle */

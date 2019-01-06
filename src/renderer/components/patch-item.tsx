@@ -9,15 +9,15 @@ export interface PatchItemProps {
 
 function getPatchIcon(patch: Git.ConvenientPatch) {
   if (patch.isAdded()) {
-    return 'a';
+    return <span className='patch-add' />;
   } else if (patch.isDeleted()) {
-    return 'd';
+    return <span className='patch-delete' />;
   } else if (patch.isModified()) {
-    return 'm';
+    return <span className='patch-modify' />;
   } else if (patch.isRenamed()) {
-    return 'r';
+    return <span className='patch-rename' />;
   } else {
-    return 'u';
+    return null;
   }
 }
 

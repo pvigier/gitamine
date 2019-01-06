@@ -109,10 +109,10 @@ div.commit-list li.selected-commit {
 
 div.commit-list li span.reference {
   border-radius: 5px;
-  border: solid 1px #000;
-  background-color: #acf;
-  padding: 1px;
+  padding: 2px;
   margin-right: 2px;
+  background-color: var(--branch-color);
+  color: white;
 }
 
 /* Patch viewer */

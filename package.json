@@ -3,7 +3,7 @@
   "productName": "gitamine",
   "version": "0.0.1",
   "description": "gitamine is a modern git client",
-  "main": "src/main/index.ts",
+  "main": "src/main/main.ts",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",

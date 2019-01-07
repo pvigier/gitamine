@@ -24,7 +24,7 @@ const createWindow = async () => {
   setMenu(mainWindow);
 
   // Load the index.html of the app
-  mainWindow.loadURL(`file://${__dirname}/../renderer/index.html`);
+  mainWindow.loadURL(`file://${__dirname}/../../assets/html/index.html`);
 
   // Open the DevTools
   if (isDevMode) {

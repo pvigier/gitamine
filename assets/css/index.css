@@ -49,6 +49,7 @@ div.repo-content {
 
 div.graph-viewer {
   flex: 1;
+  min-width: 300px;
   position: relative;
 }
 
@@ -119,6 +120,7 @@ div.commit-list li span.reference {
 
 div.patch-viewer {
   flex: 1;
+  min-width: 300px;
   z-index: 1;
 }
 

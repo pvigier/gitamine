@@ -27,7 +27,7 @@ export function setMenu(mainWindow: Electron.BrowserWindow) {
         {
           label: 'Init repo',
           accelerator: 'CmdOrCtrl+I',
-          click: () => createModalWindow(mainWindow, `file://${__dirname}/../renderer/init-repo.html`)
+          click: () => createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/init-repo.html`)
         },
         {
           label: 'Open repo',

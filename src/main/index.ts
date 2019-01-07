@@ -33,10 +33,8 @@ const createWindow = async () => {
   }
 
   // Only show when the DOM is ready
-  mainWindow.webContents.on('dom-ready', () => {
-    if (mainWindow) {
-      mainWindow.show();
-    }
+  mainWindow.once('ready-to-show', () => {
+    mainWindow!.show();
   });
 
   mainWindow.on('closed', () => {

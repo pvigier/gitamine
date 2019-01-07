@@ -6,6 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   </head>
   <body>
-    <div id="container"></div>
+    <form>
+      <div>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="repo-name">
+      </div>
+      <div>
+        <label for="path">Initialize in:</label>
+        <input type="text" id="path" name="repo-path">
+        <button id="browse" type="button">Browse</button>
+      </div>
+      <div>
+        <label for="path">Full path:</label>
+        <span id="prefix"></span>/
+        <input type="text" id="folder" name="repo-folder">
+      </div>
+      <div class="button">
+        <button id="create" type="button">Create repository</button>
+      </div>
+    </form>
+    <script type="text/tsx">require('./init-repo');</script>
   </body>
 </html>

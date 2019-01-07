@@ -58,7 +58,8 @@ if (createButton) {
   createButton.addEventListener('click', () => {
     if (pathInput && folderInput) {
       const window = remote.BrowserWindow.getFocusedWindow()!;
-      const path = join(pathInput.value, folderInput.value);
+      const folderName = folderInput.value || folderInput.getAttribute('placeholder');
+      const path = join(pathInput.value, folderName);
       window.getParentWindow().webContents.send('init-repo', path);
       window.close();
     }

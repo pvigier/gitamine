@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import * as Git from 'nodegit';
 import { AppContainer } from 'react-hot-loader';
 import { App } from './components/app';
 import { RepoState } from "./repo-state";
@@ -20,14 +21,16 @@ if (module.hot) { module.hot.accept(render); }
 
 // Events
 
-ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
+function openRepo(path: string) {
   if (app) {
-    const r = new RepoState(path, () => { app.addRepo(r); });
+    const repo = new RepoState(path, () => { app.addRepo(repo); });
   }
+}
+
+ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
+  openRepo(path);
 });
 
 ipcRenderer.on('init-repo', (event: Electron.Event, path: string) => {
-  if (app) {
-    console.log(path);
-  }
+  Git.Repository.init(path, 0).then(() => openRepo(path));
 });

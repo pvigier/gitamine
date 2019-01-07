@@ -25,3 +25,9 @@ ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
     const r = new RepoState(path, () => { app.addRepo(r); });
   }
 });
+
+ipcRenderer.on('init-repo', (event: Electron.Event, path: string) => {
+  if (app) {
+    console.log(path);
+  }
+});

@@ -1,17 +1,15 @@
-import { join } from 'path';
+import * as Path from 'path';
 import { remote } from 'electron';
 
 // Folder input
 
-const folderInput = document.getElementById('folder');
+const folderInput = document.getElementById('folder') as HTMLInputElement;
 
 // Name input
 
-const nameInput = document.getElementById('name');
+const nameInput = document.getElementById('name') as HTMLInputElement;
 if (nameInput) {
   nameInput.addEventListener('input', () => {
-    console.log('change');
-    console.log(folderInput);
     if (folderInput) {
       folderInput.setAttribute('placeholder', nameInput.value);
     }
@@ -29,7 +27,7 @@ function updatePrefixParagraph() {
 
 // Path input
 
-const pathInput = document.getElementById('path');
+const pathInput = document.getElementById('path') as HTMLInputElement;
 if (pathInput) {
   pathInput.addEventListener('input', () => {
     updatePrefixParagraph();
@@ -58,10 +56,13 @@ if (createButton) {
   createButton.addEventListener('click', () => {
     if (pathInput && folderInput) {
       const window = remote.BrowserWindow.getFocusedWindow()!;
+      const pathPrefix = pathInput.value;
       const folderName = folderInput.value || folderInput.getAttribute('placeholder');
-      const path = join(pathInput.value, folderName);
-      window.getParentWindow().webContents.send('init-repo', path);
-      window.close();
+      if (pathPrefix && folderName) {
+        const path = Path.join(pathPrefix, folderName);
+        window.getParentWindow().webContents.send('init-repo', path);
+        window.close();
+      }
     }
   });
 }

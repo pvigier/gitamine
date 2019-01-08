@@ -3,11 +3,11 @@ import { remote } from 'electron';
 
 // Folder input
 
-const folderInput = document.getElementById('folder');
+const folderInput = document.getElementById('folder') as HTMLInputElement;
 
 // URL input
 
-const urlInput = document.getElementById('url');
+const urlInput = document.getElementById('url') as HTMLInputElement;
 if (urlInput) {
   urlInput.addEventListener('input', () => {
     if (folderInput) {
@@ -27,7 +27,7 @@ function updatePrefixParagraph() {
 
 // Path input
 
-const pathInput = document.getElementById('path');
+const pathInput = document.getElementById('path') as HTMLInputElement;
 if (pathInput) {
   pathInput.addEventListener('input', () => {
     updatePrefixParagraph();
@@ -56,10 +56,13 @@ if (cloneButton) {
   cloneButton.addEventListener('click', () => {
     if (pathInput && urlInput) {
       const window = remote.BrowserWindow.getFocusedWindow()!;
+      const pathPrefix = pathInput.value;
       const folderName = folderInput.value || folderInput.getAttribute('placeholder');
-      const path = Path.join(pathInput.value, folderName);
-      window.getParentWindow().webContents.send('clone-repo', [path, urlInput.value]);
-      window.close();
+      if (pathPrefix && folderName) {
+        const path = Path.join(pathPrefix, folderName);
+        window.getParentWindow().webContents.send('clone-repo', [path, urlInput.value]);
+        window.close();
+      }
     }
   });
 }

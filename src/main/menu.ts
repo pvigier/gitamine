@@ -25,6 +25,11 @@ export function setMenu(mainWindow: Electron.BrowserWindow) {
       label: 'File',
       submenu: [
         {
+          label: 'Clone repo',
+          accelerator: 'CmdOrCtrl+N',
+          click: () => createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/clone-repo.html`)
+        },
+        {
           label: 'Init repo',
           accelerator: 'CmdOrCtrl+I',
           click: () => createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/init-repo.html`)

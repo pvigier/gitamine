@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Clone repo</title>
+    <link href="../css/clone-repo.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  </head>
+  <body>
+    <form>
+      <div>
+        <label for="path">Where to clone to:</label>
+        <input type="text" id="path" name="repo-path">
+        <button id="browse" type="button">Browse</button>
+      </div>
+      <div>
+        <label for="url">URL:</label>
+        <input type="text" id="url" name="repo-url">
+      </div>
+      <div>
+        <label for="path">Full path:</label>
+        <span id="prefix"></span>/<input type="text" id="folder" name="repo-folder">
+      </div>
+      <div class="button">
+        <button id="clone" type="button">Clone the repository</button>
+      </div>
+    </form>
+    <script type="text/tsx">require('../../src/renderer/clone-repo');</script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+/* Body */
+
+html, body {
+  margin: 0;
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Divs */
+
+div {
+  display: flex;
+  margin: 10px;
+}
+
+/* Labels */
+
+label {
+  min-width: 140px;
+  display: inline-block;
+  text-align: right;
+  margin-right: 10px;
+}
+
+/* Inputs */
+
+input {
+  flex: 1;
+}
+
+/* Prefix */
+
+span#prefix {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Clone button */
+
+button#clone {
+  margin-left: auto;
+}

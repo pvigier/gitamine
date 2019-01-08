@@ -1,3 +1,4 @@
+import * as Path from 'path';
 import { ipcRenderer } from 'electron';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -27,10 +28,17 @@ function openRepo(path: string) {
   }
 }
 
-ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
-  openRepo(path);
+ipcRenderer.on('clone-repo', (event: Electron.Event, [path, url]: [string, string]) => {
+  Git.Clone.clone(url, path).then((repo) => {
+    const path = Path.resolve(repo.path(), '..');
+    openRepo(path);
+  });
 });
 
 ipcRenderer.on('init-repo', (event: Electron.Event, path: string) => {
   Git.Repository.init(path, 0).then(() => openRepo(path));
+});
+
+ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
+  openRepo(path);
 });

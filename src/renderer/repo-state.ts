@@ -1,4 +1,4 @@
-import { basename } from 'path';
+import * as Path from 'path';
 import * as Git from 'nodegit';
 import { CommitGraph } from './commit-graph';
 
@@ -18,7 +18,7 @@ export class RepoState {
 
   constructor(path: string, onReady: () => void) {
     this.path = path;
-    this.name = basename(path);
+    this.name = Path.parse(path).name;
     this.commits = [];
     this.shaToCommit = new Map<string, Git.Commit>();
     this.references = new Map<string, Git.Commit>();

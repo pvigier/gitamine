@@ -11,7 +11,6 @@ export interface GraphCanvasProps { repo: RepoState; }
 export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   canvas: React.RefObject<HTMLCanvasElement>;
   offset: number;
-  resizeObserver: any;
 
   constructor(props: GraphCanvasProps) {
     super(props);
@@ -19,26 +18,19 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
     this.offset = 0;
   }
 
-  componentDidMount() {
+  handleScroll(offset: number, start: number, end: number) {
+    this.offset = offset;
+    this.drawGraph();
+  }
+
+  handleResize(height: number, start: number, end: number) {
     if (this.canvas.current) {
       const canvas = this.canvas.current;
-      const parent = canvas.parentElement!;
-      canvas.height = parent.clientHeight;
-      this.drawGraph();
-      // Rerender on resize
-      const handleResize = () => {
-        if (canvas.height != parent.clientHeight) {
-          canvas.height = parent.clientHeight;
-          this.drawGraph();
-        }
-      };
-      this.resizeObserver = new ResizeObserver(handleResize).observe(parent);
-      // Rerender on scroll
-      canvas.nextElementSibling!.addEventListener('scroll', (event) => {
-        this.offset = event.target!.scrollTop;
+      if (canvas.height != height) {
+        canvas.height = height;
         this.drawGraph();
-      });
-    }
+      }
+    } 
   }
 
   drawGraph() {

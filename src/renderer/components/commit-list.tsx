@@ -9,6 +9,8 @@ export interface CommitListProps {
   repo: RepoState;
   selectedCommit: Git.Commit | null;
   onCommitSelect: (commit: Git.Commit) => void;
+  onScroll: (height: number, start: number, end: number) => void;
+  onResize: (offset: number, start: number, end: number) => void;
 }
 
 export interface CommitListState {
@@ -34,28 +36,33 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
   componentDidMount() {
     if (this.div.current) {
       this.resizeObserver = new ResizeObserver(this.handleResize).observe(this.div.current);
-      this.updateState();
     }
   }
 
   handleScroll() {
-    this.updateState();
+    if (this.div.current) {
+      const newState = this.computeState()!;
+      this.props.onScroll(this.div.current.scrollTop, newState.start, newState.end);
+      this.setState(newState);
+    }
   }
 
   handleResize() {
-    this.updateState();
+    if (this.div.current) {
+      const newState = this.computeState()!;
+      this.props.onResize(this.div.current.clientHeight, newState.start, newState.end);
+      this.setState(newState);
+    }
   }
 
-  updateState() {
-    if (this.div.current) {
-      const div = this.div.current;
-      const start = Math.floor(div.scrollTop / ITEM_HEIGHT);
-      const end = Math.ceil((div.scrollTop + div.clientHeight) / ITEM_HEIGHT);
-      this.setState({
-        start: start,
-        end: end
-      });
-    }
+  computeState() {
+    const div = this.div.current!;
+    const start = Math.floor(div.scrollTop / ITEM_HEIGHT);
+    const end = Math.ceil((div.scrollTop + div.clientHeight) / ITEM_HEIGHT);
+    return {
+      start: start,
+      end: end
+    };
   }
 
   render() {

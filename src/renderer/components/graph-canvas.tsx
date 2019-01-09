@@ -11,6 +11,8 @@ export interface GraphCanvasProps { repo: RepoState; }
 export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   canvas: React.RefObject<HTMLCanvasElement>;
   offset: number;
+  start: number;
+  end: number;
 
   constructor(props: GraphCanvasProps) {
     super(props);
@@ -20,6 +22,8 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
 
   handleScroll(offset: number, start: number, end: number) {
     this.offset = offset;
+    this.start = start;
+    this.end = end;
     this.drawGraph();
   }
 
@@ -28,6 +32,8 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
       const canvas = this.canvas.current;
       if (canvas.height != height) {
         canvas.height = height;
+        this.start = start;
+        this.end = end;
         this.drawGraph();
       }
     } 
@@ -45,7 +51,10 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   }
 
   drawNodes(ctx: CanvasRenderingContext2D) {
-    for (let [commitSha, [i, j]] of this.props.repo.graph.positions) {
+    const positions = this.props.repo.commits.slice(this.start, this.end).map((commit) => 
+      this.props.repo.graph.positions.get(commit.sha())!
+    );
+    for (let [i, j] of positions) {
       const [x, y] = this.computeNodeCenterCoordinates(i, j);
       ctx.fillStyle = getBranchColor(j);
       ctx.beginPath();
@@ -60,8 +69,8 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
     for (let [commitSha, [i0, j0]] of positions) {
       const [x0, y0] = this.computeNodeCenterCoordinates(i0, j0);
       ctx.beginPath();
-      for (let [childSha, type] of repo.children.get(commitSha) as [string, ChildrenType][]) {
-        const [i1, j1] = positions.get(childSha) as [number, number];
+      for (let [childSha, type] of repo.children.get(commitSha)!) {
+        const [i1, j1] = positions.get(childSha)!;
         const [x1, y1] = this.computeNodeCenterCoordinates(i1, j1);
         ctx.moveTo(x0, y0);
         if (type === ChildrenType.Commit) {

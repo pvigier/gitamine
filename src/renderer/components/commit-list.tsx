@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { CommitItem } from './commit-item';
+import { IndexItem } from './index-item';
 import { RepoState } from "../repo-state";
 
 const ITEM_HEIGHT = 28;
@@ -9,6 +10,7 @@ export interface CommitListProps {
   repo: RepoState;
   selectedCommit: Git.Commit | null;
   onCommitSelect: (commit: Git.Commit) => void;
+  onIndexSelect: () => void;
   onScroll: (height: number, start: number, end: number) => void;
   onResize: (offset: number, start: number, end: number) => void;
 }
@@ -67,14 +69,18 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
 
   render() {
     const commits = this.props.repo.commits.slice(this.state.start, this.state.end);
-    const items = commits.map((commit: Git.Commit) => (
-      <CommitItem 
-        repo={this.props.repo} 
-        commit={commit} 
-        selected={this.props.selectedCommit === commit} 
-        onCommitSelect={this.props.onCommitSelect} 
-        key={commit.sha()} />
-    ));
+    const items = [
+      <IndexItem selected={this.props.selectedCommit === null}
+        onIndexSelect={this.props.onIndexSelect} 
+        key='index' />,
+      ...commits.map((commit: Git.Commit) => (
+        <CommitItem 
+          repo={this.props.repo} 
+          commit={commit} 
+          selected={this.props.selectedCommit === commit} 
+          onCommitSelect={this.props.onCommitSelect} 
+          key={commit.sha()} />
+      ))];
 
     // Compute height of the divs
     const paddingTop = this.state.start * ITEM_HEIGHT;

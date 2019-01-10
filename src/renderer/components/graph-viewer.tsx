@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { CommitItem } from './commit-item';
 import { GraphCanvas } from './graph-canvas';
 import { RepoState } from "../repo-state";
 import { CommitList } from './commit-list';
@@ -9,6 +8,7 @@ export interface GraphViewerProps {
   repo: RepoState;
   selectedCommit: Git.Commit | null;
   onCommitSelect: (commit: Git.Commit) => void;
+  onIndexSelect: () => void;
 }
 
 export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {

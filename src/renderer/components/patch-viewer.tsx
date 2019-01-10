@@ -10,23 +10,6 @@ loadMonaco().then((m: any) => {
   monaco = m;
 });
 
-// Util functions
- 
-function getBlobByPath(tree: Git.Tree, components: string[]): Promise<Git.Blob> {
-  if (components.length == 1) {
-    return tree.entryByName(components[0]).getBlob();
-  } else {
-    return tree.entryByName(components[0]).getTree()
-      .then((tree) => getBlobByPath(tree, components.slice(1)));
-  }
-}
-
-function getContentByPath(commit: Git.Commit, path: string) {
-  return commit.getTree()
-    .then((tree) => getBlobByPath(tree, path.split('/')))
-    .then((blob) => blob.toString());
-}
-
 // PatchViewer
 
 enum ViewMode {
@@ -46,12 +29,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   editor: any;
   viewMode: ViewMode;
   viewZoneIds: number[];
-  oldPath: string;
   oldBlob: string;
-  newPath: string;
   newBlob: string;
   hunks: Git.ConvenientHunk[];
-  parentSha: string;
   loadingPromise: Promise<void>;
 
   constructor(props: PatchViewerProps) {
@@ -87,21 +67,21 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   loadData() {
+    const repo = this.props.repo.repo;
+    const patch = this.props.patch;
     // Load old blob
     let oldPromise: Promise<string>;
     if (this.props.patch.isAdded()) {
       oldPromise = Promise.resolve('');
     } else {
-      this.parentSha = this.props.commit.parentId(0).tostrS();
-      const parentCommit = this.props.repo.shaToCommit.get(this.parentSha)!;
-      oldPromise = getContentByPath(parentCommit, this.oldPath);
+      oldPromise = repo.getBlob(patch.oldFile().id()).then((blob) => blob.toString());
     }
     // Load new blob
     let newPromise: Promise<string>;
     if (this.props.patch.isDeleted()) {
       newPromise = Promise.resolve('');
     } else {
-      newPromise = getContentByPath(this.props.commit, this.newPath);
+      newPromise = repo.getBlob(patch.newFile().id()).then((blob) => blob.toString());
     }
     // Load hunks
     this.loadingPromise = Promise.all([oldPromise, newPromise, this.props.patch.hunks()])
@@ -206,8 +186,8 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   setModels(oldString: string, newString: string) {
-    function updateOrCreateModel(sha: string, path: string, value: string) {
-      const uri = monaco.Uri.parse(`file://${sha}/${path}`);
+    function updateOrCreateModel(prefix: string, path: string, value: string) {
+      const uri = monaco.Uri.parse(`file://${prefix}/${path}`);
       let model = monaco.editor.getModel(uri);
       if (model) {
         model.setValue(value);
@@ -217,8 +197,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       return model;
     }
     
-    const originalModel = updateOrCreateModel(this.parentSha, this.oldPath, oldString);
-    const modifiedModel = updateOrCreateModel(this.props.commit.sha(), this.newPath, newString);
+    const patch = this.props.patch;
+    const originalModel = updateOrCreateModel('a', patch.oldFile().path(), oldString);
+    const modifiedModel = updateOrCreateModel('b', patch.newFile().path(), newString);
     this.editor.setModel({
       original: originalModel, 
       modified: modifiedModel
@@ -236,12 +217,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
 
   render() {
     // Set up editor
-    this.oldPath = this.props.patch.oldFile().path();
     this.oldBlob = '';
-    this.newPath = this.props.patch.newFile().path();
     this.newBlob = '';
     this.hunks = [];
-    this.parentSha = '';
     this.loadData();
 
     // Update the models if the editor is already created

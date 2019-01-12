@@ -33,6 +33,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
     }
     this.handleScroll = this.handleScroll.bind(this);
     this.handleResize = this.handleResize.bind(this);
+    this.handleKeyUp = this.handleKeyUp.bind(this);
   }
 
   componentDidMount() {
@@ -57,6 +58,31 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
     }
   }
 
+  handleKeyUp(event: React.KeyboardEvent<HTMLUListElement>) {
+    event.preventDefault();
+    if (event.keyCode === 38) {
+      let i = this.props.selectedCommit ? 
+        this.props.repo.commits.indexOf(this.props.selectedCommit) : -1;
+      i = Math.max(i - 1, -1);
+      if (i >= 0) {
+        this.props.onCommitSelect(this.props.repo.commits[i])
+      } else {
+        this.props.onIndexSelect();
+      }
+      if (i <= this.state.start && this.div.current) {
+        this.div.current.scrollTo(0, (i + 1) * ITEM_HEIGHT);
+      }
+    } else if (event.keyCode === 40) {
+      let i = this.props.selectedCommit ? 
+        this.props.repo.commits.indexOf(this.props.selectedCommit) : -1;
+      i = Math.min(i + 1, this.props.repo.commits.length - 1);
+      this.props.onCommitSelect(this.props.repo.commits[i])
+      if (i >= this.state.end - 1 && this.div.current) {
+        this.div.current.scrollTo(0, (i + 2) * ITEM_HEIGHT - this.div.current.clientHeight);
+      }
+    }
+  }
+
   computeState() {
     const div = this.div.current!;
     // Take account of the index
@@ -70,7 +96,6 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
   }
 
   render() {
-    console.log(this.state.start, this.state.end);
     // Select visible commits and add index if necessary
     const items: JSX.Element[] = [];
     if (this.state.start === -1) {
@@ -98,7 +123,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
 
     return (
       <div className='commit-list' onScroll={this.handleScroll} ref={this.div}>
-        <ul style={style}>{items}</ul>
+        <ul style={style} tabIndex={1} onKeyDown={this.handleKeyUp}>{items}</ul>
       </div>
     );
   }

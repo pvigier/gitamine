@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { PatchItem } from './patch-item';
+import { PatchList } from './patch-list';
 import { RepoState } from '../repo-state';
 
 export interface IndexViewerProps { 
@@ -60,31 +60,17 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   render() {
-    const unstagedPatchItems = this.state.unstagedPatches.map((patch) => {
-      const path = patch.newFile().path();
-      return <PatchItem patch={patch} 
-        selected={false} 
-        onPatchSelect={() => {}} 
-        key={path} />
-    })
-    const stagedPatchItems = this.state.stagedPatches.map((patch) => {
-      const path = patch.newFile().path();
-      return <PatchItem patch={patch} 
-        selected={false} 
-        onPatchSelect={() => {}} 
-        key={path} />
-    })
     return (
       <div className='commit-viewer' ref={this.div}>
         <h2>Index</h2>
         <p>Unstaged files</p>
-        <ul className='patch-list'>
-          {unstagedPatchItems}
-        </ul>
+        <PatchList patches={this.state.unstagedPatches}
+          selectedPatch={null}
+          onPatchSelect={() => {}} />
         <p>Staged files</p>
-        <ul className='patch-list'>
-          {stagedPatchItems}
-        </ul>
+        <PatchList patches={this.state.stagedPatches}
+          selectedPatch={null}
+          onPatchSelect={() => {}} />
       </div>
     );
   }

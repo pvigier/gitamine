@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { PatchItem } from './patch-item';
+import { PatchList } from './patch-list';
 
 function shortenSha(sha: string) {
   return sha.substr(0, 6);
@@ -36,8 +36,8 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
     }
   }
 
-  updatePatches(commit: Git.Commit) {
-    commit.getDiff()
+  updatePatches() {
+    this.commit.getDiff()
       .then((diffs) => {
         if (diffs.length > 0) {
           const diff = diffs[0];
@@ -55,42 +55,25 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
   }
 
   render() {
-    // Update dirtiness
-    let patchesDirty = false;
+    // Update patches if necessary
     if (this.commit !== this.props.commit) {
       this.commit = this.props.commit; 
-      patchesDirty = true;
-    }
-    const commit = this.commit;
-
-    // Patches
-    const patches = this.state.patches;
-    let patchItems: JSX.Element[] = [];
-    if (patchesDirty) {
-      this.updatePatches(commit);
-    } else {
-      patchItems = patches.map((patch) => {
-        const path = patch.newFile().path();
-        return <PatchItem patch={patch} 
-          selected={patch === this.props.selectedPatch} 
-          onPatchSelect={this.props.onPatchSelect} 
-          key={path} />
-      })
+      this.updatePatches();
     }
 
-    const author = commit.author();
+    const author = this.commit.author();
     const authoredDate = new Date(author.when().time() * 1000);
     return (
       <div className='commit-viewer' ref={this.div}>
-        <h3>Commit: {shortenSha(commit.sha())}</h3>
-        <h2>{commit.message()}</h2>
+        <h3>Commit: {shortenSha(this.commit.sha())}</h3>
+        <h2>{this.commit.message()}</h2>
         <p>By {author.name()} &lt;<a href={`mailto:${author.email()}`}>{author.email()}</a>&gt;</p>
         <p>Authored {formatDate(authoredDate)}</p>
-        <p>Last modified {formatDate(commit.date())}</p>
-        <p>Parents: {commit.parents().map((sha) => shortenSha(sha.tostrS())).join(' ')}</p>
-        <ul className='patch-list'>
-          {patchItems}
-        </ul>
+        <p>Last modified {formatDate(this.commit.date())}</p>
+        <p>Parents: {this.commit.parents().map((sha) => shortenSha(sha.tostrS())).join(' ')}</p>
+        <PatchList patches={this.state.patches}
+          selectedPatch={this.props.selectedPatch}
+          onPatchSelect={this.props.onPatchSelect} />
       </div>
     );
   }

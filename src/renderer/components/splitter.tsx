@@ -1,6 +1,8 @@
 import * as React from 'react';
 
-export interface SplitterProps { onPanelResize: (offset: number) => void; }
+export interface SplitterProps { 
+  onPanelResize: (offset: number) => void;
+}
 
 export class Splitter extends React.PureComponent<SplitterProps, {}> {
   dragging: boolean; 

@@ -6,7 +6,9 @@ const RADIUS = 11;
 const OFFSET_X = 2 * RADIUS;
 const OFFSET_Y = 28;
 
-export interface GraphCanvasProps { repo: RepoState; }
+export interface GraphCanvasProps { 
+  repo: RepoState; 
+}
 
 export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   canvas: React.RefObject<HTMLCanvasElement>;

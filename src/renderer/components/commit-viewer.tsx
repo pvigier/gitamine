@@ -16,7 +16,9 @@ export interface CommitViewerProps {
   onPatchSelect: (patch: Git.ConvenientPatch) => void;
 }
 
-export interface CommitViewerState { patches: Git.ConvenientPatch[]; }
+export interface CommitViewerState { 
+  patches: Git.ConvenientPatch[];
+}
 
 export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitViewerState> {
   commit: Git.Commit;

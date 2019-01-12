@@ -7,7 +7,9 @@ import { PatchViewer } from './patch-viewer';
 import { Splitter } from './splitter';
 import { RepoState } from "../repo-state";
 
-export interface RepoDashboardProps { repo: RepoState; }
+export interface RepoDashboardProps { 
+  repo: RepoState;
+}
 
 export interface RepoDashboardState { 
   selectedCommit: Git.Commit | null;

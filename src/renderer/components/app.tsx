@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { RepoDashboard } from './repo-dashboard';
-import { RepoState } from "../repo-state";
+import { RepoState } from '../repo-state';
 
-export interface AppState { repos: RepoState[]; }
+export interface AppState {
+  repos: RepoState[]; 
+}
 
 export class App extends React.PureComponent<{}, AppState> {
-  state: AppState;
-
   constructor(props: {}) {
     super(props);
     this.state = {

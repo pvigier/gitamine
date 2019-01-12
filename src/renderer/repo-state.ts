@@ -2,7 +2,10 @@ import * as Path from 'path';
 import * as Git from 'nodegit';
 import { CommitGraph } from './commit-graph';
 
-export enum ChildrenType {Commit, Merge}
+export enum ChildrenType {
+  Commit,
+  Merge
+}
 
 export class RepoState {
   path: string;

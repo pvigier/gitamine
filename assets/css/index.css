@@ -234,7 +234,7 @@ span.patch-rename::before {
 
 /* Ellipsis middle */
 
-.ellipsis-middle:before {
+.ellipsis-middle::before {
   float: right;
   content: attr(data-tail);
 }

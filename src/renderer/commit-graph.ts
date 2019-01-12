@@ -52,8 +52,8 @@ export class CommitGraph {
       return branches.length - 1;
     }
 
-    let i = 0;
-    const branches: (string | null)[] = [];
+    let i = 1;
+    const branches: (string | null)[] = ['index'];
     for (let commit of repo.commits) {
       let j = -1;
       const commitSha = commit.sha();
@@ -62,10 +62,14 @@ export class CommitGraph {
       //console.log('children: ', children);
       // Find a commit to replace
       let commitToReplace: string | null = null;
-      for (let [childSha, type] of children) {
-        if (repo.parents.get(childSha)![0] === commitSha) {
-          commitToReplace = childSha;
-          break;
+      if (commitSha === repo.head) {
+        commitToReplace = 'index';
+      } else {
+        for (let [childSha, type] of children) {
+          if (repo.parents.get(childSha)![0] === commitSha) {
+            commitToReplace = childSha;
+            break;
+          }
         }
       }
       // Insert the commit in the active branches

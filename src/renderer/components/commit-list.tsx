@@ -59,8 +59,10 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
 
   computeState() {
     const div = this.div.current!;
-    const start = Math.floor(div.scrollTop / ITEM_HEIGHT);
-    const end = Math.ceil((div.scrollTop + div.clientHeight) / ITEM_HEIGHT);
+    // Take account of the index
+    const top = div.scrollTop - ITEM_HEIGHT;
+    const start = Math.floor(top / ITEM_HEIGHT);
+    const end = Math.ceil((top + div.clientHeight) / ITEM_HEIGHT);
     return {
       start: start,
       end: end
@@ -68,27 +70,32 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
   }
 
   render() {
-    const commits = this.props.repo.commits.slice(this.state.start, this.state.end);
-    const items = [
-      <IndexItem selected={this.props.selectedCommit === null}
+    console.log(this.state.start, this.state.end);
+    // Select visible commits and add index if necessary
+    const items: JSX.Element[] = [];
+    if (this.state.start === -1) {
+      items.push(<IndexItem selected={this.props.selectedCommit === null}
         onIndexSelect={this.props.onIndexSelect} 
-        key='index' />,
-      ...commits.map((commit: Git.Commit) => (
-        <CommitItem 
-          repo={this.props.repo} 
-          commit={commit} 
-          selected={this.props.selectedCommit === commit} 
-          onCommitSelect={this.props.onCommitSelect} 
-          key={commit.sha()} />
-      ))];
+        key='index' />);
+    }
+    const commits = this.props.repo.commits.slice(Math.max(this.state.start, 0), this.state.end);
+    items.push(...commits.map((commit: Git.Commit) => (
+      <CommitItem 
+        repo={this.props.repo} 
+        commit={commit} 
+        selected={this.props.selectedCommit === commit} 
+        onCommitSelect={this.props.onCommitSelect} 
+        key={commit.sha()} />
+    )));
 
     // Compute height of the divs
-    const paddingTop = this.state.start * ITEM_HEIGHT;
+    const paddingTop = (this.state.start + 1) * ITEM_HEIGHT;
     const paddingBottom = (this.props.repo.commits.length - this.state.end) * ITEM_HEIGHT;
     const style = {
       paddingTop: paddingTop,
       paddingBottom: paddingBottom
     };
+
     return (
       <div className='commit-list' onScroll={this.handleScroll} ref={this.div}>
         <ul style={style}>{items}</ul>

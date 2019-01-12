@@ -51,7 +51,8 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   }
 
   drawNodes(ctx: CanvasRenderingContext2D) {
-    const positions = this.props.repo.commits.slice(this.start, this.end).map((commit) => 
+    // Draw only visible nodes
+    const positions = this.props.repo.commits.slice(Math.max(this.start, 0), this.end).map((commit) => 
       this.props.repo.graph.positions.get(commit.sha())!
     );
     for (let [i, j] of positions) {

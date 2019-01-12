@@ -81,7 +81,8 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         onPatchSelect={this.handlePatchSelect} 
         ref={this.rightViewer as React.RefObject<CommitViewer>} />
     } else {
-      rightViewer = <IndexViewer ref={this.rightViewer as React.RefObject<IndexViewer>} />
+      rightViewer = <IndexViewer repo={this.props.repo} 
+        ref={this.rightViewer as React.RefObject<IndexViewer>} />
     }
     return (
       <div className='repo-dashboard'>

@@ -14,6 +14,7 @@ export class RepoState {
   shaToReferences: Map<string, string[]>;
   parents: Map<string, string[]>;
   children: Map<string, [string, ChildrenType][]>;
+  head: string;
   graph: CommitGraph;
 
   constructor(path: string, onReady: () => void) {
@@ -36,6 +37,7 @@ export class RepoState {
       .then(() => this.repo.getReferenceNames(Git.Reference.TYPE.OID))
       .then((names) => this.getReferenceCommits(names))
       .then(() => this.getAllCommits())
+      .then(() => this.getHead())
       .then(() => this.getParents())
       .then(() => {
         this.updateChildren();
@@ -71,6 +73,11 @@ export class RepoState {
           this.shaToCommit.set(commit.sha(), commit);
         }
       });
+  }
+
+  getHead() {
+    return this.repo.head().then((head: Git.Reference) => 
+      this.head = this.references.get(head.name())!.sha());
   }
 
   getParents() {

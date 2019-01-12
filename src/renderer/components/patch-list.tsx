@@ -16,6 +16,21 @@ export class PatchList extends React.PureComponent<PatchListProps, PatchListStat
     super(props);
     this.state = {
     }
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+  }
+
+  handleKeyDown(event: React.KeyboardEvent<HTMLUListElement>) {
+    if (this.props.selectedPatch) {
+      if (event.keyCode === 38) {
+        let i = this.props.patches.indexOf(this.props.selectedPatch);
+        i = (i - 1 + this.props.patches.length) % this.props.patches.length;
+        this.props.onPatchSelect(this.props.patches[i])
+      } else if (event.keyCode === 40) {
+        let i = this.props.patches.indexOf(this.props.selectedPatch);
+        i = (i + 1) % this.props.patches.length;
+        this.props.onPatchSelect(this.props.patches[i])
+      }
+    }
   }
 
   render() {
@@ -29,7 +44,7 @@ export class PatchList extends React.PureComponent<PatchListProps, PatchListStat
     });
 
     return (
-      <ul className='patch-list'>
+      <ul className='patch-list' tabIndex={1} onKeyDown={this.handleKeyDown}>
         {patchItems}
       </ul>
     );

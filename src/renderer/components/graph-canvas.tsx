@@ -67,12 +67,18 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   drawEdges(ctx: CanvasRenderingContext2D) {
     const repo = this.props.repo;
     const positions = repo.graph.positions;
+    ctx.lineWidth = 2;
     for (let [commitSha, [i0, j0]] of positions) {
       const [x0, y0] = this.computeNodeCenterCoordinates(i0, j0);
-      ctx.beginPath();
       for (let [childSha, type] of repo.children.get(commitSha)!) {
         const [i1, j1] = positions.get(childSha)!;
         const [x1, y1] = this.computeNodeCenterCoordinates(i1, j1);
+        ctx.beginPath();
+        if (j0 !== j1 && type === ChildrenType.Commit) {
+          ctx.strokeStyle = getBranchColor(j1);
+        } else {
+          ctx.strokeStyle = getBranchColor(j0);
+        }
         ctx.moveTo(x0, y0);
         if (j0 !== j1) {
           if (type === ChildrenType.Commit) {
@@ -93,9 +99,10 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
             }
           }
         }
+        //console.log(i0, i1, j0, j1, ctx.strokeStyle);
         ctx.lineTo(x1, y1);
+        ctx.stroke();
       }
-      ctx.stroke();
     }
   }
 

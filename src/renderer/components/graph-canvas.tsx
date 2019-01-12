@@ -74,21 +74,23 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
         const [i1, j1] = positions.get(childSha)!;
         const [x1, y1] = this.computeNodeCenterCoordinates(i1, j1);
         ctx.moveTo(x0, y0);
-        if (type === ChildrenType.Commit) {
-          if (x0 < x1) {
-            ctx.lineTo(x1 - RADIUS, y0);
-            ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
-          } else {
-            ctx.lineTo(x1 + RADIUS, y0);
-            ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
-          }
-        } else {
-          if (x0 < x1) {
-            ctx.lineTo(x0, y1 + RADIUS);
-            ctx.quadraticCurveTo(x0, y1, x0 + RADIUS, y1);
-          } else {
-            ctx.lineTo(x0, y1 + RADIUS);
-            ctx.quadraticCurveTo(x0, y1, x0 - RADIUS, y1);
+        if (j0 !== j1) {
+          if (type === ChildrenType.Commit) {
+            if (x0 < x1) {
+              ctx.lineTo(x1 - RADIUS, y0);
+              ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
+            } else {
+              ctx.lineTo(x1 + RADIUS, y0);
+              ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
+            }
+          } else if (type === ChildrenType.Merge) {
+            if (x0 < x1) {
+              ctx.lineTo(x0, y1 + RADIUS);
+              ctx.quadraticCurveTo(x0, y1, x0 + RADIUS, y1);
+            } else {
+              ctx.lineTo(x0, y1 + RADIUS);
+              ctx.quadraticCurveTo(x0, y1, x0 - RADIUS, y1);
+            }
           }
         }
         ctx.lineTo(x1, y1);

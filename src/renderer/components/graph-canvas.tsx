@@ -5,6 +5,9 @@ import { getBranchColor } from '../commit-graph';
 const RADIUS = 11;
 const OFFSET_X = 2 * RADIUS;
 const OFFSET_Y = 28;
+const LINE_WIDTH = 2;
+const INNER_RADIUS = RADIUS - LINE_WIDTH / 2;
+const DASH_LENGTH = 2 * Math.PI * INNER_RADIUS / 32;
 
 export interface GraphCanvasProps { 
   repo: RepoState; 
@@ -46,11 +49,55 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
       this.canvas.current.width = this.props.repo.graph.width * OFFSET_X;
       const ctx = this.canvas.current.getContext('2d');
       if (ctx) {
+        this.drawIndexEdge(ctx);
         this.drawEdges(ctx);
+        if (this.start === -1) {
+          this.drawIndexNode(ctx);
+        }
         this.drawNodes(ctx);
       }
     }
   }
+
+  // Index 
+
+  drawIndexNode(ctx: CanvasRenderingContext2D) {
+    // Set the style
+    ctx.lineWidth = LINE_WIDTH;
+    ctx.setLineDash([DASH_LENGTH]);
+    ctx.strokeStyle = getBranchColor(0);
+
+    // Draw the node
+    const [x, y] = this.computeNodeCenterCoordinates(0, 0);
+    ctx.beginPath();
+    ctx.arc(x, y, INNER_RADIUS, 0, 2 * Math.PI, true);
+    ctx.stroke();
+  }
+
+  drawIndexEdge(ctx: CanvasRenderingContext2D) {
+    const repo = this.props.repo;
+    const positions = repo.graph.positions;
+    // Draw the edge between the index and the head commit
+    if (positions.size > 0) {
+      let [x0, y0] = this.computeNodeCenterCoordinates(0, 0);
+      y0 += RADIUS;
+      const [x1, y1] = this.computeNodeCenterCoordinates(...positions.get(repo.head)!);
+
+      // Set the style
+      ctx.lineWidth = LINE_WIDTH;
+      ctx.setLineDash([DASH_LENGTH]);
+      ctx.strokeStyle = getBranchColor(0);
+
+      // Draw the edge
+      const [x, y] = this.computeNodeCenterCoordinates(0, 0);
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.lineTo(x1, y1);
+      ctx.stroke();
+    }
+  }
+
+  // Commits
 
   drawNodes(ctx: CanvasRenderingContext2D) {
     // Draw only visible nodes
@@ -69,7 +116,8 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
   drawEdges(ctx: CanvasRenderingContext2D) {
     const repo = this.props.repo;
     const positions = repo.graph.positions;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = LINE_WIDTH;
+    ctx.setLineDash([]);
     for (let [commitSha, [i0, j0]] of positions) {
       const [x0, y0] = this.computeNodeCenterCoordinates(i0, j0);
       for (let [childSha, type] of repo.children.get(commitSha)!) {
@@ -101,7 +149,6 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
             }
           }
         }
-        //console.log(i0, i1, j0, j1, ctx.strokeStyle);
         ctx.lineTo(x1, y1);
         ctx.stroke();
       }

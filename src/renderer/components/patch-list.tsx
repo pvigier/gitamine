@@ -6,6 +6,8 @@ export interface PatchListProps {
   patches: Git.ConvenientPatch[];
   selectedPatch: Git.ConvenientPatch | null;
   onPatchSelect: (patch: Git.ConvenientPatch) => void;
+  onStage?: (patch: Git.ConvenientPatch) => void;
+  onUnstage?: (patch: Git.ConvenientPatch) => void;
 }
 
 export interface PatchListState {
@@ -40,6 +42,8 @@ export class PatchList extends React.PureComponent<PatchListProps, PatchListStat
       return <PatchItem patch={patch} 
         selected={patch === this.props.selectedPatch} 
         onPatchSelect={this.props.onPatchSelect} 
+        onStage={this.props.onStage}
+        onUnstage={this.props.onUnstage}
         key={path} />;
     });
 

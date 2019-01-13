@@ -190,8 +190,9 @@ ul.patch-list {
 }
 
 ul.patch-list li {
-  padding: 2px 4px;
+  padding: 4px;
   display: flex;
+  position: relative;
   user-select: none;
 }
 
@@ -205,6 +206,26 @@ ul.patch-list li.selected-patch {
 
 ul.patch-list li span.icon {
   padding-right: 4px;
+}
+
+ul.patch-list li div.buttons {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  text-align: right;
+  line-height: 25px; /* Height of the list element */
+}
+
+ul.patch-list li div.buttons button {
+  display: none;
+  margin-right: 2px;
+  padding: 0px 2px;
+}
+
+ul.patch-list li div.buttons:hover button {
+  display: inline;
 }
 
 /* Patch icons */

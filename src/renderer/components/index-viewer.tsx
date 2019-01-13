@@ -17,6 +17,7 @@ export interface IndexViewerState {
 
 export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexViewerState> {
   div: React.RefObject<HTMLDivElement>;
+  index: Git.Index;
 
   constructor(props: IndexViewerProps) {
     super(props);
@@ -27,8 +28,9 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     }
     this.handleUnstagedPatchSelect = this.handleUnstagedPatchSelect.bind(this);
     this.handleStagedPatchSelect = this.handleStagedPatchSelect.bind(this);
-    this.getUnstagedPatches();
-    this.getStagedPatches();
+    this.stagePatch = this.stagePatch.bind(this);
+    this.unstagePatch = this.unstagePatch.bind(this);
+    this.getPatches();
   }
 
   handleUnstagedPatchSelect(patch: Git.ConvenientPatch) {
@@ -39,36 +41,41 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.props.onPatchSelect(patch, PatchViewerMode.Unstage);
   }
 
+  stagePatch(patch: Git.ConvenientPatch) {
+    this.index.addByPath(patch.newFile().path())
+      .then(() => this.index.write());
+  }
+
+  unstagePatch(patch: Git.ConvenientPatch) {
+    this.index.removeByPath(patch.newFile().path())
+      .then(() => this.index.write());
+  }
+
   resize(offset: number) {
     if (this.div.current) {
       this.div.current.style.width = `${this.div.current.clientWidth + offset}px`;
     }
   }
 
-  getUnstagedPatches() {
-    const repo = this.props.repo.repo;
-    repo.index()
-      .then((index) => Git.Diff.indexToWorkdir(repo, index) )
-      .then((diff) => diff.findSimilar({}).then(() => diff))
-      .then((diff) => diff.patches())
-      .then((patches) => {
-        this.setState({
-          unstagedPatches: patches
-        });
-      });
-  }
-
-  getStagedPatches() {
+  getPatches() {
     const repo = this.props.repo.repo;
     const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
     Promise.all([repo.index(), headCommit.getTree()])
-      .then(([index, tree]) => Git.Diff.treeToIndex(repo, tree, index) )
-      .then((diff) => diff.findSimilar({}).then(() => diff))
-      .then((diff) => diff.patches())
-      .then((patches) => {
-        this.setState({
-          stagedPatches: patches
-        });
+      .then(([index, tree]) => {
+        this.index = index;
+        const unstagedPatches = Git.Diff.indexToWorkdir(repo, index) 
+          .then((diff) => diff.findSimilar({}).then(() => diff))
+          .then((diff) => diff.patches());
+        const stagedPatches = Git.Diff.treeToIndex(repo, tree, index)
+          .then((diff) => diff.findSimilar({}).then(() => diff))
+          .then((diff) => diff.patches());
+        Promise.all([unstagedPatches, stagedPatches])
+          .then(([unstagedPatches, stagedPatches]) => {
+            this.setState({
+              unstagedPatches: unstagedPatches,
+              stagedPatches: stagedPatches
+            });
+          });
       });
   }
 
@@ -79,11 +86,13 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
         <p>Unstaged files</p>
         <PatchList patches={this.state.unstagedPatches}
           selectedPatch={this.props.selectedPatch}
-          onPatchSelect={this.handleUnstagedPatchSelect} />
+          onPatchSelect={this.handleUnstagedPatchSelect} 
+          onStage={this.stagePatch} />
         <p>Staged files</p>
         <PatchList patches={this.state.stagedPatches}
           selectedPatch={this.props.selectedPatch}
-          onPatchSelect={this.handleStagedPatchSelect} />
+          onPatchSelect={this.handleStagedPatchSelect}
+          onUnstage={this.unstagePatch} />
       </div>
     );
   }

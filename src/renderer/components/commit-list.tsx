@@ -88,7 +88,8 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
     // Take account of the index
     const top = div.scrollTop - ITEM_HEIGHT;
     const start = Math.floor(top / ITEM_HEIGHT);
-    const end = Math.ceil((top + div.clientHeight) / ITEM_HEIGHT);
+    const end = Math.min(Math.ceil((top + div.clientHeight) / ITEM_HEIGHT), 
+      this.props.repo.commits.length);
     return {
       start: start,
       end: end

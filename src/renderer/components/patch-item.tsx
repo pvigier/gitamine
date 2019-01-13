@@ -9,46 +9,22 @@ export interface PatchItemProps {
 
 function getPatchIcon(patch: Git.ConvenientPatch) {
   if (patch.isAdded()) {
-    return <span className='patch-add' />;
+    return <span className='icon patch-add' />;
   } else if (patch.isDeleted()) {
-    return <span className='patch-delete' />;
+    return <span className='icon patch-delete' />;
   } else if (patch.isModified()) {
-    return <span className='patch-modify' />;
+    return <span className='icon patch-modify' />;
   } else if (patch.isRenamed()) {
-    return <span className='patch-rename' />;
+    return <span className='icon patch-rename' />;
   } else {
     return null;
   }
 }
 
 export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
-  li: React.RefObject<HTMLLIElement>;
-  resizeObserver: any;
-
   constructor(props: PatchItemProps) {
     super(props);
-    this.li = React.createRef();
-    this.updateEllipsis = this.updateEllipsis.bind(this);
     this.handleClick = this.handleClick.bind(this);
-  }
-
-  componentDidMount() {
-    if (this.li.current) {
-      this.updateEllipsis();
-      this.resizeObserver = new ResizeObserver(this.updateEllipsis).observe(this.li.current);
-    }
-  }
-
-  updateEllipsis() {
-    if (this.li.current) {
-      const li = this.li.current;
-      if (li.offsetWidth < li.scrollWidth){
-        const path = this.props.patch.newFile().path();
-        li.setAttribute('data-tail', path.substr(path.lastIndexOf('/')));
-      } else {
-        li.setAttribute('data-tail', '');
-      }
-    }
   }
 
   handleClick(event: React.MouseEvent<HTMLLIElement>) {
@@ -56,10 +32,16 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
   }
 
   render() {
-    const classNames =['ellipsis-middle', this.props.selected ? 'selected-patch' : ''];
+    const path = this.props.patch.newFile().path();
+    const i = Math.max(path.lastIndexOf('/'), 0);
     return (
-      <li className={classNames.join(' ')} onClick={this.handleClick} ref={this.li}>
-        {getPatchIcon(this.props.patch)} {this.props.patch.newFile().path()}
+      <li className={this.props.selected ? 'selected-patch' : ''}  
+        onClick={this.handleClick}>
+        {getPatchIcon(this.props.patch)}
+        <div className='ellipsis-middle'>
+          <div className='left'>{path.substr(0, i)}</div>
+          <div className='right'>{path.substr(i)}</div>
+        </div>
       </li>
     );
   }

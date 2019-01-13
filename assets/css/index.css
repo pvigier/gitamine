@@ -191,6 +191,7 @@ ul.patch-list {
 
 ul.patch-list li {
   padding: 2px 4px;
+  display: flex;
   user-select: none;
 }
 
@@ -200,6 +201,10 @@ ul.patch-list li:hover {
 
 ul.patch-list li.selected-patch {
   background: #ccc;
+}
+
+ul.patch-list li span.icon {
+  padding-right: 4px;
 }
 
 /* Patch icons */
@@ -234,13 +239,21 @@ span.patch-rename::before {
 
 /* Ellipsis middle */
 
-.ellipsis-middle::before {
-  float: right;
-  content: attr(data-tail);
+div.ellipsis-middle {
+  display: flex;
+  overflow: hidden;
 }
 
-.ellipsis-middle {
-  white-space: nowrap;
+div.ellipsis-middle div.left {
   text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
+}
+
+div.ellipsis-middle div.right {
+  max-width: 100%;
+  flex-shrink: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }

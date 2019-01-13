@@ -1,10 +1,13 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
+import { PatchViewerMode } from './patch-viewer';
 import { RepoState } from '../repo-state';
 
 export interface IndexViewerProps { 
   repo: RepoState;
+  selectedPatch: Git.ConvenientPatch | null;
+  onPatchSelect: (patch: Git.ConvenientPatch, mode: PatchViewerMode) => void;
 }
 
 export interface IndexViewerState {
@@ -22,8 +25,18 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       unstagedPatches: [],
       stagedPatches: []
     }
+    this.handleUnstagedPatchSelect = this.handleUnstagedPatchSelect.bind(this);
+    this.handleStagedPatchSelect = this.handleStagedPatchSelect.bind(this);
     this.getUnstagedPatches();
     this.getStagedPatches();
+  }
+
+  handleUnstagedPatchSelect(patch: Git.ConvenientPatch) {
+    this.props.onPatchSelect(patch, PatchViewerMode.Stage);
+  }
+
+  handleStagedPatchSelect(patch: Git.ConvenientPatch) {
+    this.props.onPatchSelect(patch, PatchViewerMode.Unstage);
   }
 
   resize(offset: number) {
@@ -65,12 +78,12 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
         <h2>Index</h2>
         <p>Unstaged files</p>
         <PatchList patches={this.state.unstagedPatches}
-          selectedPatch={null}
-          onPatchSelect={() => {}} />
+          selectedPatch={this.props.selectedPatch}
+          onPatchSelect={this.handleUnstagedPatchSelect} />
         <p>Staged files</p>
         <PatchList patches={this.state.stagedPatches}
-          selectedPatch={null}
-          onPatchSelect={() => {}} />
+          selectedPatch={this.props.selectedPatch}
+          onPatchSelect={this.handleStagedPatchSelect} />
       </div>
     );
   }

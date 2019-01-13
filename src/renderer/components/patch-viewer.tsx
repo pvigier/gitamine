@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { RepoState } from '../repo-state'
@@ -10,7 +11,32 @@ loadMonaco().then((m: any) => {
   monaco = m;
 });
 
+// Util
+
+function getBlob(repo: Git.Repository, file: Git.DiffFile) {
+  return repo.getBlob(file.id()).then(
+    (blob) => blob.toString(),
+    () => {
+      return new Promise<string>((resolve, reject) => {
+        fs.readFile(file.path(), (error, data) => {
+          if (!error) {
+            resolve(data.toString());
+          } else {
+            reject(error);
+          }
+        });
+      })
+    }
+  );
+}
+
 // PatchViewer
+
+export enum PatchViewerMode {
+  ReadOnly,
+  Stage,
+  Unstage
+}
 
 enum ViewMode {
   Hunk,
@@ -19,10 +45,10 @@ enum ViewMode {
 }
 
 export interface PatchViewerProps { 
-  repo: RepoState,
-  commit: Git.Commit,
-  patch: Git.ConvenientPatch,
-  onEscapePressed: () => void
+  repo: RepoState;
+  patch: Git.ConvenientPatch;
+  mode: PatchViewerMode;
+  onEscapePressed: () => void;
 }
 
 export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
@@ -74,14 +100,14 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     if (this.props.patch.isAdded()) {
       oldPromise = Promise.resolve('');
     } else {
-      oldPromise = repo.getBlob(patch.oldFile().id()).then((blob) => blob.toString());
+      oldPromise = getBlob(repo, patch.oldFile());
     }
     // Load new blob
     let newPromise: Promise<string>;
     if (this.props.patch.isDeleted()) {
       newPromise = Promise.resolve('');
     } else {
-      newPromise = repo.getBlob(patch.newFile().id()).then((blob) => blob.toString());
+      newPromise = getBlob(repo, patch.newFile());
     }
     // Load hunks
     this.loadingPromise = Promise.all([oldPromise, newPromise, this.props.patch.hunks()])

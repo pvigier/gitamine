@@ -3,7 +3,7 @@ import * as Git from 'nodegit';
 import { GraphViewer } from './graph-viewer';
 import { CommitViewer } from './commit-viewer';
 import { IndexViewer } from './index-viewer';
-import { PatchViewer } from './patch-viewer';
+import { PatchViewer, PatchViewerMode } from './patch-viewer';
 import { Splitter } from './splitter';
 import { RepoState } from "../repo-state";
 
@@ -14,6 +14,7 @@ export interface RepoDashboardProps {
 export interface RepoDashboardState { 
   selectedCommit: Git.Commit | null;
   selectedPatch: Git.ConvenientPatch | null;
+  patchViewerMode: PatchViewerMode;
 }
 
 export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
@@ -29,7 +30,8 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     this.handlePanelResize = this.handlePanelResize.bind(this);
     this.state = {
       selectedCommit: null,
-      selectedPatch: null
+      selectedPatch: null,
+      patchViewerMode: PatchViewerMode.ReadOnly
     };
   }
 
@@ -45,9 +47,10 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     } as RepoDashboardState);
   }
 
-  handlePatchSelect(patch: Git.ConvenientPatch) {
+  handlePatchSelect(patch: Git.ConvenientPatch, mode: PatchViewerMode) {
     this.setState({
-      selectedPatch: patch
+      selectedPatch: patch,
+      patchViewerMode: mode
     } as RepoDashboardState);
   }
 
@@ -65,10 +68,10 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
 
   render() {
     let leftViewer; 
-    if (this.state.selectedCommit && this.state.selectedPatch) {
+    if (this.state.selectedPatch) {
       leftViewer = <PatchViewer repo={this.props.repo} 
-        commit={this.state.selectedCommit!} 
         patch={this.state.selectedPatch!} 
+        mode={this.state.patchViewerMode}
         onEscapePressed={this.exitPatchViewer} /> 
     } else {
       leftViewer = <GraphViewer repo={this.props.repo} 
@@ -84,6 +87,8 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         ref={this.rightViewer as React.RefObject<CommitViewer>} />
     } else {
       rightViewer = <IndexViewer repo={this.props.repo} 
+        selectedPatch={this.state.selectedPatch} 
+        onPatchSelect={this.handlePatchSelect} 
         ref={this.rightViewer as React.RefObject<IndexViewer>} />
     }
     return (

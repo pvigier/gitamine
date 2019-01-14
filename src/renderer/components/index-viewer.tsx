@@ -45,16 +45,6 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.getPatches();
   }
 
-  async stagePatch(patch: Git.ConvenientPatch) {
-    await this.index.addByPath(patch.newFile().path())
-    this.index.write();
-  }
-
-  async unstagePatch(patch: Git.ConvenientPatch) {
-    await this.index.removeByPath(patch.newFile().path())
-    this.index.write();
-  }
-
   resize(offset: number) {
     if (this.div.current) {
       this.div.current.style.width = `${this.div.current.clientWidth + offset}px`;
@@ -79,6 +69,21 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       unstagedPatches: await unstagedDiff.patches(),
       stagedPatches: await stagedDiff.patches()
     });
+  }
+
+  async stagePatch(patch: Git.ConvenientPatch) {
+    if (patch.isDeleted()) {
+      await this.index.removeByPath(patch.newFile().path())
+      this.index.write();
+    } else {
+      await this.index.addByPath(patch.newFile().path())
+      this.index.write();
+    }
+  }
+
+  unstagePatch(patch: Git.ConvenientPatch) {
+    const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
+    Git.Reset.default(this.props.repo.repo, headCommit, patch.newFile().path());
   }
 
   render() {

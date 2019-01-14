@@ -41,6 +41,10 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.props.onPatchSelect(patch, PatchViewerMode.Unstage);
   }
 
+  refresh() {
+    this.getPatches();
+  }
+
   async stagePatch(patch: Git.ConvenientPatch) {
     await this.index.addByPath(patch.newFile().path())
     this.index.write();
@@ -64,7 +68,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 
         Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
     }
-    this.index = await repo.index();
+    this.index = await repo.refreshIndex();
     const [unstagedDiff, stagedDiff] = await Promise.all([
       Git.Diff.indexToWorkdir(repo, this.index, options),
       Git.Diff.treeToIndex(repo, await headCommit.getTree(), this.index, options)

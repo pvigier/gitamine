@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { GraphViewer } from './graph-viewer';
@@ -33,6 +34,13 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       selectedPatch: null,
       patchViewerMode: PatchViewerMode.ReadOnly
     };
+
+    // Watch Index 
+    fs.watch(this.props.repo.repo.path(), (e, filename) => {
+      if (filename === 'index') {
+        this.refreshIndex();
+      }
+    })
   }
 
   handleCommitSelect(commit: Git.Commit) {
@@ -63,6 +71,12 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   handlePanelResize(offset: number) {
     if (this.rightViewer.current) {
       this.rightViewer.current.resize(offset);
+    }
+  }
+
+  refreshIndex() {
+    if (!this.state.selectedCommit && this.rightViewer.current) {
+      (this.rightViewer.current as IndexViewer).refresh();
     }
   }
 

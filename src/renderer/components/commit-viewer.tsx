@@ -44,22 +44,15 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
     }
   }
 
-  updatePatches() {
-    this.commit.getDiff()
-      .then((diffs) => {
-        if (diffs.length > 0) {
-          const diff = diffs[0];
-          return diff.findSimilar({})
-            .then(() => diff.patches());
-        } else {
-          return [];
-        }
+  async updatePatches() {
+    const diffs = await this.props.commit.getDiff();
+    if (diffs.length > 0) {
+      const diff = diffs[0];
+      diff.findSimilar({})
+      this.setState({
+        patches: await diff.patches()
       })
-      .then((patches) => {
-        this.setState({
-          patches: patches
-        })
-      });
+    }
   }
 
   render() {

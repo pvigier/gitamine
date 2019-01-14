@@ -41,14 +41,14 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.props.onPatchSelect(patch, PatchViewerMode.Unstage);
   }
 
-  stagePatch(patch: Git.ConvenientPatch) {
-    this.index.addByPath(patch.newFile().path())
-      .then(() => this.index.write());
+  async stagePatch(patch: Git.ConvenientPatch) {
+    await this.index.addByPath(patch.newFile().path())
+    this.index.write();
   }
 
-  unstagePatch(patch: Git.ConvenientPatch) {
-    this.index.removeByPath(patch.newFile().path())
-      .then(() => this.index.write());
+  async unstagePatch(patch: Git.ConvenientPatch) {
+    await this.index.removeByPath(patch.newFile().path())
+    this.index.write();
   }
 
   resize(offset: number) {
@@ -57,26 +57,24 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     }
   }
 
-  getPatches() {
+  async getPatches() {
     const repo = this.props.repo.repo;
     const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
-    Promise.all([repo.index(), headCommit.getTree()])
-      .then(([index, tree]) => {
-        this.index = index;
-        const unstagedPatches = Git.Diff.indexToWorkdir(repo, index) 
-          .then((diff) => diff.findSimilar({}).then(() => diff))
-          .then((diff) => diff.patches());
-        const stagedPatches = Git.Diff.treeToIndex(repo, tree, index)
-          .then((diff) => diff.findSimilar({}).then(() => diff))
-          .then((diff) => diff.patches());
-        Promise.all([unstagedPatches, stagedPatches])
-          .then(([unstagedPatches, stagedPatches]) => {
-            this.setState({
-              unstagedPatches: unstagedPatches,
-              stagedPatches: stagedPatches
-            });
-          });
-      });
+    const options = {
+      flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 
+        Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
+    }
+    this.index = await repo.index();
+    const [unstagedDiff, stagedDiff] = await Promise.all([
+      Git.Diff.indexToWorkdir(repo, this.index, options),
+      Git.Diff.treeToIndex(repo, await headCommit.getTree(), this.index, options)
+    ]);
+    unstagedDiff.findSimilar({});
+    stagedDiff.findSimilar({});
+    this.setState({
+      unstagedPatches: await unstagedDiff.patches(),
+      stagedPatches: await stagedDiff.patches()
+    });
   }
 
   render() {

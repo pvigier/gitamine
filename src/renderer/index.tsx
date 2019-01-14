@@ -28,17 +28,24 @@ function openRepo(path: string) {
   }
 }
 
-ipcRenderer.on('clone-repo', (event: Electron.Event, [path, url]: [string, string]) => {
-  Git.Clone.clone(url, path).then((repo) => {
-    const path = Path.resolve(repo.path(), '..');
-    openRepo(path);
-  });
+ipcRenderer.on('clone-repo', async (event: Electron.Event, [path, url]: [string, string]) => {
+  try {
+    const repo = await Git.Clone.clone(url, path);
+    openRepo(Path.dirname(repo.path()));
+  } catch (e) {
+    console.error(e);
+  }
 });
 
-ipcRenderer.on('init-repo', (event: Electron.Event, path: string) => {
-  Git.Repository.init(path, 0).then(() => openRepo(path));
+ipcRenderer.on('init-repo', async (event: Electron.Event, path: string) => {
+  try {
+    const repo = await Git.Repository.init(path, 0);
+    openRepo(Path.dirname(repo.path()));
+  } catch (e) {
+    console.error(e);
+  }
 });
 
 ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
-  openRepo(path);
+    openRepo(path);
 });

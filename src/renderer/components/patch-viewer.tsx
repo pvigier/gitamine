@@ -14,21 +14,20 @@ loadMonaco().then((m: any) => {
 
 // Util
 
-function getBlob(repo: Git.Repository, file: Git.DiffFile) {
-  return repo.getBlob(file.id()).then(
-    (blob) => blob.toString(),
-    () => {
-      return new Promise<string>((resolve, reject) => {
-        fs.readFile(Path.join(Path.dirname(repo.path()), file.path()), (error, data) => {
-          if (!error) {
-            resolve(data.toString());
-          } else {
-            reject(error);
-          }
-        });
-      })
-    }
-  );
+async function getBlob(repo: Git.Repository, file: Git.DiffFile) {
+  try {
+    return (await repo.getBlob(file.id())).toString();
+  } catch (e) {
+    return new Promise<string>((resolve, reject) => {
+      fs.readFile(Path.join(Path.dirname(repo.path()), file.path()), (error, data) => {
+        if (!error) {
+          resolve(data.toString());
+        } else {
+          reject(error);
+        }
+      });
+    })
+  }
 }
 
 // PatchViewer

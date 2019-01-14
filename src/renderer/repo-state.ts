@@ -33,63 +33,59 @@ export class RepoState {
     this.load(path, onReady);
   }
 
-  load(path: string, onReady: () => void) {
-    // Load the repository
-    Git.Repository.open(path)
-      .then((repo) => { this.repo = repo; })
-      .then(() => this.repo.getReferenceNames(Git.Reference.TYPE.OID))
-      .then((names) => this.getReferenceCommits(names))
-      .then(() => this.getAllCommits())
-      .then(() => this.getHead())
-      .then(() => this.getParents())
-      .then(() => {
-        this.updateChildren();
-        this.topologicalSort();
-        this.graph = new CommitGraph(this);
-        onReady();
-      });
+  async load(path: string, onReady: () => void) {
+    try {
+      this.repo = await Git.Repository.open(path);
+      const names = await this.repo.getReferenceNames(Git.Reference.TYPE.OID);
+      await this.getReferenceCommits(names);
+      await this.getAllCommits();
+      await this.getHead();
+      await this.getParents();
+      this.updateChildren();
+      this.topologicalSort();
+      this.graph = new CommitGraph(this);
+      onReady();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   getReferenceCommits(names: string[]) {
-    return Promise.all(names.map((name) => {
-      return this.repo.getReferenceCommit(name)
-        .then((commit) => { 
-          this.references.set(name, commit);
-          if (!this.shaToReferences.has(commit.sha())) {
-            this.shaToReferences.set(commit.sha(), []);
-          }
-          this.shaToReferences.get(commit.sha())!.push(name);
-        }, () => { console.log('failed'); });
+    return Promise.all(names.map(async (name) => {
+      try {
+        const commit = await this.repo.getReferenceCommit(name);
+        this.references.set(name, commit);
+        if (!this.shaToReferences.has(commit.sha())) {
+          this.shaToReferences.set(commit.sha(), []);
+        }
+        this.shaToReferences.get(commit.sha())!.push(name);
+      } catch (e) {
+        console.error(e);
+      }
     }))
   }
 
-  getAllCommits() {
+  async getAllCommits() {
     const walker = Git.Revwalk.create(this.repo);
     walker.sorting(Git.Revwalk.SORT.TIME);
     for (let name of this.references.keys()) {
       walker.pushRef(name); 
     }
-    return walker.getCommitsUntil(() => true)
-      .then((commits) => {
-        this.commits = commits;
-        for (let commit of commits) {
-          this.shaToCommit.set(commit.sha(), commit);
-        }
-      });
+    this.commits = await walker.getCommitsUntil(() => true);
+    for (let commit of this.commits) {
+      this.shaToCommit.set(commit.sha(), commit);
+    }
   }
 
-  getHead() {
-    return this.repo.head().then((head: Git.Reference) => 
-      this.head = this.references.get(head.name())!.sha());
+  async getHead() {
+    this.head = this.references.get((await this.repo.head()).name())!.sha();
   }
 
   getParents() {
-    const promises = this.commits.map((commit) => {
-      return commit.getParents(Infinity).then((parents) => {
-        this.parents.set(commit.sha(), parents.map(commit => commit.sha()));
-      })
-    });
-    return Promise.all(promises)
+    return Promise.all(this.commits.map(async (commit) => {
+      const parents = await commit.getParents(Infinity);
+      this.parents.set(commit.sha(), parents.map(commit => commit.sha()));
+    }));
   }
 
   updateChildren() {

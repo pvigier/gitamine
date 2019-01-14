@@ -10,7 +10,7 @@ export interface PatchItemProps {
 }
 
 function getPatchIcon(patch: Git.ConvenientPatch) {
-  if (patch.isAdded()) {
+  if (patch.isAdded() || patch.isUntracked()) {
     return <span className='icon patch-add' />;
   } else if (patch.isDeleted()) {
     return <span className='icon patch-delete' />;

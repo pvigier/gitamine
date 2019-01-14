@@ -1,3 +1,4 @@
+import * as Path from 'path';
 import * as fs from 'fs';
 import * as React from 'react';
 import * as Git from 'nodegit';
@@ -18,7 +19,7 @@ function getBlob(repo: Git.Repository, file: Git.DiffFile) {
     (blob) => blob.toString(),
     () => {
       return new Promise<string>((resolve, reject) => {
-        fs.readFile(file.path(), (error, data) => {
+        fs.readFile(Path.join(Path.dirname(repo.path()), file.path()), (error, data) => {
           if (!error) {
             resolve(data.toString());
           } else {

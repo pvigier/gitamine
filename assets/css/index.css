@@ -177,6 +177,20 @@ div.commit-viewer p {
   margin: 4px 8px;
 }
 
+div.commit-viewer div.button-inline {
+  display: flex;
+  position: relative;
+} 
+
+div.commit-viewer div.button-inline button {
+  position: absolute;
+  right: 8px;
+} 
+
+div.commit-viewer > input, button {
+  margin: 4px 8px;
+}
+
 /* Patch list */
 
 ul.patch-list {

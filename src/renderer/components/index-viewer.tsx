@@ -90,16 +90,24 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     return (
       <div className='commit-viewer' ref={this.div}>
         <h2>Index</h2>
-        <p>Unstaged files</p>
+        <div className='button-inline'>
+          <p>Unstaged files ({this.state.unstagedPatches.length})</p>
+          <button disabled={this.state.unstagedPatches.length === 0}>Stage all changes</button>
+        </div>
         <PatchList patches={this.state.unstagedPatches}
           selectedPatch={this.props.selectedPatch}
           onPatchSelect={this.handleUnstagedPatchSelect} 
           onStage={this.stagePatch} />
-        <p>Staged files</p>
+        <div className='button-inline'>
+          <p>Staged files ({this.state.stagedPatches.length})</p>
+          <button disabled={this.state.stagedPatches.length === 0}>Unstage all changes</button>
+        </div >
         <PatchList patches={this.state.stagedPatches}
           selectedPatch={this.props.selectedPatch}
           onPatchSelect={this.handleStagedPatchSelect}
           onUnstage={this.unstagePatch} />
+        <input placeholder={'Summary'} />
+        <button>Commit</button>
       </div>
     );
   }

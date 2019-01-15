@@ -18,10 +18,12 @@ export interface IndexViewerState {
 export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexViewerState> {
   div: React.RefObject<HTMLDivElement>;
   index: Git.Index;
+  summaryInput: React.RefObject<HTMLInputElement>;
 
   constructor(props: IndexViewerProps) {
     super(props);
     this.div = React.createRef<HTMLDivElement>();
+    this.summaryInput = React.createRef<HTMLInputElement>();
     this.state = {
       unstagedPatches: [],
       stagedPatches: []
@@ -32,6 +34,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.stageAll = this.stageAll.bind(this);
     this.unstagePatch = this.unstagePatch.bind(this);
     this.unstageAll = this.unstageAll.bind(this);
+    this.commit = this.commit.bind(this);
     this.getPatches();
   }
 
@@ -100,6 +103,18 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     await Git.Reset.default(this.props.repo.repo, headCommit, paths);
   }
 
+  async commit() {
+    if (this.summaryInput.current) {
+      const message = this.summaryInput.current.value;
+      if (message.length > 0) {
+        const author = Git.Signature.now('John Doe', 'john@doe.com');
+        const oid = await this.index.writeTree();
+        const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
+        await this.props.repo.repo.createCommit('HEAD', author, author, message, oid, [headCommit]);
+      }
+    }
+  }
+
   render() {
     return (
       <div className='commit-viewer' ref={this.div}>
@@ -126,8 +141,8 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           selectedPatch={this.props.selectedPatch}
           onPatchSelect={this.handleStagedPatchSelect}
           onUnstage={this.unstagePatch} />
-        <input placeholder={'Summary'} />
-        <button>Commit</button>
+        <input placeholder={'Summary'} ref={this.summaryInput}/>
+        <button onClick={this.commit}>Commit</button>
       </div>
     );
   }

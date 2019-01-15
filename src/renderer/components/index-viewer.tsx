@@ -29,7 +29,9 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.handleUnstagedPatchSelect = this.handleUnstagedPatchSelect.bind(this);
     this.handleStagedPatchSelect = this.handleStagedPatchSelect.bind(this);
     this.stagePatch = this.stagePatch.bind(this);
+    this.stageAll = this.stageAll.bind(this);
     this.unstagePatch = this.unstagePatch.bind(this);
+    this.unstageAll = this.unstageAll.bind(this);
     this.getPatches();
   }
 
@@ -81,9 +83,21 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     }
   }
 
+  async stageAll() {
+    const paths = this.state.stagedPatches.map((patch) => patch.newFile().path());
+    await this.index.addAll(paths, Git.Index.ADD_OPTION.ADD_DEFAULT);
+    await this.index.write();
+  }
+
   async unstagePatch(patch: Git.ConvenientPatch) {
     const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
     await Git.Reset.default(this.props.repo.repo, headCommit, patch.newFile().path());
+  }
+
+  async unstageAll() {
+    const paths = this.state.stagedPatches.map((patch) => patch.newFile().path());
+    const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
+    await Git.Reset.default(this.props.repo.repo, headCommit, paths);
   }
 
   render() {
@@ -92,7 +106,10 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
         <h2>Index</h2>
         <div className='button-inline'>
           <p>Unstaged files ({this.state.unstagedPatches.length})</p>
-          <button disabled={this.state.unstagedPatches.length === 0}>Stage all changes</button>
+          <button disabled={this.state.unstagedPatches.length === 0}
+            onClick={this.stageAll}>
+            Stage all changes
+          </button>
         </div>
         <PatchList patches={this.state.unstagedPatches}
           selectedPatch={this.props.selectedPatch}
@@ -100,7 +117,10 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           onStage={this.stagePatch} />
         <div className='button-inline'>
           <p>Staged files ({this.state.stagedPatches.length})</p>
-          <button disabled={this.state.stagedPatches.length === 0}>Unstage all changes</button>
+          <button disabled={this.state.stagedPatches.length === 0}
+            onClick={this.unstageAll}>
+            Unstage all changes
+           </button>
         </div >
         <PatchList patches={this.state.stagedPatches}
           selectedPatch={this.props.selectedPatch}

@@ -74,16 +74,16 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   async stagePatch(patch: Git.ConvenientPatch) {
     if (patch.isDeleted()) {
       await this.index.removeByPath(patch.newFile().path())
-      this.index.write();
+      await this.index.write();
     } else {
       await this.index.addByPath(patch.newFile().path())
-      this.index.write();
+      await this.index.write();
     }
   }
 
-  unstagePatch(patch: Git.ConvenientPatch) {
+  async unstagePatch(patch: Git.ConvenientPatch) {
     const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
-    Git.Reset.default(this.props.repo.repo, headCommit, patch.newFile().path());
+    await Git.Reset.default(this.props.repo.repo, headCommit, patch.newFile().path());
   }
 
   render() {

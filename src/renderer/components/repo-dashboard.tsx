@@ -1,4 +1,6 @@
+import * as Path from 'path';
 import * as fs from 'fs';
+import * as node_watch from 'node-watch';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { GraphViewer } from './graph-viewer';
@@ -35,12 +37,23 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       patchViewerMode: PatchViewerMode.ReadOnly
     };
 
+    const path = this.props.repo.repo.path();
     // Watch Index 
-    fs.watch(this.props.repo.repo.path(), (e, filename) => {
+    // TODO: there may be problems with index.lock
+    fs.watch(path, (error: string, filename: string) => {
       if (filename === 'index') {
         this.refreshIndex();
       }
-    })
+    });
+    // Watch working directory
+    const regex = /.*\.git\/.*/; // Exclude .git folders
+    node_watch(Path.dirname(path), 
+      {recursive: true, filter: (f: string) => !regex.test(f)}, 
+      (error: string, filename: string) => {
+        console.log('wd', filename);
+        this.refreshIndex();
+      }
+    );
   }
 
   handleCommitSelect(commit: Git.Commit) {

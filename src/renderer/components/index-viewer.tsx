@@ -63,7 +63,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
 
   async getPatches() {
     const repo = this.props.repo.repo;
-    const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
+    const headCommit = this.props.repo.getHeadCommit();
     const options = {
       flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 
         Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
@@ -98,13 +98,13 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   async unstagePatch(patch: Git.ConvenientPatch) {
-    const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
+    const headCommit = this.props.repo.getHeadCommit();
     await Git.Reset.default(this.props.repo.repo, headCommit, patch.newFile().path());
   }
 
   async unstageAll() {
     const paths = this.state.stagedPatches.map((patch) => patch.newFile().path());
-    const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
+    const headCommit = this.props.repo.getHeadCommit();
     await Git.Reset.default(this.props.repo.repo, headCommit, paths);
   }
 
@@ -112,7 +112,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     if (this.state.summary.length > 0) {
       const author = Git.Signature.now('John Doe', 'john@doe.com');
       const oid = await this.index.writeTree();
-      const headCommit = this.props.repo.shaToCommit.get(this.props.repo.head)!;
+      const headCommit = this.props.repo.getHeadCommit();
       await this.props.repo.repo.createCommit('HEAD', author, author, 
         this.state.summary, oid, [headCommit]);
     }

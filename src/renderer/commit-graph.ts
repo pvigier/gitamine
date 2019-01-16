@@ -60,7 +60,7 @@ export class CommitGraph {
       const children = repo.children.get(commit.sha()) as [string, ChildrenType][];
       // Find a commit to replace
       let commitToReplace: string | null = null;
-      if (commitSha === repo.head) {
+      if (commitSha === repo.getHeadCommit().sha()) {
         commitToReplace = 'index';
       } else {
         for (let [childSha, type] of children) {

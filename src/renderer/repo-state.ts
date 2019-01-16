@@ -43,7 +43,7 @@ export class RepoState {
     await this.getParents(newCommits);
     this.removeUnreachableCommits();
     this.sortCommits();
-    await this.getHead();
+    await this.updateHead();
     this.graph = new CommitGraph(this);
   }
 
@@ -183,7 +183,11 @@ export class RepoState {
     this.commits = sortedCommits;
   }
 
-  async getHead() {
-    this.head = this.references.get((await this.repo.head()).name())!.sha();
+  async updateHead() {
+    this.head = (await this.repo.head()).name();
+  }
+
+  getHeadCommit() {
+    return this.references.get(this.head)!;
   }
 }

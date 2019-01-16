@@ -28,9 +28,8 @@ export class CommitGraph {
   positions: Map<string, [number, number]>
   width: number;
 
-  constructor(repo: RepoState) {
+  constructor() {
     this.positions = new Map<string, [number, number]>();
-    this.computePositions(repo);
   }
 
   computePositions(repo: RepoState) {
@@ -52,6 +51,7 @@ export class CommitGraph {
       return branches.length - 1;
     }
 
+    this.positions.clear();
     let i = 1;
     const branches: (string | null)[] = ['index'];
     for (let commit of repo.commits) {

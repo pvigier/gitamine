@@ -30,6 +30,7 @@ export class RepoState {
     this.shaToReferences = new Map<string, string[]>();
     this.parents = new Map<string, string[]>();
     this.children = new Map<string, [string, ChildrenType][]>();
+    this.graph = new CommitGraph();
 
     this.update().then(onReady);
   }
@@ -44,7 +45,7 @@ export class RepoState {
     this.removeUnreachableCommits();
     this.sortCommits();
     await this.updateHead();
-    this.graph = new CommitGraph(this);
+    this.graph.computePositions(this);
   }
 
   async getReferenceCommits(names: string[]) {

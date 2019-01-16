@@ -21,10 +21,12 @@ export interface RepoDashboardState {
 }
 
 export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
+  graphViewer: React.RefObject<GraphViewer>;
   rightViewer: React.RefObject<CommitViewer | IndexViewer>;
 
   constructor(props: RepoDashboardProps) {
     super(props);
+    this.graphViewer = React.createRef();
     this.rightViewer = React.createRef();
     this.handleCommitSelect = this.handleCommitSelect.bind(this);
     this.handleIndexSelect = this.handleIndexSelect.bind(this);
@@ -37,7 +39,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       patchViewerMode: PatchViewerMode.ReadOnly
     };
 
-    const path = this.props.repo.repo.path();
+    const path = this.props.repo.path;
     // Watch Index 
     // TODO: there may be problems with index.lock
     fs.watch(path, (error: string, filename: string) => {
@@ -54,6 +56,8 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         this.refreshIndex();
       }
     );
+    // Watch references
+    node_watch(Path.join(path, 'refs'), {recursive: true}, () => this.refreshReferences());
   }
 
   handleCommitSelect(commit: Git.Commit) {
@@ -93,6 +97,14 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
   }
 
+  async refreshReferences() {
+    // TODO: update only references that changed
+    await this.props.repo.update();
+    if (this.graphViewer.current) {
+      this.graphViewer.current.updateGraph();
+    }
+  }
+
   render() {
     let leftViewer; 
     if (this.state.selectedPatch) {
@@ -104,7 +116,8 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       leftViewer = <GraphViewer repo={this.props.repo} 
         selectedCommit={this.state.selectedCommit} 
         onCommitSelect={this.handleCommitSelect}
-        onIndexSelect={this.handleIndexSelect} />
+        onIndexSelect={this.handleIndexSelect} 
+        ref={this.graphViewer} />
     }
     let rightViewer;
     if (this.state.selectedCommit) {

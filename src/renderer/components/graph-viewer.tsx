@@ -13,10 +13,12 @@ export interface GraphViewerProps {
 
 export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
   canvas: React.RefObject<GraphCanvas>;
+  commitList: React.RefObject<CommitList>;
 
   constructor(props: GraphViewerProps) {
     super(props);
     this.canvas = React.createRef();
+    this.commitList = React.createRef();
     this.handleListScroll = this.handleListScroll.bind(this);
     this.handleListResize = this.handleListResize.bind(this);
   }
@@ -33,6 +35,15 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
     }
   }
 
+  updateGraph() {
+    if (this.canvas.current) {
+      this.canvas.current.drawGraph();
+    }
+    if (this.commitList.current) {
+      this.commitList.current.forceUpdate();
+    }
+  }
+
   render() {
     return (
       <div className='graph-viewer'>
@@ -40,7 +51,8 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
           <GraphCanvas repo={this.props.repo} ref={this.canvas} />
           <CommitList {...this.props} 
             onScroll={this.handleListScroll} 
-            onResize={this.handleListResize} />
+            onResize={this.handleListResize}
+            ref={this.commitList} />
         </div>
       </div>
     );

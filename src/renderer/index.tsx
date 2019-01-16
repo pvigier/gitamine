@@ -22,16 +22,16 @@ if (module.hot) { module.hot.accept(render); }
 
 // Events
 
-function openRepo(path: string) {
+function openRepo(repo: Git.Repository) {
   if (app) {
-    const repo = new RepoState(path, () => { app.addRepo(repo); });
+    const repoState = new RepoState(repo, () => { app.addRepo(repoState); });
   }
 }
 
 ipcRenderer.on('clone-repo', async (event: Electron.Event, [path, url]: [string, string]) => {
   try {
     const repo = await Git.Clone.clone(url, path);
-    openRepo(Path.dirname(repo.path()));
+    openRepo(repo);
   } catch (e) {
     console.error(e);
   }
@@ -40,12 +40,17 @@ ipcRenderer.on('clone-repo', async (event: Electron.Event, [path, url]: [string,
 ipcRenderer.on('init-repo', async (event: Electron.Event, path: string) => {
   try {
     const repo = await Git.Repository.init(path, 0);
-    openRepo(Path.dirname(repo.path()));
+    openRepo(repo);
   } catch (e) {
     console.error(e);
   }
 });
 
-ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
-    openRepo(path);
+ipcRenderer.on('open-repo', async (event: Electron.Event, path: string) => {
+  try {
+    const repo = await Git.Repository.open(path);
+    openRepo(repo);
+  } catch (e) {
+    console.error(e);
+  }
 });

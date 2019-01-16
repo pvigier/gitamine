@@ -8,9 +8,9 @@ export enum ChildrenType {
 }
 
 export class RepoState {
+  repo: Git.Repository;
   path: string;
   name: string;
-  repo: Git.Repository;
   commits: Git.Commit[];
   shaToCommit: Map<string, Git.Commit>;
   references: Map<string, Git.Commit>;
@@ -20,9 +20,10 @@ export class RepoState {
   head: string;
   graph: CommitGraph;
 
-  constructor(path: string, onReady: () => void) {
-    this.path = path;
-    this.name = Path.parse(path).name;
+  constructor(repo: Git.Repository, onReady: () => void) {
+    this.repo = repo;
+    this.path = this.repo.path(); 
+    this.name = Path.parse(Path.dirname(this.path)).name;
     this.commits = [];
     this.shaToCommit = new Map<string, Git.Commit>();
     this.references = new Map<string, Git.Commit>();
@@ -30,26 +31,20 @@ export class RepoState {
     this.parents = new Map<string, string[]>();
     this.children = new Map<string, [string, ChildrenType][]>();
 
-    this.update(path, onReady);
+    this.update().then(onReady);
   }
 
-  async update(path: string, onReady: () => void) {
-    try {
-      this.repo = await Git.Repository.open(path);
-      const names = await this.repo.getReferenceNames(Git.Reference.TYPE.OID);
-      const referencesToUpdate = await this.getReferenceCommits(names);
-      console.log(referencesToUpdate);
-      const newCommits = await this.getNewCommits(referencesToUpdate);
-      console.log(newCommits);
-      await this.getParents(newCommits);
-      this.removeUnreachableCommits();
-      this.sortCommits();
-      await this.getHead();
-      this.graph = new CommitGraph(this);
-      onReady();
-    } catch (e) {
-      console.error(e);
-    }
+  async update() {
+    const names = await this.repo.getReferenceNames(Git.Reference.TYPE.OID);
+    const referencesToUpdate = await this.getReferenceCommits(names);
+    console.log(referencesToUpdate);
+    const newCommits = await this.getNewCommits(referencesToUpdate);
+    console.log(newCommits);
+    await this.getParents(newCommits);
+    this.removeUnreachableCommits();
+    this.sortCommits();
+    await this.getHead();
+    this.graph = new CommitGraph(this);
   }
 
   async getReferenceCommits(names: string[]) {

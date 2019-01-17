@@ -23,11 +23,13 @@ export interface RepoDashboardState {
 export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
   graphViewer: React.RefObject<GraphViewer>;
   rightViewer: React.RefObject<CommitViewer | IndexViewer>;
+  dirtyWordingDirectory: boolean;
 
   constructor(props: RepoDashboardProps) {
     super(props);
     this.graphViewer = React.createRef();
     this.rightViewer = React.createRef();
+    this.dirtyWordingDirectory = false;
     this.handleCommitSelect = this.handleCommitSelect.bind(this);
     this.handleIndexSelect = this.handleIndexSelect.bind(this);
     this.handlePatchSelect = this.handlePatchSelect.bind(this);
@@ -50,6 +52,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         this.refreshIndex();
       }
     });
+
     // Watch working directory
     const regex = /.*\.git\/.*/; // Exclude .git folders
     node_watch(Path.dirname(path), 
@@ -57,9 +60,17 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       (error: string, filename: string) => {
         console.log('wd', filename);
         // TODO: check if the file is ignored
-        this.refreshIndex();
+        this.dirtyWordingDirectory = true;
       }
     );
+    // To prevent from updating too often
+    setInterval(async () => {
+      if (this.dirtyWordingDirectory) {
+        this.refreshIndex();
+        this.dirtyWordingDirectory = false;
+      }
+    }, 200);
+
     // Watch references
     node_watch(Path.join(path, 'refs'), {recursive: true}, async () => {
       await this.refreshReferences();

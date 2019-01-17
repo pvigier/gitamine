@@ -64,7 +64,7 @@ export class RepoState {
     this.shaToReferences.clear();
     for (let [name, commit] of referenceCommits) {
       if (commit) {
-        if (this.references.get(name) !== commit) {
+        if (!this.references.has(name) || this.references.get(name)!.sha() !== commit.sha()) {
           referencesToUpdate.push(name);
         }
         newReferences.set(name, commit);
@@ -117,7 +117,7 @@ export class RepoState {
   }
 
   removeUnreachableCommits() {
-    // Find unreach commits
+    // Find unreachable commits by doing a DFS
     const alreadyAdded = new Map<string, boolean>();
     const frontier = [...this.references.values()];
     for (let commit of frontier) {
@@ -127,18 +127,21 @@ export class RepoState {
       const commit = frontier.pop()!;
       const commitSha = commit.sha();
       for (let parentSha of this.parents.get(commitSha)!) {
-        if (!alreadyAdded.get(commitSha)) {
+        if (!alreadyAdded.get(parentSha)) {
           alreadyAdded.set(parentSha, true);
           frontier.push(this.shaToCommit.get(parentSha)!);
         }
       }
     }
-
-    // Remove them
-    for (let [commitSha, seen] of alreadyAdded.entries()) {
-      if (!seen) {
-        this.removeCommit(this.shaToCommit.get(commitSha)!);
+    var commitsToRemove: Git.Commit[] = [];
+    for (let commit of this.commits) {
+      if (!alreadyAdded.has(commit.sha())) {
+        commitsToRemove.push(commit);
       }
+    }
+    // Remove them
+    for (let commit of commitsToRemove) {
+      this.removeCommit(commit);
     }
   }
 

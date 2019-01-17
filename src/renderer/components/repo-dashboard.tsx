@@ -40,10 +40,13 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     };
 
     const path = this.props.repo.path;
-    // Watch Index 
+    // Watch index and head 
     // TODO: there may be problems with index.lock
-    fs.watch(path, (error: string, filename: string) => {
+    fs.watch(path, async (error: string, filename: string) => {
       if (filename === 'index') {
+        this.refreshIndex();
+      } else if (filename === 'HEAD') {
+        await this.refreshHead();
         this.refreshIndex();
       }
     });
@@ -53,36 +56,40 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       {recursive: true, filter: (f: string) => !regex.test(f)}, 
       (error: string, filename: string) => {
         console.log('wd', filename);
+        // TODO: check if the file is ignored
         this.refreshIndex();
       }
     );
     // Watch references
-    node_watch(Path.join(path, 'refs'), {recursive: true}, () => this.refreshReferences());
+    node_watch(Path.join(path, 'refs'), {recursive: true}, async () => {
+      await this.refreshReferences();
+      this.refreshIndex();
+    });
   }
 
   handleCommitSelect(commit: Git.Commit) {
     this.setState({
       selectedCommit: commit
-    } as RepoDashboardState);
+    });
   }
 
   handleIndexSelect() {
     this.setState({
       selectedCommit: null
-    } as RepoDashboardState);
+    });
   }
 
   handlePatchSelect(patch: Git.ConvenientPatch, mode: PatchViewerMode) {
     this.setState({
       selectedPatch: patch,
       patchViewerMode: mode
-    } as RepoDashboardState);
+    });
   }
 
   exitPatchViewer() {
     this.setState({
       selectedPatch: null
-    } as RepoDashboardState);
+    });
   }
 
   handlePanelResize(offset: number) {
@@ -94,6 +101,14 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   refreshIndex() {
     if (!this.state.selectedCommit && this.rightViewer.current) {
       (this.rightViewer.current as IndexViewer).refresh();
+    }
+  }
+
+  async refreshHead() {
+    await this.props.repo.updateHead();
+    await this.props.repo.updateGraph();
+    if (this.graphViewer.current) {
+      this.graphViewer.current.updateGraph();
     }
   }
 

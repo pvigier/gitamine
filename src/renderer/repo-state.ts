@@ -45,7 +45,7 @@ export class RepoState {
     this.removeUnreachableCommits();
     this.sortCommits();
     await this.updateHead();
-    this.graph.computePositions(this);
+    this.updateGraph();
   }
 
   async getReferenceCommits(names: string[]) {
@@ -193,5 +193,9 @@ export class RepoState {
 
   getHeadCommit() {
     return this.references.get(this.head)!;
+  }
+
+  updateGraph() {
+    this.graph.computePositions(this);
   }
 }

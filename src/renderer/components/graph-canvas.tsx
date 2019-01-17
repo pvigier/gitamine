@@ -27,9 +27,7 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
 
   handleScroll(offset: number, start: number, end: number) {
     this.offset = offset;
-    this.start = start;
-    this.end = end;
-    this.drawGraph();
+    this.handleRangeUpdate(start, end);
   }
 
   handleResize(height: number, start: number, end: number) {
@@ -37,11 +35,15 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
       const canvas = this.canvas.current;
       if (canvas.height != height) {
         canvas.height = height;
-        this.start = start;
-        this.end = end;
-        this.drawGraph();
+        this.handleRangeUpdate(start, end);
       }
     } 
+  }
+
+  handleRangeUpdate(start: number , end: number) {
+    this.start = start;
+    this.end = end;
+    this.drawGraph();
   }
 
   drawGraph() {

@@ -13,6 +13,7 @@ export interface CommitListProps {
   onIndexSelect: () => void;
   onScroll: (height: number, start: number, end: number) => void;
   onResize: (offset: number, start: number, end: number) => void;
+  onStateUpdate: (start: number, end: number) => void;
 }
 
 export interface CommitListState {
@@ -80,6 +81,14 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
       if (i >= this.state.end - 1 && this.div.current) {
         this.div.current.scrollTo(0, (i + 2) * ITEM_HEIGHT - this.div.current.clientHeight);
       }
+    }
+  }
+
+  updateState() {
+    if (this.div.current) {
+      const newState = this.computeState()!;
+      this.props.onStateUpdate(newState.start, newState.end);
+      this.setState(newState);
     }
   }
 

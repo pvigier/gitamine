@@ -21,6 +21,7 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
     this.commitList = React.createRef();
     this.handleListScroll = this.handleListScroll.bind(this);
     this.handleListResize = this.handleListResize.bind(this);
+    this.handleListStateUpdate = this.handleListStateUpdate.bind(this);
   }
 
   handleListScroll(offset: number, start: number, end: number) {
@@ -35,11 +36,15 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
     }
   }
 
-  updateGraph() {
+  handleListStateUpdate(start: number, end: number) {
     if (this.canvas.current) {
-      this.canvas.current.drawGraph();
+      this.canvas.current.handleRangeUpdate(start, end);
     }
+  }
+
+  updateGraph() {
     if (this.commitList.current) {
+      this.commitList.current.updateState();
       this.commitList.current.forceUpdate();
     }
   }
@@ -52,6 +57,7 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
           <CommitList {...this.props} 
             onScroll={this.handleListScroll} 
             onResize={this.handleListResize}
+            onStateUpdate={this.handleListStateUpdate}
             ref={this.commitList} />
         </div>
       </div>

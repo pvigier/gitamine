@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { RepoState } from "../repo-state";
-import { getBranchColor } from '../commit-graph';
 
 function removeBranchPrefix(name: string) {
   return name.substr(name.indexOf('/', name.indexOf('/') + 1) + 1);
@@ -12,6 +11,7 @@ export interface CommitItemProps {
   references: string[];
   commit: Git.Commit;
   selected: boolean;
+  color: string;
   onCommitSelect: (commit: Git.Commit) => void;
 }
 
@@ -26,10 +26,9 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
   }
 
   render() {
-    const commitSha = this.props.commit.sha();
     const spans = this.props.references.map((reference) => {
       const style = {};
-      style['--branch-color'] = getBranchColor(this.props.repo.graph.positions.get(commitSha)![1])
+      style['--branch-color'] = this.props.color; 
       return (
         <span key={reference} className='reference' style={style}>
           {removeBranchPrefix(reference)}

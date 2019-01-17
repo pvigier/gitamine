@@ -3,6 +3,7 @@ import * as Git from 'nodegit';
 import { CommitItem } from './commit-item';
 import { IndexItem } from './index-item';
 import { RepoState } from "../repo-state";
+import { getBranchColor } from '../commit-graph';
 
 const ITEM_HEIGHT = 28;
 
@@ -114,15 +115,20 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
         key='index' />);
     }
     const commits = this.props.repo.commits.slice(Math.max(this.state.start, 0), this.state.end);
-    items.push(...commits.map((commit: Git.Commit) => (
-      <CommitItem 
-        repo={this.props.repo} 
-        commit={commit} 
-        references={this.props.repo.shaToReferences.get(commit.sha()) || []}
-        selected={this.props.selectedCommit === commit} 
-        onCommitSelect={this.props.onCommitSelect} 
-        key={commit.sha()} />
-    )));
+    items.push(...commits.map((commit: Git.Commit) => {
+      const commitSha = commit.sha();
+      const color = getBranchColor(this.props.repo.graph.positions.get(commitSha)![1]);
+      return (
+        <CommitItem 
+          repo={this.props.repo} 
+          commit={commit} 
+          references={this.props.repo.shaToReferences.get(commitSha) || []}
+          selected={this.props.selectedCommit === commit} 
+          onCommitSelect={this.props.onCommitSelect} 
+          color={color}
+          key={commit.sha()} />
+      );
+    }));
 
     // Compute height of the divs
     const paddingTop = (this.state.start + 1) * ITEM_HEIGHT;

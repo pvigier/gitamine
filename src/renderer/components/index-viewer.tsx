@@ -63,6 +63,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
 
   async getPatches() {
     const repo = this.props.repo.repo;
+    await this.props.repo.updateHead(); // Why is this necessary to have index up-to-date when changing branch
     const headCommit = this.props.repo.getHeadCommit();
     const options = {
       flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 
@@ -115,6 +116,9 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       const headCommit = this.props.repo.getHeadCommit();
       await this.props.repo.repo.createCommit('HEAD', author, author, 
         this.state.summary, oid, [headCommit]);
+      this.setState({
+        summary: ''
+      });
     }
   }
 

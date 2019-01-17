@@ -52,6 +52,7 @@ export class CommitGraph {
     }
 
     this.positions.clear();
+    const headSha = repo.getHeadCommit().sha();
     let i = 1;
     const branches: (string | null)[] = ['index'];
     for (let commit of repo.commits) {
@@ -60,7 +61,7 @@ export class CommitGraph {
       const children = repo.children.get(commit.sha()) as [string, ChildrenType][];
       // Find a commit to replace
       let commitToReplace: string | null = null;
-      if (commitSha === repo.getHeadCommit().sha()) {
+      if (commitSha === headSha) {
         commitToReplace = 'index';
       } else {
         for (let [childSha, type] of children) {

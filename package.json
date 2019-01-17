@@ -58,6 +58,7 @@
     "electron-devtools-installer": "^2.2.4",
     "electron-squirrel-startup": "^1.0.0",
     "monaco-loader": "^0.15.0",
+    "node-interval-tree": "^1.3.3",
     "node-watch": "^0.6.0",
     "nodegit": "^0.23.0",
     "react": "^16.7.0",

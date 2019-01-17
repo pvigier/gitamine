@@ -1,4 +1,5 @@
 import { RepoState, ChildrenType } from './repo-state'
+import IntervalTree from 'node-interval-tree';
 
 const BRANCH_COLORS = [
   'DarkBlue', 
@@ -24,9 +25,12 @@ export function getBranchColor(j: number) {
   return BRANCH_COLORS[j % BRANCH_COLORS.length];
 }
 
+export type Edge = [[number, number], [number, number], ChildrenType];
+
 export class CommitGraph {
   positions: Map<string, [number, number]>
   width: number;
+  edges: IntervalTree<Edge>;
 
   constructor() {
     this.positions = new Map<string, [number, number]>();
@@ -95,5 +99,16 @@ export class CommitGraph {
       ++i;
     }
     this.width = branches.length;
+    this.updateIntervalTree(repo);
+  }
+
+  updateIntervalTree(repo: RepoState) {
+    this.edges = new IntervalTree<Edge>();
+    for (let [commitSha, [i0, j0]] of this.positions) {
+      for (let [childSha, type] of repo.children.get(commitSha)!) {
+        const [i1, j1] = this.positions.get(childSha)!;
+        this.edges.insert(i1, i0, [[i0, j0], [i1, j1], type]);
+      }
+    }
   }
 }

@@ -117,47 +117,40 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
 
   drawEdges(ctx: CanvasRenderingContext2D) {
     const repo = this.props.repo;
-    const positions = repo.graph.positions;
+    const edges = repo.graph.edges;
     ctx.lineWidth = LINE_WIDTH;
     ctx.setLineDash([]);
-    for (let [commitSha, [i0, j0]] of positions) {
+    for (let [[i0, j0], [i1, j1], type] of edges.search(this.start, this.end)) {
       const [x0, y0] = this.computeNodeCenterCoordinates(i0, j0);
-      for (let [childSha, type] of repo.children.get(commitSha)!) {
-        const [i1, j1] = positions.get(childSha)!;
-        // Check if the edge is visible
-        if (i1 >= this.end || i0 < this.start) {
-          break;
-        }
-        const [x1, y1] = this.computeNodeCenterCoordinates(i1, j1);
-        ctx.beginPath();
-        if (j0 !== j1 && type === ChildrenType.Commit) {
-          ctx.strokeStyle = getBranchColor(j1);
-        } else {
-          ctx.strokeStyle = getBranchColor(j0);
-        }
-        ctx.moveTo(x0, y0);
-        if (j0 !== j1) {
-          if (type === ChildrenType.Commit) {
-            if (x0 < x1) {
-              ctx.lineTo(x1 - RADIUS, y0);
-              ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
-            } else {
-              ctx.lineTo(x1 + RADIUS, y0);
-              ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
-            }
-          } else if (type === ChildrenType.Merge) {
-            if (x0 < x1) {
-              ctx.lineTo(x0, y1 + RADIUS);
-              ctx.quadraticCurveTo(x0, y1, x0 + RADIUS, y1);
-            } else {
-              ctx.lineTo(x0, y1 + RADIUS);
-              ctx.quadraticCurveTo(x0, y1, x0 - RADIUS, y1);
-            }
+      const [x1, y1] = this.computeNodeCenterCoordinates(i1, j1);
+      ctx.beginPath();
+      if (j0 !== j1 && type === ChildrenType.Commit) {
+        ctx.strokeStyle = getBranchColor(j1);
+      } else {
+        ctx.strokeStyle = getBranchColor(j0);
+      }
+      ctx.moveTo(x0, y0);
+      if (j0 !== j1) {
+        if (type === ChildrenType.Commit) {
+          if (x0 < x1) {
+            ctx.lineTo(x1 - RADIUS, y0);
+            ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
+          } else {
+            ctx.lineTo(x1 + RADIUS, y0);
+            ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
+          }
+        } else if (type === ChildrenType.Merge) {
+          if (x0 < x1) {
+            ctx.lineTo(x0, y1 + RADIUS);
+            ctx.quadraticCurveTo(x0, y1, x0 + RADIUS, y1);
+          } else {
+            ctx.lineTo(x0, y1 + RADIUS);
+            ctx.quadraticCurveTo(x0, y1, x0 - RADIUS, y1);
           }
         }
-        ctx.lineTo(x1, y1);
-        ctx.stroke();
       }
+      ctx.lineTo(x1, y1);
+      ctx.stroke();
     }
   }
 

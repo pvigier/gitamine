@@ -124,6 +124,10 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
       const [x0, y0] = this.computeNodeCenterCoordinates(i0, j0);
       for (let [childSha, type] of repo.children.get(commitSha)!) {
         const [i1, j1] = positions.get(childSha)!;
+        // Check if the edge is visible
+        if (i1 >= this.end || i0 < this.start) {
+          break;
+        }
         const [x1, y1] = this.computeNodeCenterCoordinates(i1, j1);
         ctx.beginPath();
         if (j0 !== j1 && type === ChildrenType.Commit) {

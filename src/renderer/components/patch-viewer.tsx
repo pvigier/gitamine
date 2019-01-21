@@ -55,6 +55,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   editor: any;
   viewMode: ViewMode;
   viewZoneIds: number[];
+  overlayWidgets: any[];
   oldBlob: string;
   newBlob: string;
   hunks: Git.ConvenientHunk[];
@@ -65,6 +66,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.editor = null;
     this.viewMode = ViewMode.Hunk;
     this.viewZoneIds = [];
+    this.overlayWidgets = [];
     this.setUpEditor = this.setUpEditor.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
   }
@@ -138,11 +140,16 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       renderSideBySide: this.viewMode === ViewMode.Split
     });
     // Reset view zones
-    this.editor.getModifiedEditor().changeViewZones((changeAccessor: any) => {
+    const editor = this.editor.getModifiedEditor();
+    editor.changeViewZones((changeAccessor: any) => {
       for (let viewZoneId of this.viewZoneIds) {
         changeAccessor.removeZone(viewZoneId);
       }
     });
+    // Reset overlay widgets
+    for (let overlayWidget of this.overlayWidgets) {
+      editor.removeOverlayWidget(overlayWidget);
+    }
     // Reset line numbers
     this.setLineNumbers((i: number) => i, (i: number) => i); 
     // Update models
@@ -193,17 +200,64 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       generateLineNumbers(newStarts, newOffsets));
     // Add view zones
     const editor = this.editor.getModifiedEditor();
+    for (let i = 0; i < this.hunks.length; ++i) {
+      this.createHunkWidget(editor, this.hunks[i], newStarts[i] - 1, 
+        `hunk.${this.overlayWidgets.length}`);
+    }
+  }
+
+  createHunkWidget(editor: any, hunk: Git.ConvenientHunk, start: number, hunkId: string) {
+    const overlayNode = document.createElement('div');
+    overlayNode.classList.add('overlay-zone');
+
+    const contentNode = document.createElement('div');
+    const textNode = document.createElement('p');
+    textNode.textContent = `@@ -${hunk.oldStart()},${hunk.oldLines()} +${hunk.newStart()},${hunk.newLines()}`;
+    contentNode.appendChild(textNode);
+    if (this.props.mode === PatchViewerMode.Stage) {
+      const buttonsNode = document.createElement('div');
+      // Discard button
+      const discardButton = document.createElement('button');
+      discardButton.textContent = 'Discard';
+      buttonsNode.appendChild(discardButton);
+      // Stage button
+      const stageButton = document.createElement('button');
+      stageButton.textContent = 'Stage';
+      buttonsNode.appendChild(stageButton);
+      contentNode.appendChild(buttonsNode);
+    } else if (this.props.mode === PatchViewerMode.Unstage) {
+      const buttonsNode = document.createElement('div');
+      // Unstage button
+      const unstageButton = document.createElement('button');
+      unstageButton.textContent = 'Unstage';
+      buttonsNode.appendChild(unstageButton);
+      contentNode.appendChild(buttonsNode);
+    }
+    overlayNode.appendChild(contentNode);
+
+    let overlayWidget = {
+      getId: () => hunkId,
+      getDomNode: () => overlayNode,
+      getPosition: () => null
+    };
+    editor.addOverlayWidget(overlayWidget);
+    this.overlayWidgets.push(overlayWidget);
+
+    // Used only to compute the position.
+    let zoneNode = document.createElement('div');
+
     editor.changeViewZones((changeAccessor: any) => {
-        for (let i = 0; i < this.hunks.length; ++i) {
-          const hunk = this.hunks[i];
-          const domNode = document.createElement('div');
-          domNode.innerHTML = `@@ -${hunk.oldStart()},${hunk.oldLines()} +${hunk.newStart()},${hunk.newLines()}`;
-          this.viewZoneIds.push(changeAccessor.addZone({
-                afterLineNumber: newStarts[i] - 1,
-                heightInLines: 1,
-                domNode: domNode
-          }));
+      this.viewZoneIds.push(changeAccessor.addZone({
+        afterLineNumber: start,
+        heightInLines: 2,
+        domNode: zoneNode,
+        onDomNodeTop: (top: number) => {
+          overlayNode.style.top = top + "px";
+        },
+        onComputedHeight: (height: number) => {
+          overlayNode.style.height = height + "px";
         }
+      }));
     });
   }
 

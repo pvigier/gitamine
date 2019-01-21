@@ -292,3 +292,31 @@ div.ellipsis-middle div.right {
   overflow: hidden;
   white-space: nowrap;
 }
+
+/* Overlay zones */
+
+div.overlay-zone {
+  width: 100%;
+}
+
+div.overlay-zone > div {
+  display: flex;
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  border-bottom: 1px solid;
+}
+
+div.overlay-zone > div > div {
+  position: absolute;
+  right: 18px;
+  bottom: 2px;
+}
+
+div.overlay-zone p {
+  margin: 0px;
+}
+
+div.overlay-zone button {
+  margin: 0px 2px;
+}

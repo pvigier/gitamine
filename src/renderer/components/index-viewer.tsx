@@ -7,7 +7,7 @@ import { RepoState } from '../repo-state';
 export interface IndexViewerProps { 
   repo: RepoState;
   selectedPatch: Git.ConvenientPatch | null;
-  onPatchSelect: (patch: Git.ConvenientPatch, mode: PatchViewerMode) => void;
+  onPatchSelect: (patch: Git.ConvenientPatch | null, mode: PatchViewerMode) => void;
 }
 
 export interface IndexViewerState {
@@ -51,8 +51,27 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.setState({summary: event.target.value});
   }
 
-  refresh() {
-    this.getPatches();
+  async refresh() {
+    await this.getPatches();
+  }
+
+  refreshSelectedPatch(unstagedPatch: boolean) {
+    const patches = unstagedPatch ? 
+      [this.state.unstagedPatches, this.state.stagedPatches] :
+      [this.state.stagedPatches, this.state.unstagedPatches];
+    const handler = unstagedPatch ? 
+      [this.handleUnstagedPatchSelect, this.handleStagedPatchSelect] :
+      [this.handleStagedPatchSelect, this.handleUnstagedPatchSelect];
+    const path = this.props.selectedPatch!.newFile().path();
+    for (let i = 0; i < patches.length; ++i) {
+      for (let patch of patches[i]) {
+        if (path === patch.newFile().path()) {
+          handler[i].call(this, patch);
+          return;
+        }
+      }
+    }
+    this.props.onPatchSelect(null, PatchViewerMode.ReadOnly);
   }
 
   resize(offset: number) {
@@ -76,9 +95,13 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     ]);
     unstagedDiff.findSimilar({});
     stagedDiff.findSimilar({});
-    this.setState({
-      unstagedPatches: await unstagedDiff.patches(),
-      stagedPatches: await stagedDiff.patches()
+    return new Promise<void>(async (resolve) => {
+      this.setState({
+        unstagedPatches: await unstagedDiff.patches(),
+        stagedPatches: await stagedDiff.patches()
+      }, () => {
+        resolve();
+      });
     });
   }
 

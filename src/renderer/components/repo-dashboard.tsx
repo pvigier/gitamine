@@ -90,7 +90,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     });
   }
 
-  handlePatchSelect(patch: Git.ConvenientPatch, mode: PatchViewerMode) {
+  handlePatchSelect(patch: Git.ConvenientPatch | null, mode: PatchViewerMode) {
     this.setState({
       selectedPatch: patch,
       patchViewerMode: mode
@@ -109,9 +109,13 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
   }
 
-  refreshIndex() {
+  async refreshIndex() {
     if (!this.state.selectedCommit && this.rightViewer.current) {
-      (this.rightViewer.current as IndexViewer).refresh();
+      const indexViewer = this.rightViewer.current as IndexViewer;
+      await indexViewer.refresh();
+      if (this.state.selectedPatch && this.state.patchViewerMode !== PatchViewerMode.ReadOnly) {
+        indexViewer.refreshSelectedPatch(this.state.patchViewerMode === PatchViewerMode.Stage);
+      }
     }
   }
 

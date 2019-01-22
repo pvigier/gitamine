@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { RepoState, ChildrenType } from '../repo-state';
-import { getBranchColor } from '../commit-graph';
+import { RepoState } from '../repo-state';
+import { getBranchColor, EdgeType } from '../commit-graph';
 
 const RADIUS = 11;
 const OFFSET_X = 2 * RADIUS;
@@ -124,27 +124,27 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
       const [x0, y0] = this.computeNodeCenterCoordinates(i0, j0);
       const [x1, y1] = this.computeNodeCenterCoordinates(i1, j1);
       ctx.beginPath();
-      if (j0 !== j1 && type === ChildrenType.Commit) {
+      if (j0 !== j1 && type === EdgeType.Merge) {
         ctx.strokeStyle = getBranchColor(j1);
       } else {
         ctx.strokeStyle = getBranchColor(j0);
       }
       ctx.moveTo(x0, y0);
       if (j0 !== j1) {
-        if (type === ChildrenType.Commit) {
+        if (type === EdgeType.Merge) {
           if (x0 < x1) {
             ctx.lineTo(x1 - RADIUS, y0);
-            ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
+            ctx.quadraticCurveTo(x1, y0, x1, y0 + RADIUS);
           } else {
             ctx.lineTo(x1 + RADIUS, y0);
-            ctx.quadraticCurveTo(x1, y0, x1, y0 - RADIUS);
+            ctx.quadraticCurveTo(x1, y0, x1, y0 + RADIUS);
           }
-        } else if (type === ChildrenType.Merge) {
+        } else {
           if (x0 < x1) {
-            ctx.lineTo(x0, y1 + RADIUS);
+            ctx.lineTo(x0, y1 - RADIUS);
             ctx.quadraticCurveTo(x0, y1, x0 + RADIUS, y1);
           } else {
-            ctx.lineTo(x0, y1 + RADIUS);
+            ctx.lineTo(x0, y1 - RADIUS);
             ctx.quadraticCurveTo(x0, y1, x0 - RADIUS, y1);
           }
         }

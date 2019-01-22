@@ -1,4 +1,4 @@
-import { RepoState, ChildrenType } from './repo-state'
+import { RepoState } from './repo-state'
 import IntervalTree from 'node-interval-tree';
 
 const BRANCH_COLORS = [
@@ -25,7 +25,12 @@ export function getBranchColor(j: number) {
   return BRANCH_COLORS[j % BRANCH_COLORS.length];
 }
 
-export type Edge = [[number, number], [number, number], ChildrenType];
+export enum EdgeType {
+  Normal,
+  Merge
+}
+
+export type Edge = [[number, number], [number, number], EdgeType];
 
 export class CommitGraph {
   positions: Map<string, [number, number]>
@@ -62,13 +67,13 @@ export class CommitGraph {
     for (let commit of repo.commits) {
       let j = -1;
       const commitSha = commit.sha();
-      const children = repo.children.get(commit.sha()) as [string, ChildrenType][];
+      const children = repo.children.get(commit.sha())!;
       // Find a commit to replace
       let commitToReplace: string | null = null;
       if (commitSha === headSha) {
         commitToReplace = 'index';
       } else {
-        for (let [childSha, type] of children) {
+        for (let childSha of children) {
           if (repo.parents.get(childSha)![0] === commitSha) {
             commitToReplace = childSha;
             break;
@@ -81,7 +86,7 @@ export class CommitGraph {
         branches[j] = commitSha;
       } else {
         if (children.length > 0) {
-          const childSha = children[0][0];
+          const childSha = children[0];
           const jChild = this.positions.get(childSha)![1];
           j = insertCommit(commitSha, jChild);
         } else {
@@ -90,7 +95,7 @@ export class CommitGraph {
         }
       }
       // Remove children from active branches
-      for (let [childSha, type] of children) {
+      for (let childSha of children) {
         if (childSha != commitToReplace && repo.parents.get(childSha)![0] === commitSha) {
           branches[branches.indexOf(childSha)] = null;
         }
@@ -105,9 +110,11 @@ export class CommitGraph {
   updateIntervalTree(repo: RepoState) {
     this.edges = new IntervalTree<Edge>();
     for (let [commitSha, [i0, j0]] of this.positions) {
-      for (let [childSha, type] of repo.children.get(commitSha)!) {
-        const [i1, j1] = this.positions.get(childSha)!;
-        this.edges.insert(i1, i0, [[i0, j0], [i1, j1], type]);
+      const parents = repo.parents.get(commitSha)!;
+      const type = parents.length > 1 ? EdgeType.Merge : EdgeType.Normal;
+      for (let parentSha of parents) {
+        const [i1, j1] = this.positions.get(parentSha)!;
+        this.edges.insert(i0, i1, [[i0, j0], [i1, j1], type]);
       }
     }
   }

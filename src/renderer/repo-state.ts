@@ -2,11 +2,6 @@ import * as Path from 'path';
 import * as Git from 'nodegit';
 import { CommitGraph } from './commit-graph';
 
-export enum ChildrenType {
-  Commit,
-  Merge
-}
-
 export class RepoState {
   repo: Git.Repository;
   path: string;
@@ -16,7 +11,7 @@ export class RepoState {
   references: Map<string, Git.Commit>;
   shaToReferences: Map<string, string[]>;
   parents: Map<string, string[]>;
-  children: Map<string, [string, ChildrenType][]>;
+  children: Map<string, string[]>;
   head: string;
   graph: CommitGraph;
 
@@ -29,7 +24,7 @@ export class RepoState {
     this.references = new Map<string, Git.Commit>();
     this.shaToReferences = new Map<string, string[]>();
     this.parents = new Map<string, string[]>();
-    this.children = new Map<string, [string, ChildrenType][]>();
+    this.children = new Map<string, string[]>();
     this.graph = new CommitGraph();
 
     this.update().then(onReady);
@@ -38,9 +33,7 @@ export class RepoState {
   async update() {
     const names = await this.repo.getReferenceNames(Git.Reference.TYPE.OID);
     const referencesToUpdate = await this.getReferenceCommits(names);
-    console.log(referencesToUpdate);
     const newCommits = await this.getNewCommits(referencesToUpdate);
-    console.log(newCommits);
     await this.getParents(newCommits);
     this.removeUnreachableCommits();
     this.sortCommits();
@@ -106,12 +99,8 @@ export class RepoState {
       const parentShas = (await commit.getParents(Infinity)).map(commit => commit.sha());
       this.parents.set(commitSha, parentShas);
       // Update children
-      for (let i = 0; i < parentShas.length; ++i) {
-        if (i === 0) {
-          this.children.get(parentShas[i])!.push([commitSha, ChildrenType.Commit]);
-        } else {
-          this.children.get(parentShas[i])!.push([commitSha, ChildrenType.Merge]);
-        }
+      for (let parentSha of parentShas) {
+        this.children.get(parentSha)!.push(commitSha);
       }
     }));
   }
@@ -146,7 +135,6 @@ export class RepoState {
   }
 
   removeCommit(commit: Git.Commit) {
-    console.log('remove commit', commit.sha());
     this.commits.splice(this.commits.indexOf(commit), 1);
     const commitSha = commit.sha();
     this.shaToCommit.delete(commitSha);
@@ -155,7 +143,7 @@ export class RepoState {
       parentChildren.splice(parentChildren.findIndex((x) => x[0] === commitSha), 1);
     }
     this.parents.delete(commitSha);
-    for (let [childSha, type] of this.children.get(commitSha)!) {
+    for (let childSha of this.children.get(commitSha)!) {
       const childParents = this.parents.get(childSha)!;
       childParents.splice(childParents.indexOf(commitSha), 1);
     }
@@ -170,7 +158,7 @@ export class RepoState {
         return;
       }
       alreadySeen.set(commitSha, true);
-      for (let [childSha, type] of this.children.get(commitSha)!) {
+      for (let childSha of this.children.get(commitSha)!) {
         dfs(this.shaToCommit.get(childSha)!);
       }
       sortedCommits.push(commit);

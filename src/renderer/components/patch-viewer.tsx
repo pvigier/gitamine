@@ -139,6 +139,17 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.editor.updateOptions({
       renderSideBySide: this.viewMode === ViewMode.Split
     });
+    // Reset editor
+    this.resetEditor();
+    // Update models
+    if (this.viewMode === ViewMode.Hunk) {
+      this.setHunkModels(); 
+    } else {
+      this.setBlobModels();
+    }
+  }
+
+  resetEditor() {
     // Reset view zones
     const editor = this.editor.getModifiedEditor();
     editor.changeViewZones((changeAccessor: any) => {
@@ -146,18 +157,14 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
         changeAccessor.removeZone(viewZoneId);
       }
     });
+    this.viewZoneIds = [];
     // Reset overlay widgets
     for (let overlayWidget of this.overlayWidgets) {
       editor.removeOverlayWidget(overlayWidget);
     }
+    this.overlayWidgets = [];
     // Reset line numbers
     this.setLineNumbers((i: number) => i, (i: number) => i); 
-    // Update models
-    if (this.viewMode === ViewMode.Hunk) {
-      this.setHunkModels(); 
-    } else {
-      this.setBlobModels();
-    }
   }
 
   setHunkModels()

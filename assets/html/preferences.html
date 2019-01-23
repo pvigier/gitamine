@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Preferences</title>
+    <link href="../css/preferences.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li id="li-profile" data-section="section-profile" class="selected">Profile</li>
+        <li id="li-authentication" data-section="section-authentication">Authentication</li>
+        <li id="li-ui-preferences" data-section="section-ui-preferences">UI Preferences</li>
+        <li id="li-editor-preferences" data-section="section-editor-preferences">Editor Preferences</li>
+      </ul>
+    </nav>
+    <main>
+      <section id="section-profile" class="shown">
+        <h1>Profile</h1>
+        <form>
+          <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="profile-name">
+          </div>
+          <div>
+            <label for="path">Email</label>
+            <input type="text" id="email" name="profile-email">
+          </div>
+        </form>
+      </section>
+      <section id="section-authentication">
+        <h1>Authentication</h1>
+      </section>
+      <section id="section-ui-preferences">
+        <h1>UI Preferences</h1>
+      </section>
+      <section id="section-editor-preferences">
+        <h1>Editor Preferences</h1>
+      </section>
+    </main>
+    <script type="text/tsx">require('../../src/renderer/preferences');</script>
+  </body>
+</html>

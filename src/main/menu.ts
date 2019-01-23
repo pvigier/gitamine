@@ -46,6 +46,17 @@ export function setMenu(mainWindow: Electron.BrowserWindow) {
           }
         },
         {
+          type: 'separator'
+        },
+        {
+          label: 'Preferences',
+          accelerator: 'CmdOrCtrl+,',
+          click: () => createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/preferences.html`)
+        },
+        {
+          type: 'separator'
+        },
+        {
           role: 'quit'
         }
       ]

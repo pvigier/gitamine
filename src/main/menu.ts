@@ -45,6 +45,9 @@ export function setMenu(mainWindow: Electron.BrowserWindow) {
             });
           }
         },
+        {
+          role: 'quit'
+        }
       ]
     },
     {

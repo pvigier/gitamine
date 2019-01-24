@@ -1,3 +1,7 @@
+const settings = require('electron-settings');
+
+// Manage tabs
+
 document.body.addEventListener('click', (event) => {
   const element = event.target as HTMLElement;
   if (element.dataset.section) {
@@ -27,3 +31,32 @@ function hideAllSectionsAndDeselectListItems() {
     section.classList.remove('shown')
   });
 }
+
+// Populate inputs
+
+function setInputValuesFromStore(ids: string[], keys: string[]) {
+  const values = settings.getAll();
+  for (let i = 0; i < ids.length; ++i) {
+    if (values[keys[i]]) {
+      const element = document.getElementById(ids[i]) as HTMLInputElement;
+      element.value = values[keys[i]];
+    }
+  }
+}
+
+setInputValuesFromStore(['name', 'email'], ['gitamine.name', 'gitamine.email']);
+
+// Save the settings
+
+function saveInputValuesInStore(ids: string[], keys: string[]) {
+  const values = {};
+  for (let i = 0; i < ids.length; ++i) {
+    const element = document.getElementById(ids[i]) as HTMLInputElement;
+    values[keys[i]] = element.value;
+  }
+  settings.setAll(values);
+}
+
+window.onbeforeunload = () => {
+  saveInputValuesInStore(['name', 'email'], ['gitamine.name', 'gitamine.email']);
+};

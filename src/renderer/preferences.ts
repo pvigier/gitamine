@@ -1,4 +1,6 @@
 import * as settings from 'electron-settings';
+import { NAMESPACE, Field } from './settings';
+
 
 // Manage tabs
 
@@ -35,9 +37,9 @@ function hideAllSectionsAndDeselectListItems() {
 // Populate inputs
 
 function setInputValuesFromStore(ids: string[], keys: string[]) {
-  if (settings.has('gitamine'))
+  if (settings.has(NAMESPACE))
   {
-    const values = settings.get('gitamine');
+    const values = settings.get(NAMESPACE);
     for (let i = 0; i < ids.length; ++i) {
       if (values[keys[i]]) {
         const element = document.getElementById(ids[i]) as HTMLInputElement;
@@ -47,7 +49,7 @@ function setInputValuesFromStore(ids: string[], keys: string[]) {
   }
 }
 
-setInputValuesFromStore(['name', 'email'], ['name', 'email']);
+setInputValuesFromStore(['name', 'email'], [Field.Name, Field.Email]);
 
 // Save the settings
 
@@ -61,5 +63,5 @@ function saveInputValuesInStore(ids: string[], keys: string[]) {
 }
 
 window.onbeforeunload = () => {
-  saveInputValuesInStore(['name', 'email'], ['name', 'email']);
+  saveInputValuesInStore(['name', 'email'], [Field.Name, Field.Email]);
 };

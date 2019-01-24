@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
+import * as settings from 'electron-settings';
 import { PatchList } from './patch-list';
 import { PatchViewerMode } from './patch-viewer';
 import { RepoState } from '../repo-state';
@@ -134,7 +135,9 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
 
   async commit() {
     if (this.state.summary.length > 0) {
-      const author = Git.Signature.now('John Doe', 'john@doe.com');
+      const name = settings.get('gitamine.name');
+      const email = settings.get('gitamine.email');
+      const author = Git.Signature.now(name, email);
       const oid = await this.index.writeTree();
       const headCommit = this.props.repo.getHeadCommit();
       await this.props.repo.repo.createCommit('HEAD', author, author, 

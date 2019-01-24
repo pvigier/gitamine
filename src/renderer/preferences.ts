@@ -1,4 +1,4 @@
-const settings = require('electron-settings');
+import * as settings from 'electron-settings';
 
 // Manage tabs
 
@@ -35,16 +35,19 @@ function hideAllSectionsAndDeselectListItems() {
 // Populate inputs
 
 function setInputValuesFromStore(ids: string[], keys: string[]) {
-  const values = settings.getAll();
-  for (let i = 0; i < ids.length; ++i) {
-    if (values[keys[i]]) {
-      const element = document.getElementById(ids[i]) as HTMLInputElement;
-      element.value = values[keys[i]];
+  if (settings.has('gitamine'))
+  {
+    const values = settings.get('gitamine');
+    for (let i = 0; i < ids.length; ++i) {
+      if (values[keys[i]]) {
+        const element = document.getElementById(ids[i]) as HTMLInputElement;
+        element.value = values[keys[i]];
+      }
     }
   }
 }
 
-setInputValuesFromStore(['name', 'email'], ['gitamine.name', 'gitamine.email']);
+setInputValuesFromStore(['name', 'email'], ['name', 'email']);
 
 // Save the settings
 
@@ -54,9 +57,9 @@ function saveInputValuesInStore(ids: string[], keys: string[]) {
     const element = document.getElementById(ids[i]) as HTMLInputElement;
     values[keys[i]] = element.value;
   }
-  settings.setAll(values);
+  settings.set('gitamine', values);
 }
 
 window.onbeforeunload = () => {
-  saveInputValuesInStore(['name', 'email'], ['gitamine.name', 'gitamine.email']);
+  saveInputValuesInStore(['name', 'email'], ['name', 'email']);
 };

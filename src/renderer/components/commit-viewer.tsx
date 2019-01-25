@@ -1,3 +1,4 @@
+import { clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
@@ -55,6 +56,37 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
     }
   }
 
+  static createShaButton(sha: string) {
+    function handleHover(event: React.MouseEvent<HTMLDivElement>) {
+      const element = event.target as HTMLDivElement;
+      const tooltipSpan = element.getElementsByClassName('tooltip-text')[0];
+      tooltipSpan.textContent = 'Copy';
+    }
+    function handleClick(event: React.MouseEvent<HTMLDivElement>) {
+      clipboard.writeText(sha);
+      const element = event.target as HTMLDivElement;
+      const tooltipSpan = element.getElementsByClassName('tooltip-text')[0];
+      tooltipSpan.textContent = 'Copied';
+    }
+    return (
+      <span className='tooltip-bottom' key={sha} onMouseEnter={handleHover} onClick={handleClick}>
+        {shortenSha(sha)}
+        <span className='tooltip-text'>Copy</span>
+      </span>
+    );
+  }
+
+  static createShaButtons(shas: Git.Oid[]) {
+    const buttons = [];
+    for (let i = 0; i < shas.length; ++i) {
+      buttons.push(CommitViewer.createShaButton(shas[i].tostrS()))
+      if (i < shas.length - 1) {
+        buttons.push(', ');
+      }
+    }
+    return buttons;
+  }
+
   render() {
     // Update patches if necessary
     if (this.commit !== this.props.commit) {
@@ -66,12 +98,12 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
     const authoredDate = new Date(author.when().time() * 1000);
     return (
       <div className='commit-viewer' ref={this.div}>
-        <h3>Commit: {shortenSha(this.commit.sha())}</h3>
+        <h3>Commit: {CommitViewer.createShaButton(this.commit.sha())}</h3>
         <h2>{this.commit.message()}</h2>
         <p>By {author.name()} &lt;<a href={`mailto:${author.email()}`}>{author.email()}</a>&gt;</p>
         <p>Authored {formatDate(authoredDate)}</p>
         <p>Last modified {formatDate(this.commit.date())}</p>
-        <p>Parents: {this.commit.parents().map((sha) => shortenSha(sha.tostrS())).join(' ')}</p>
+        <p>Parents: {CommitViewer.createShaButtons(this.commit.parents())}</p>
         <PatchList patches={this.state.patches}
           selectedPatch={this.props.selectedPatch}
           onPatchSelect={this.handlePatchSelect} />

@@ -164,7 +164,7 @@ div.commit-viewer {
 div.commit-viewer h3 {
     margin: 4px 0;
     text-align: center;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: normal;
 }
 
@@ -319,4 +319,39 @@ div.overlay-zone p {
 
 div.overlay-zone button {
   margin: 0px 2px;
+}
+
+/* Tooltips */
+
+.tooltip-bottom {
+  position: relative;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip-bottom .tooltip-text {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translateX(-50%);
+}
+
+.tooltip-bottom .tooltip-text::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent black transparent;
+}
+
+.tooltip-bottom:hover .tooltip-text {
+  visibility: visible;
 }

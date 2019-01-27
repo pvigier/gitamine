@@ -324,7 +324,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   render() {
-    // Set up editor
+    // Load data
     this.oldBlob = '';
     this.newBlob = '';
     this.hunks = [];

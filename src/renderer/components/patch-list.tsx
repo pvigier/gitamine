@@ -10,14 +10,9 @@ export interface PatchListProps {
   onUnstage?: (patch: Git.ConvenientPatch) => void;
 }
 
-export interface PatchListState {
-}
-
-export class PatchList extends React.PureComponent<PatchListProps, PatchListState> {
+export class PatchList extends React.PureComponent<PatchListProps, {}> {
   constructor(props: PatchListProps) {
     super(props);
-    this.state = {
-    }
     this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 

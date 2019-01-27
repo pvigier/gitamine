@@ -47,7 +47,7 @@ export class RepoState {
       try {
         return [name, await this.repo.getReferenceCommit(name)] as [string, Git.Commit];
       } catch (e) {
-        console.error(e);
+        console.log(e);
         return [name, null] as [string, null];
       }
     }));
@@ -135,7 +135,7 @@ export class RepoState {
   }
 
   removeCommit(commit: Git.Commit) {
-    this.commits.splice(this.commits.indexOf(commit), 1);
+    this.commits.splice(this.commits.indexOf(commit), 1); // TODO: batch removal
     const commitSha = commit.sha();
     this.shaToCommit.delete(commitSha);
     for (let parentSha of this.parents.get(commitSha)!) {

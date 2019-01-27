@@ -20,7 +20,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
   addRepo(repo: RepoState) {
     this.setState((state: AppState): AppState => ({
-      repos: state.repos.concat([repo])
+      repos: [repo]
     }));
   }
 

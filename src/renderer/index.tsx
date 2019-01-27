@@ -1,8 +1,8 @@
-import * as Path from 'path';
 import { ipcRenderer } from 'electron';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as Git from 'nodegit';
+import * as unhandled from 'electron-unhandled';
 import { AppContainer } from 'react-hot-loader';
 import { App } from './components/app';
 import { RepoState } from "./repo-state";
@@ -53,4 +53,19 @@ ipcRenderer.on('open-repo', async (event: Electron.Event, path: string) => {
   } catch (e) {
     app.showNotification(e.message);
   }
+});
+
+// Unhandled exceptions
+
+function handleError(e: any) {
+  if (e.code === 'ENOTDIR' || e.code === 'ENOENT') {
+    console.log(e);
+  }
+  else {
+    console.error(e);
+  }
+}
+
+unhandled({
+  logger: handleError 
 });

@@ -33,7 +33,7 @@ ipcRenderer.on('clone-repo', async (event: Electron.Event, [path, url]: [string,
     const repo = await Git.Clone.clone(url, path);
     openRepo(repo);
   } catch (e) {
-    console.error(e);
+    app.showNotification(e.message);
   }
 });
 
@@ -42,7 +42,7 @@ ipcRenderer.on('init-repo', async (event: Electron.Event, path: string) => {
     const repo = await Git.Repository.init(path, 0);
     openRepo(repo);
   } catch (e) {
-    console.error(e);
+    app.showNotification(e.message);
   }
 });
 
@@ -51,6 +51,6 @@ ipcRenderer.on('open-repo', async (event: Electron.Event, path: string) => {
     const repo = await Git.Repository.open(path);
     openRepo(repo);
   } catch (e) {
-    console.error(e);
+    app.showNotification(e.message);
   }
 });

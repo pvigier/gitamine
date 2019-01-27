@@ -2,10 +2,12 @@ import { ipcRenderer } from 'electron';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as Git from 'nodegit';
+import * as settings from 'electron-settings';
 import * as unhandled from 'electron-unhandled';
 import { AppContainer } from 'react-hot-loader';
 import { App } from './components/app';
 import { RepoState } from "./repo-state";
+import { Field, getKey } from './settings';
 
 let app: App;
 
@@ -24,7 +26,17 @@ if (module.hot) { module.hot.accept(render); }
 
 function openRepo(repo: Git.Repository) {
   if (app) {
-    const repoState = new RepoState(repo, () => { app.addRepo(repoState); });
+    const repoState = new RepoState(repo, () => { 
+      app.addRepo(repoState); 
+      // Update settings
+      const recentlyOpened: string[] = settings.get(getKey(Field.RecentlyOpened), []);
+      // Make sure that there is no duplicate
+      const iPath = recentlyOpened.indexOf(repoState.path);
+      if (iPath !== -1) {
+        recentlyOpened.splice(iPath, 1);
+      }
+      settings.set(getKey(Field.RecentlyOpened), [repoState.path, ...recentlyOpened.slice(0, 2)]);
+    });
   }
 }
 

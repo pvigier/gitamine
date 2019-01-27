@@ -2,7 +2,8 @@ export const NAMESPACE = 'gitamine';
 
 export enum Field {
   Name = 'name',
-  Email = 'email'
+  Email = 'email',
+  RecentlyOpened = 'recentlyOpened'
 }
 
 export function getKey(field: Field) {

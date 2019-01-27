@@ -2,6 +2,7 @@ import * as React from 'react';
 import { RepoDashboard } from './repo-dashboard';
 import { RepoState } from '../repo-state';
 import { NotificationQueue } from './notification-queue';
+import { WelcomeDashboard } from './welcome-dashboard';
 
 export interface AppState {
   repos: RepoState[]; 
@@ -31,7 +32,9 @@ export class App extends React.PureComponent<{}, AppState> {
   }
 
   render() {
-    const repoDashboards = this.state.repos.map((repo: RepoState) => <RepoDashboard repo={repo} key={repo.path} />);
+    const repoDashboards = this.state.repos.length === 0 ?
+      <WelcomeDashboard /> :
+      this.state.repos.map((repo: RepoState) => <RepoDashboard repo={repo} key={repo.path} />);
     return (
       <div id='app'>
         {repoDashboards}

@@ -1,8 +1,11 @@
 import * as React from 'react';
+import * as Git from 'nodegit';
+import * as settings from 'electron-settings';
 import { RepoDashboard } from './repo-dashboard';
 import { RepoState } from '../repo-state';
 import { NotificationQueue } from './notification-queue';
 import { WelcomeDashboard } from './welcome-dashboard';
+import { Field, getKey } from '../settings';
 
 export interface AppState {
   repos: RepoState[]; 
@@ -19,10 +22,47 @@ export class App extends React.PureComponent<{}, AppState> {
     };
   }
 
-  addRepo(repo: RepoState) {
-    this.setState((state: AppState): AppState => ({
-      repos: [repo]
-    }));
+  async cloneRepo(url: string, path: string) {
+    try {
+      const repo = await Git.Clone.clone(url, path);
+      this.addRepo(repo);
+    } catch (e) {
+      this.showNotification(e.message);
+    }
+  }
+
+  async initRepo(path: string) {
+    try {
+      const repo = await Git.Repository.init(path, 0);
+      this.addRepo(repo);
+    } catch (e) {
+      this.showNotification(e.message);
+    }
+  }
+
+  async openRepo(path: string) {
+    try {
+      const repo = await Git.Repository.open(path);
+      this.addRepo(repo);
+    } catch (e) {
+      this.showNotification(e.message);
+    }
+  }
+
+  addRepo(repo: Git.Repository) {
+    const repoState = new RepoState(repo, () => { 
+      this.setState((state: AppState): AppState => ({
+        repos: [repoState]
+      }));
+      // Update settings
+      const recentlyOpened: string[] = settings.get(getKey(Field.RecentlyOpened), []);
+      // Make sure that there is no duplicate
+      const iPath = recentlyOpened.indexOf(repoState.path);
+      if (iPath !== -1) {
+        recentlyOpened.splice(iPath, 1);
+      }
+      settings.set(getKey(Field.RecentlyOpened), [repoState.path, ...recentlyOpened.slice(0, 2)]);
+    });
   }
 
   showNotification(message: string) {

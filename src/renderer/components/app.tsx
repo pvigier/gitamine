@@ -20,6 +20,7 @@ export class App extends React.PureComponent<{}, AppState> {
     this.state = {
       repos: []
     };
+    this.openRepo = this.openRepo.bind(this);
   }
 
   async cloneRepo(url: string, path: string) {
@@ -73,7 +74,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
   render() {
     const repoDashboards = this.state.repos.length === 0 ?
-      <WelcomeDashboard /> :
+      <WelcomeDashboard onRecentlyOpenedRepoClick={this.openRepo} /> :
       this.state.repos.map((repo: RepoState) => <RepoDashboard repo={repo} key={repo.path} />);
     return (
       <div id='app'>

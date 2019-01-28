@@ -1,7 +1,7 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { enableLiveReload } from 'electron-compile';
-import { setMenu } from './menu';
+import { setMenu, openCloneRepoWindow, openInitRepoWindow, openOpenRepoWindow } from './menu';
 
 // Live reloading
 const isDevMode = process.execPath.match(/[\\/]electron/);
@@ -57,5 +57,25 @@ app.on('activate', () => {
   // dock icon is clicked and there are no other windows open
   if (mainWindow === null) {
     createWindow();
+  }
+});
+
+// Events
+
+ipcMain.on('open-clone-repo-window', () => {
+  if (mainWindow) {
+    openCloneRepoWindow(mainWindow);
+  }
+});
+
+ipcMain.on('open-init-repo-window', () => {
+  if (mainWindow) {
+    openInitRepoWindow(mainWindow);
+  }
+});
+
+ipcMain.on('open-open-repo-window', () => {
+  if (mainWindow) {
+    openOpenRepoWindow(mainWindow);
   }
 });

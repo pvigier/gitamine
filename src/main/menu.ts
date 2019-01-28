@@ -19,6 +19,22 @@ function createModalWindow(parent: BrowserWindow, path: string) {
   });
 }
 
+export function openCloneRepoWindow(mainWindow: Electron.BrowserWindow) {
+  createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/clone-repo.html`);
+}
+
+export function openInitRepoWindow(mainWindow: Electron.BrowserWindow) {
+  createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/init-repo.html`);
+}
+
+export function openOpenRepoWindow(mainWindow: Electron.BrowserWindow) {
+  dialog.showOpenDialog(mainWindow, {properties: ['openDirectory']}, (paths) => {
+    if (paths) {
+      mainWindow.webContents.send('open-repo', paths[0]);
+    }
+  });
+}
+
 export function setMenu(mainWindow: Electron.BrowserWindow) {
   const template = [
     {
@@ -27,23 +43,17 @@ export function setMenu(mainWindow: Electron.BrowserWindow) {
         {
           label: 'Clone repo',
           accelerator: 'CmdOrCtrl+N',
-          click: () => createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/clone-repo.html`)
+          click: () => openCloneRepoWindow(mainWindow)
         },
         {
           label: 'Init repo',
           accelerator: 'CmdOrCtrl+I',
-          click: () => createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/init-repo.html`)
+          click: () => openInitRepoWindow(mainWindow)
         },
         {
           label: 'Open repo',
           accelerator: 'CmdOrCtrl+O',
-          click: function() {
-            dialog.showOpenDialog(mainWindow, {properties: ['openDirectory']}, (paths) => {
-              if (paths) {
-                mainWindow.webContents.send('open-repo', paths[0]);
-              }
-            });
-          }
+          click: () => openOpenRepoWindow(mainWindow)
         },
         {
           type: 'separator'

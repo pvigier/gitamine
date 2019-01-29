@@ -1,10 +1,7 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
+import { ReferenceBadge } from './reference-badge';
 import { RepoState } from "../repo-state";
-
-function removeBranchPrefix(name: string) {
-  return name.substr(name.indexOf('/', name.indexOf('/') + 1) + 1);
-}
 
 export interface CommitItemProps { 
   repo: RepoState;
@@ -26,13 +23,13 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
   }
 
   render() {
-    const spans = this.props.references.map((reference) => {
-      const style = {};
-      style['--branch-color'] = this.props.color; 
+    const badges = this.props.references.map((name) => (
+      <ReferenceBadge name={name} color={this.props.color} key={name} />
+    ));
       return (
         <span key={reference} className='reference' style={style}>
           {removeBranchPrefix(reference)}
-        </span>
+        {badges}{this.props.commit.message()}
       );
     });
     return (

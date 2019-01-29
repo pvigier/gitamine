@@ -108,12 +108,22 @@ div.commit-list li.selected-commit {
   background: #ccc;
 }
 
+/* Reference badge */ 
+
 div.commit-list li span.reference {
   border-radius: 5px;
   padding: 2px;
   margin-right: 2px;
   background-color: var(--branch-color);
   color: white;
+}
+
+div.commit-list li span.reference:hover {
+  filter: brightness(1.05);
+}
+
+div.commit-list li span.reference.selected {
+  filter: brightness(1.1);
 }
 
 /* Patch viewer */

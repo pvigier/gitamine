@@ -7,14 +7,19 @@ function removeReferencePrefix(name: string) {
 export class ReferenceBadgeProps {
   name: string;
   color: string;
+  selected: boolean;
 }
 
 export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}> {
   render() {
     const style = {};
     style['--branch-color'] = this.props.color; 
+    const classNames = ['reference'];
+    if (this.props.selected) {
+      classNames.push('selected');
+    }
     return (
-      <span className='reference' style={style}>
+      <span className={classNames.join(' ')} style={style}>
         {removeReferencePrefix(this.props.name)}
       </span>
     );

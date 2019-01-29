@@ -24,7 +24,10 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
 
   render() {
     const badges = this.props.references.map((name) => (
-      <ReferenceBadge name={name} color={this.props.color} key={name} />
+      <ReferenceBadge name={name} 
+        color={this.props.color} 
+        selected={name === this.props.repo.head} 
+        key={name} />
     ));
       return (
         <span key={reference} className='reference' style={style}>

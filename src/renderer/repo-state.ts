@@ -184,4 +184,11 @@ export class RepoState {
   updateGraph() {
     this.graph.computePositions(this);
   }
+
+  // Operations
+
+  async checkoutReference(name: string) {
+    const reference = await this.repo.getReference(name);
+    this.repo.checkoutRef(reference);
+  }
 }

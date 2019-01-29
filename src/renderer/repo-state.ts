@@ -13,6 +13,7 @@ export class RepoState {
   parents: Map<string, string[]>;
   children: Map<string, string[]>;
   head: string;
+  headCommit: Git.Commit;
   graph: CommitGraph;
 
   constructor(repo: Git.Repository, onReady: () => void) {
@@ -177,10 +178,7 @@ export class RepoState {
 
   async updateHead() {
     this.head = (await this.repo.head()).name();
-  }
-
-  getHeadCommit() {
-    return this.references.get(this.head)!;
+    this.headCommit = await this.repo.getHeadCommit();
   }
 
   updateGraph() {

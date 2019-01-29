@@ -83,7 +83,7 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
     if (positions.size > 0) {
       let [x0, y0] = this.computeNodeCenterCoordinates(0, 0);
       y0 += RADIUS;
-      const [x1, y1] = this.computeNodeCenterCoordinates(...positions.get(repo.getHeadCommit().sha())!);
+      const [x1, y1] = this.computeNodeCenterCoordinates(...positions.get(repo.headCommit.sha())!);
 
       // Set the style
       ctx.lineWidth = LINE_WIDTH;

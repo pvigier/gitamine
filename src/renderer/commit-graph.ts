@@ -61,7 +61,7 @@ export class CommitGraph {
     }
 
     this.positions.clear();
-    const headSha = repo.getHeadCommit().sha();
+    const headSha = repo.headCommit.sha();
     let i = 1;
     const branches: (string | null)[] = ['index'];
     for (let commit of repo.commits) {

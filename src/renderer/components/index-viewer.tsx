@@ -85,7 +85,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   async getPatches() {
     const repo = this.props.repo.repo;
     await this.props.repo.updateHead(); // Why is this necessary to have index up-to-date when changing branch
-    const headCommit = this.props.repo.getHeadCommit();
+    const headCommit = this.props.repo.headCommit;
     const options = {
       flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 
         Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
@@ -124,13 +124,13 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   async unstagePatch(patch: Git.ConvenientPatch) {
-    const headCommit = this.props.repo.getHeadCommit();
+    const headCommit = this.props.repo.headCommit;
     await Git.Reset.default(this.props.repo.repo, headCommit, patch.newFile().path());
   }
 
   async unstageAll() {
     const paths = this.state.stagedPatches.map((patch) => patch.newFile().path());
-    const headCommit = this.props.repo.getHeadCommit();
+    const headCommit = this.props.repo.headCommit;
     await Git.Reset.default(this.props.repo.repo, headCommit, paths);
   }
 
@@ -140,7 +140,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       const email = settings.get(getKey(Field.Email));
       const author = Git.Signature.now(name, email);
       const oid = await this.index.writeTree();
-      const headCommit = this.props.repo.getHeadCommit();
+      const headCommit = this.props.repo.headCommit;
       await this.props.repo.repo.createCommit('HEAD', author, author, 
         this.state.summary, oid, [headCommit]);
       this.setState({

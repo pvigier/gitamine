@@ -18,6 +18,7 @@ export interface IndexViewerState {
 
 export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexViewerState> {
   div: React.RefObject<HTMLDivElement>;
+  iSelectedPatch: number;
 
   constructor(props: IndexViewerProps) {
     super(props);
@@ -35,10 +36,12 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   handleUnstagedPatchSelect(patch: Git.ConvenientPatch) {
+    this.iSelectedPatch = this.state.unstagedPatches.indexOf(patch); 
     this.props.onPatchSelect(patch, PatchViewerMode.Stage);
   }
 
   handleStagedPatchSelect(patch: Git.ConvenientPatch) {
+    this.iSelectedPatch = this.state.stagedPatches.indexOf(patch); 
     this.props.onPatchSelect(patch, PatchViewerMode.Unstage);
   }
 
@@ -58,14 +61,27 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       [this.handleUnstagedPatchSelect, this.handleStagedPatchSelect] :
       [this.handleStagedPatchSelect, this.handleUnstagedPatchSelect];
     const path = this.props.selectedPatch!.newFile().path();
-    for (let i = 0; i < patches.length; ++i) {
-      for (let patch of patches[i]) {
-        if (path === patch.newFile().path()) {
-          handler[i].call(this, patch);
-          return;
-        }
-      }
+    // Try to find the find in the same list
+    let patch = patches[0].find((patch) => path === patch.newFile().path());
+    if (patch) {
+      handler[0].call(this, patch);
+      return;
     }
+    // If there is another patch in this list, select it
+    if (patches[0].length > 0) {
+      const i = this.iSelectedPatch < patches[0].length ?
+        this.iSelectedPatch :
+        Math.max(patches[0].length - 1, this.iSelectedPatch - 1);
+      handler[0].call(this, patches[0][i]);
+      return;
+    }
+    // Otherwise, try to find the file in the other list
+    patch = patches[1].find((patch) => path === patch.newFile().path());
+    if (patch) {
+      handler[1].call(this, patch);
+      return;
+    }
+    // Finally, if there nothing succeeded reset the selected patch
     this.props.onPatchSelect(null, PatchViewerMode.ReadOnly);
   }
 

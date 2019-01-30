@@ -3,7 +3,6 @@ import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
 import { PatchViewerMode } from './patch-viewer';
 import { RepoState } from '../repo-state';
-import { Field, Settings } from '../settings';
 
 export interface IndexViewerProps { 
   repo: RepoState;
@@ -19,7 +18,6 @@ export interface IndexViewerState {
 
 export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexViewerState> {
   div: React.RefObject<HTMLDivElement>;
-  index: Git.Index;
 
   constructor(props: IndexViewerProps) {
     super(props);
@@ -31,10 +29,6 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     }
     this.handleUnstagedPatchSelect = this.handleUnstagedPatchSelect.bind(this);
     this.handleStagedPatchSelect = this.handleStagedPatchSelect.bind(this);
-    this.stagePatch = this.stagePatch.bind(this);
-    this.stageAll = this.stageAll.bind(this);
-    this.unstagePatch = this.unstagePatch.bind(this);
-    this.unstageAll = this.unstageAll.bind(this);
     this.handleSummaryChange = this.handleSummaryChange.bind(this);
     this.commit = this.commit.bind(this);
     this.getPatches();
@@ -82,66 +76,19 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   async getPatches() {
-    const repo = this.props.repo.repo;
-    await this.props.repo.updateHead(); // Why is this necessary to have index up-to-date when changing branch
-    const headCommit = this.props.repo.headCommit;
-    const options = {
-      flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 
-        Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
-    }
-    this.index = await repo.refreshIndex();
-    const [unstagedDiff, stagedDiff] = await Promise.all([
-      Git.Diff.indexToWorkdir(repo, this.index, options),
-      Git.Diff.treeToIndex(repo, await headCommit.getTree(), this.index, options)
-    ]);
-    unstagedDiff.findSimilar({});
-    stagedDiff.findSimilar({});
     return new Promise<void>(async (resolve) => {
       this.setState({
-        unstagedPatches: await unstagedDiff.patches(),
-        stagedPatches: await stagedDiff.patches()
+        unstagedPatches: await this.props.repo.getUnstagedPatches(),
+        stagedPatches: await this.props.repo.getStagedPatches()
       }, () => {
         resolve();
       });
     });
   }
 
-  async stagePatch(patch: Git.ConvenientPatch) {
-    if (patch.isDeleted()) {
-      await this.index.removeByPath(patch.newFile().path())
-      await this.index.write();
-    } else {
-      await this.index.addByPath(patch.newFile().path())
-      await this.index.write();
-    }
-  }
-
-  async stageAll() {
-    const paths = this.state.stagedPatches.map((patch) => patch.newFile().path());
-    await this.index.addAll(paths, Git.Index.ADD_OPTION.ADD_DEFAULT);
-    await this.index.write();
-  }
-
-  async unstagePatch(patch: Git.ConvenientPatch) {
-    const headCommit = this.props.repo.headCommit;
-    await Git.Reset.default(this.props.repo.repo, headCommit, patch.newFile().path());
-  }
-
-  async unstageAll() {
-    const paths = this.state.stagedPatches.map((patch) => patch.newFile().path());
-    const headCommit = this.props.repo.headCommit;
-    await Git.Reset.default(this.props.repo.repo, headCommit, paths);
-  }
-
   async commit() {
     if (this.state.summary.length > 0) {
-      const name = Settings.get(Field.Name);
-      const email = Settings.get(Field.Email);
-      const author = Git.Signature.now(name, email);
-      const oid = await this.index.writeTree();
-      const headCommit = this.props.repo.headCommit;
-      await this.props.repo.repo.createCommit('HEAD', author, author, 
-        this.state.summary, oid, [headCommit]);
+      await this.props.repo.commit(this.state.summary);
       this.setState({
         summary: ''
       });
@@ -149,31 +96,32 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   render() {
+    const repo = this.props.repo;
     return (
       <div className='commit-viewer' ref={this.div}>
         <h2>Index</h2>
         <div className='button-inline'>
           <p>Unstaged files ({this.state.unstagedPatches.length})</p>
           <button disabled={this.state.unstagedPatches.length === 0}
-            onClick={this.stageAll}>
+            onClick={repo.stageAll.bind(repo, this.state.unstagedPatches)}>
             Stage all changes
           </button>
         </div>
         <PatchList patches={this.state.unstagedPatches}
           selectedPatch={this.props.selectedPatch}
           onPatchSelect={this.handleUnstagedPatchSelect} 
-          onStage={this.stagePatch} />
+          onStage={repo.stagePatch.bind(repo)} />
         <div className='button-inline'>
           <p>Staged files ({this.state.stagedPatches.length})</p>
           <button disabled={this.state.stagedPatches.length === 0}
-            onClick={this.unstageAll}>
+            onClick={repo.unstageAll.bind(repo, this.state.stagedPatches)}>
             Unstage all changes
            </button>
         </div >
         <PatchList patches={this.state.stagedPatches}
           selectedPatch={this.props.selectedPatch}
           onPatchSelect={this.handleStagedPatchSelect}
-          onUnstage={this.unstagePatch} />
+          onUnstage={repo.unstagePatch.bind(repo)} />
         <input placeholder={'Summary'} 
           value={this.state.summary} 
           onChange={this.handleSummaryChange} />

@@ -1,6 +1,12 @@
 import * as Path from 'path';
 import * as Git from 'nodegit';
 import { CommitGraph } from './commit-graph';
+import { Field, Settings } from './settings';
+
+const diffOptions = {
+  flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 
+  Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
+}
 
 export class RepoState {
   repo: Git.Repository;
@@ -14,6 +20,7 @@ export class RepoState {
   children: Map<string, string[]>;
   head: string;
   headCommit: Git.Commit;
+  index: Git.Index;
   graph: CommitGraph;
 
   constructor(repo: Git.Repository, onReady: () => void) {
@@ -28,18 +35,23 @@ export class RepoState {
     this.children = new Map<string, string[]>();
     this.graph = new CommitGraph();
 
-    this.update().then(onReady);
+    this.init().then(onReady);
   }
 
-  async update() {
+  async init() {
+    await this.updateCommits();
+    await this.updateHead();
+    await this.updateIndex();
+    await this.updateGraph();
+  }
+
+  async updateCommits() {
     const names = await this.repo.getReferenceNames(Git.Reference.TYPE.OID);
     const referencesToUpdate = await this.getReferenceCommits(names);
     const newCommits = await this.getNewCommits(referencesToUpdate);
     await this.getParents(newCommits);
     this.removeUnreachableCommits();
     this.sortCommits();
-    await this.updateHead();
-    this.updateGraph();
   }
 
   async getReferenceCommits(names: string[]) {
@@ -181,14 +193,89 @@ export class RepoState {
     this.headCommit = await this.repo.getHeadCommit();
   }
 
+  async updateIndex() {
+    this.index = await this.repo.refreshIndex();
+  }
+
   updateGraph() {
     this.graph.computePositions(this);
   }
 
-  // Operations
+  // Head operations
 
   async checkoutReference(name: string) {
     const reference = await this.repo.getReference(name);
     this.repo.checkoutRef(reference);
+  }
+
+  // Index operations
+
+  async getUnstagedPatches() {
+    const unstagedDiff = await Git.Diff.indexToWorkdir(this.repo, this.index, diffOptions);
+    await unstagedDiff.findSimilar({});
+    return await unstagedDiff.patches();
+  }
+
+  async getStagedPatches() {
+    const stagedDiff = await Git.Diff.treeToIndex(this.repo, await this.headCommit.getTree(), this.index, diffOptions);
+    await stagedDiff.findSimilar({});
+    return await stagedDiff.patches();
+  }
+
+  async stageHunk(patch: Git.ConvenientPatch, hunk: Git.ConvenientHunk) {
+    const lines = await hunk.lines();
+    const path = patch.newFile().path();
+    this.repo.stageLines(path, lines, false);
+  }
+
+  async stagePatch(patch: Git.ConvenientPatch) {
+    if (patch.isDeleted()) {
+      await this.index.removeByPath(patch.newFile().path())
+      await this.index.write();
+    } else {
+      await this.index.addByPath(patch.newFile().path())
+      await this.index.write();
+    }
+  }
+
+  async stageAll(patches: Git.ConvenientPatch[]) {
+    const paths = patches.map((patch) => patch.newFile().path());
+    await this.index.addAll(paths, Git.Index.ADD_OPTION.ADD_DEFAULT);
+    await this.index.write();
+  }
+
+  async unstageHunk(patch: Git.ConvenientPatch, hunk: Git.ConvenientHunk) {
+    const lines = await hunk.lines();
+    const path = patch.newFile().path();
+    this.repo.stageLines(path, lines, true);
+  }
+
+  async unstagePatch(patch: Git.ConvenientPatch) {
+    await Git.Reset.default(this.repo, this.headCommit, patch.newFile().path());
+  }
+
+  async unstageAll(patches: Git.ConvenientPatch[]) {
+    const paths = patches.map((patch) => patch.newFile().path());
+    await Git.Reset.default(this.repo, this.headCommit, paths);
+  }
+
+  async discardHunk(patch: Git.ConvenientPatch, hunk: Git.ConvenientHunk) {
+    const lines = await hunk.lines();
+    const path = patch.newFile().path();
+    this.repo.discardLines(path, lines);
+  }
+
+  async discardPatch(patch: Git.ConvenientPatch) {
+    // This a bit hacky
+    const hunks = await patch.hunks();
+    hunks.forEach((hunk) => this.discardHunk(patch, hunk));
+  }
+
+  async commit(message: string) {
+    const name = Settings.get(Field.Name);
+    const email = Settings.get(Field.Email);
+    const author = Git.Signature.now(name, email);
+    const oid = await this.index.writeTree();
+    await this.repo.createCommit('HEAD', author, author, message, oid, [this.headCommit]);
   }
 }

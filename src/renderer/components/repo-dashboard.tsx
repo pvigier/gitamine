@@ -112,6 +112,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   async refreshIndex() {
     if (!this.state.selectedCommit && this.rightViewer.current) {
       const indexViewer = this.rightViewer.current as IndexViewer;
+      await this.props.repo.updateIndex();
       await indexViewer.refresh();
       if (this.state.selectedPatch && this.state.patchViewerMode !== PatchViewerMode.ReadOnly) {
         indexViewer.refreshSelectedPatch(this.state.patchViewerMode === PatchViewerMode.Stage);
@@ -129,7 +130,9 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
 
   async refreshReferences() {
     // TODO: update only references that changed
-    await this.props.repo.update();
+    await this.props.repo.updateCommits();
+    await this.props.repo.updateHead();
+    await this.props.repo.updateGraph();
     if (this.graphViewer.current) {
       this.graphViewer.current.updateGraph();
     }

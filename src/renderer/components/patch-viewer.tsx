@@ -94,24 +94,6 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     }
   }
 
-  async stageHunk(hunk: Git.ConvenientHunk) {
-    const lines = await hunk.lines();
-    const path = this.props.patch.newFile().path();
-    this.props.repo.repo.stageLines(path, lines, false);
-  }
-
-  async unstageHunk(hunk: Git.ConvenientHunk) {
-    const lines = await hunk.lines();
-    const path = this.props.patch.newFile().path();
-    this.props.repo.repo.stageLines(path, lines, true);
-  }
-
-  async discardHunk(hunk: Git.ConvenientHunk) {
-    const lines = await hunk.lines();
-    const path = this.props.patch.newFile().path();
-    this.props.repo.repo.discardLines(path, lines);
-  }
-
   loadData() {
     const repo = this.props.repo.repo;
     const patch = this.props.patch;
@@ -232,6 +214,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   createHunkWidget(editor: any, hunk: Git.ConvenientHunk, start: number, hunkId: string) {
+    const repo = this.props.repo;
+    const patch = this.props.patch;
+
     const overlayNode = document.createElement('div');
     overlayNode.classList.add('overlay-zone');
 
@@ -244,12 +229,12 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       // Discard button
       const discardButton = document.createElement('button');
       discardButton.textContent = 'Discard';
-      discardButton.addEventListener('click', this.discardHunk.bind(this, hunk));
+      discardButton.addEventListener('click', repo.discardHunk.bind(repo, patch, hunk));
       buttonsNode.appendChild(discardButton);
       // Stage button
       const stageButton = document.createElement('button');
       stageButton.textContent = 'Stage';
-      stageButton.addEventListener('click', this.stageHunk.bind(this, hunk));
+      stageButton.addEventListener('click', repo.stageHunk.bind(repo, patch, hunk));
       buttonsNode.appendChild(stageButton);
       contentNode.appendChild(buttonsNode);
     } else if (this.props.mode === PatchViewerMode.Unstage) {
@@ -257,7 +242,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       // Unstage button
       const unstageButton = document.createElement('button');
       unstageButton.textContent = 'Unstage';
-      unstageButton.addEventListener('click', this.unstageHunk.bind(this, hunk));
+      unstageButton.addEventListener('click', repo.unstageHunk.bind(repo, patch, hunk));
       buttonsNode.appendChild(unstageButton);
       contentNode.appendChild(buttonsNode);
     }

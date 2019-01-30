@@ -1,4 +1,6 @@
-export const NAMESPACE = 'gitamine';
+import * as settings from 'electron-settings';
+
+const NAMESPACE = 'gitamine';
 
 export enum Field {
   Name = 'name',
@@ -6,6 +8,28 @@ export enum Field {
   RecentlyOpened = 'recentlyOpened'
 }
 
-export function getKey(field: Field) {
+function getKey(field: Field) {
   return `${NAMESPACE}.${field}`;
+}
+
+export class Settings {
+  static exists() {
+    return settings.has(NAMESPACE);
+  }
+  
+  static getAll() {
+    return settings.get(NAMESPACE);
+  }
+
+  static setAll(values: any) {
+    settings.set(NAMESPACE, values);
+  }
+
+  static get(field: Field, defaultValue?: any) {
+    return settings.get(getKey(field), defaultValue);
+  }
+
+  static set(field: Field, value: any) {
+    settings.set(getKey(field), value);
+  }
 }

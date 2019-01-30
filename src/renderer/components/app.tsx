@@ -1,11 +1,10 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
-import * as settings from 'electron-settings';
 import { RepoDashboard } from './repo-dashboard';
 import { RepoState } from '../repo-state';
 import { NotificationQueue } from './notification-queue';
 import { WelcomeDashboard } from './welcome-dashboard';
-import { Field, getKey } from '../settings';
+import { Field, Settings } from '../settings';
 
 export interface AppState {
   repos: RepoState[]; 
@@ -56,13 +55,13 @@ export class App extends React.PureComponent<{}, AppState> {
         repos: [repoState]
       }));
       // Update settings
-      const recentlyOpened: string[] = settings.get(getKey(Field.RecentlyOpened), []);
+      const recentlyOpened: string[] = Settings.get(Field.RecentlyOpened, []);
       // Make sure that there is no duplicate
       const iPath = recentlyOpened.indexOf(repoState.path);
       if (iPath !== -1) {
         recentlyOpened.splice(iPath, 1);
       }
-      settings.set(getKey(Field.RecentlyOpened), [repoState.path, ...recentlyOpened.slice(0, 2)]);
+      Settings.set(Field.RecentlyOpened, [repoState.path, ...recentlyOpened.slice(0, 2)]);
     });
   }
 

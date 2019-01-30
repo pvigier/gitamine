@@ -1,7 +1,6 @@
 import { ipcRenderer } from 'electron';
 import * as React from 'react';
-import * as settings from 'electron-settings';
-import { Field, getKey } from '../settings';
+import { Field, Settings } from '../settings';
 
 export class WelcomeDashboardProps {
   onRecentlyOpenedRepoClick: (path: string) => void
@@ -27,7 +26,7 @@ export class WelcomeDashboard extends React.PureComponent<WelcomeDashboardProps,
   }
 
   render() {
-    const recentlyOpenedItems = settings.get(getKey(Field.RecentlyOpened), [])
+    const recentlyOpenedItems = Settings.get(Field.RecentlyOpened, [])
       .map((path: string) => (
         <button key={path} onClick={() => this.props.onRecentlyOpenedRepoClick(path)}>
           {path}

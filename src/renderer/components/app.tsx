@@ -20,6 +20,7 @@ export class App extends React.PureComponent<{}, AppState> {
       repos: []
     };
     this.openRepo = this.openRepo.bind(this);
+    this.showNotification = this.showNotification.bind(this);
   }
 
   async cloneRepo(url: string, path: string) {
@@ -50,7 +51,7 @@ export class App extends React.PureComponent<{}, AppState> {
   }
 
   addRepo(repo: Git.Repository) {
-    const repoState = new RepoState(repo, () => { 
+    const repoState = new RepoState(repo, this.showNotification, () => { 
       this.setState((state: AppState): AppState => ({
         repos: [repoState]
       }));
@@ -62,7 +63,7 @@ export class App extends React.PureComponent<{}, AppState> {
         recentlyOpened.splice(iPath, 1);
       }
       Settings.set(Field.RecentlyOpened, [repoState.path, ...recentlyOpened.slice(0, 2)]);
-    });
+    }); 
   }
 
   showNotification(message: string) {

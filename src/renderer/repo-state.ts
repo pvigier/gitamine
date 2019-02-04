@@ -22,8 +22,9 @@ export class RepoState {
   headCommit: Git.Commit;
   index: Git.Index;
   graph: CommitGraph;
+  onNotification: (message: string) => void;
 
-  constructor(repo: Git.Repository, onReady: () => void) {
+  constructor(repo: Git.Repository, onNotification: (message: string) => void, onReady: () => void) {
     this.repo = repo;
     this.path = this.repo.path(); 
     this.name = Path.parse(Path.dirname(this.path)).name;
@@ -34,6 +35,7 @@ export class RepoState {
     this.parents = new Map<string, string[]>();
     this.children = new Map<string, string[]>();
     this.graph = new CommitGraph();
+    this.onNotification = onNotification;
 
     this.init().then(onReady);
   }
@@ -274,8 +276,16 @@ export class RepoState {
   async commit(message: string) {
     const name = Settings.get(Field.Name);
     const email = Settings.get(Field.Email);
-    const author = Git.Signature.now(name, email);
-    const oid = await this.index.writeTree();
-    await this.repo.createCommit('HEAD', author, author, message, oid, [this.headCommit]);
+    try {
+      const author = Git.Signature.now(name, email);
+      try {
+        const oid = await this.index.writeTree();
+        await this.repo.createCommit('HEAD', author, author, message, oid, [this.headCommit]);
+      } catch (e) {
+        this.onNotification(`Unable to commit: ${e.message}`);
+      }
+    } catch (e) {
+      this.onNotification('Unable to set an author for this commit. Please check you configure correctly your account in "Preferences".');
+    }
   }
 }

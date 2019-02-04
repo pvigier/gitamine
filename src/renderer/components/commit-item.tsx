@@ -27,17 +27,12 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
       <ReferenceBadge name={name} 
         color={this.props.color} 
         selected={name === this.props.repo.head} 
+        repo={this.props.repo}
         key={name} />
     ));
-      return (
-        <span key={reference} className='reference' style={style}>
-          {removeBranchPrefix(reference)}
-        {badges}{this.props.commit.message()}
-      );
-    });
     return (
       <li className={this.props.selected ? 'selected-commit' : ''} onClick={this.handleClick}>
-        {spans}{this.props.commit.message()}
+        {badges}{this.props.commit.message()}
       </li>
     );
   }

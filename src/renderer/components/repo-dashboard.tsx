@@ -54,7 +54,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     });
 
     // Watch working directory
-    const regex = /.*\.git\/.*/; // Exclude .git folders
+    const regex = /(.*\.git(\/.*|$))|(.*\.git(\\.*|$))/; // Exclude .git folders
     node_watch(Path.dirname(path), 
       {recursive: true, filter: (f: string) => !regex.test(f)}, 
       (error: string, filename: string) => {

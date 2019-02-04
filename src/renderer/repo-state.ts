@@ -269,8 +269,12 @@ export class RepoState {
 
   async discardPatch(patch: Git.ConvenientPatch) {
     // This a bit hacky
-    const hunks = await patch.hunks();
-    hunks.forEach((hunk) => this.discardHunk(patch, hunk));
+    const path = patch.newFile().path();
+    Git.Checkout.head(this.repo, {
+      baseline: await this.headCommit.getTree(),
+      checkoutStrategy: Git.Checkout.STRATEGY.FORCE,
+      paths: path
+    });
   }
 
   async commit(message: string) {

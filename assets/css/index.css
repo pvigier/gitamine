@@ -38,6 +38,11 @@ div.repo-toolbar h1 {
   font-size: 20px;
 }
 
+div.repo-toolbar div.toolbar-buttons {
+  display: table-cell;
+  vertical-align: middle;
+}
+
 /* Repo content */
 
 div.repo-content {

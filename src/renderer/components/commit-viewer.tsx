@@ -3,6 +3,7 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
 import { PatchViewerMode } from './patch-viewer';
+import { PatchType } from '../repo-state';
 
 function shortenSha(sha: string) {
   return sha.substr(0, 6);
@@ -105,6 +106,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
         <p>Last modified {formatDate(this.commit.date())}</p>
         <p>Parents: {CommitViewer.createShaButtons(this.commit.parents())}</p>
         <PatchList patches={this.state.patches}
+          type={PatchType.Committed}
           selectedPatch={this.props.selectedPatch}
           onPatchSelect={this.handlePatchSelect} />
       </div>

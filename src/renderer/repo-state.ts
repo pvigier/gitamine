@@ -8,6 +8,12 @@ const diffOptions = {
   Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
 }
 
+export enum PatchType {
+  Unstaged,
+  Staged,
+  Committed
+}
+
 export class RepoState {
   repo: Git.Repository;
   path: string;

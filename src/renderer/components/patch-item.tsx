@@ -1,12 +1,13 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
+import { RepoState, PatchType } from '../repo-state';
 
 export interface PatchItemProps { 
+  repo?: RepoState;
   patch: Git.ConvenientPatch;
+  type: PatchType;
   selected: boolean;
   onPatchSelect: (patch: Git.ConvenientPatch) => void;
-  onStage?: (patch: Git.ConvenientPatch) => void;
-  onUnstage?: (patch: Git.ConvenientPatch) => void;
 }
 
 function getPatchIcon(patch: Git.ConvenientPatch) {
@@ -37,21 +38,22 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
 
   handleStageClick(event: React.MouseEvent<HTMLButtonElement>) {
     event.stopPropagation();
-    this.props.onStage!(this.props.patch);
+    this.props.repo!.stagePatch(this.props.patch);
   }
 
   handleUnstageClick(event: React.MouseEvent<HTMLButtonElement>) {
     event.stopPropagation();
-    this.props.onUnstage!(this.props.patch);
+    this.props.repo!.unstagePatch(this.props.patch);
   }
+    }
 
   render() {
     // Buttons
     const buttons: JSX.Element[] = [];
-    if (this.props.onStage) {
+    if (this.props.type === PatchType.Unstaged) {
       buttons.push(<button onClick={this.handleStageClick} key='stage'>Stage</button>);
     }
-    if (this.props.onUnstage) {
+    if (this.props.type === PatchType.Staged) {
       buttons.push(<button onClick={this.handleUnstageClick} key='unstage'>Unstage</button>);
     }
     const buttonDiv = buttons.length > 0 ? 

@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
 import { PatchViewerMode } from './patch-viewer';
-import { RepoState } from '../repo-state';
+import { RepoState, PatchType } from '../repo-state';
 
 export interface IndexViewerProps { 
   repo: RepoState;
@@ -123,10 +123,11 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
             Stage all changes
           </button>
         </div>
-        <PatchList patches={this.state.unstagedPatches}
+        <PatchList repo={this.props.repo}
+          patches={this.state.unstagedPatches}
+          type={PatchType.Unstaged}
           selectedPatch={this.props.selectedPatch}
-          onPatchSelect={this.handleUnstagedPatchSelect} 
-          onStage={repo.stagePatch.bind(repo)} />
+          onPatchSelect={this.handleUnstagedPatchSelect} />
         <div className='button-inline'>
           <p>Staged files ({this.state.stagedPatches.length})</p>
           <button disabled={this.state.stagedPatches.length === 0}
@@ -134,10 +135,11 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
             Unstage all changes
            </button>
         </div >
-        <PatchList patches={this.state.stagedPatches}
+        <PatchList repo={this.props.repo}
+          patches={this.state.stagedPatches}
+          type={PatchType.Staged}
           selectedPatch={this.props.selectedPatch}
-          onPatchSelect={this.handleStagedPatchSelect}
-          onUnstage={repo.unstagePatch.bind(repo)} />
+          onPatchSelect={this.handleStagedPatchSelect} />
         <input placeholder={'Summary'} 
           value={this.state.summary} 
           onChange={this.handleSummaryChange} />

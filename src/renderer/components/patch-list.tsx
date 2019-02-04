@@ -1,13 +1,14 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchItem } from './patch-item';
+import { RepoState, PatchType } from '../repo-state';
 
 export interface PatchListProps { 
+  repo?: RepoState
   patches: Git.ConvenientPatch[];
+  type: PatchType;
   selectedPatch: Git.ConvenientPatch | null;
   onPatchSelect: (patch: Git.ConvenientPatch) => void;
-  onStage?: (patch: Git.ConvenientPatch) => void;
-  onUnstage?: (patch: Git.ConvenientPatch) => void;
 }
 
 export class PatchList extends React.PureComponent<PatchListProps, {}> {
@@ -34,11 +35,11 @@ export class PatchList extends React.PureComponent<PatchListProps, {}> {
     // Patch items
     const patchItems = this.props.patches.map((patch) => {
       const path = patch.newFile().path();
-      return <PatchItem patch={patch} 
+      return <PatchItem repo={this.props.repo}
+        patch={patch} 
+        type={this.props.type}
         selected={patch === this.props.selectedPatch} 
         onPatchSelect={this.props.onPatchSelect} 
-        onStage={this.props.onStage}
-        onUnstage={this.props.onUnstage}
         key={path} />;
     });
 

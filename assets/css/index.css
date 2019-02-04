@@ -23,15 +23,15 @@ div.repo-dashboard {
   flex-direction: column;
 }
 
-/* Repo header */ 
+/* Repo toolbar */ 
 
-div.repo-header {
+div.repo-toolbar {
   height: 50px;
   display: table;
   text-align: center;
 }
 
-div.repo-header h1 {
+div.repo-toolbar h1 {
   display: table-cell;
   vertical-align: middle;
   margin: 0px;

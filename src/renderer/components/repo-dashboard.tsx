@@ -9,6 +9,7 @@ import { IndexViewer } from './index-viewer';
 import { PatchViewer, PatchViewerMode } from './patch-viewer';
 import { Splitter } from './splitter';
 import { RepoState } from "../repo-state";
+import { Toolbar } from './toolbar';
 
 export interface RepoDashboardProps { 
   repo: RepoState;
@@ -166,9 +167,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
     return (
       <div className='repo-dashboard'>
-        <div className='repo-header'>
-          <h1>{this.props.repo.name}</h1>
-        </div>
+        <Toolbar repo={this.props.repo} />
         <div className='repo-content'>
           {leftViewer}
           <Splitter onPanelResize={this.handlePanelResize} />

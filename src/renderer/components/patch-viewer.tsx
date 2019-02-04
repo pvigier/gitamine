@@ -79,6 +79,12 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     window.removeEventListener('keyup', this.handleKeyUp);
   }
 
+  componentDidUpdate(prevProps: PatchViewerProps) {
+    if (this.props.patch !== prevProps.patch) {
+      this.loadAndUpdate();
+    }
+  }
+
   handleKeyUp(event: KeyboardEvent) {
     if (event.keyCode === 27) {
       this.props.onEscapePressed();
@@ -94,7 +100,14 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     }
   }
 
-  loadData() {
+  async loadAndUpdate() {
+    await this.loadData();
+    if (this.editor) {
+      this.updateEditor();
+    }
+  }
+
+  async loadData() {
     const repo = this.props.repo.repo;
     const patch = this.props.patch;
     // Load old blob
@@ -112,12 +125,10 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       newPromise = getBlob(repo, patch.newFile());
     }
     // Load hunks
-    this.loadingPromise = Promise.all([oldPromise, newPromise, this.props.patch.hunks()])
-      .then(([oldBlob, newBlob, hunks]) => {
-        this.oldBlob = oldBlob;
-        this.newBlob = newBlob;
-        this.hunks = hunks;
-      });
+    const [oldBlob, newBlob, hunks] = await Promise.all([oldPromise, newPromise, this.props.patch.hunks()]);
+    this.oldBlob = oldBlob;
+    this.newBlob = newBlob;
+    this.hunks = hunks;
   }
 
   setUpEditor(element: HTMLDivElement) {
@@ -130,7 +141,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
         readOnly: true
       }
       this.editor = monaco.editor.createDiffEditor(element, options)
-      this.loadingPromise.then(() => this.updateEditor());
+      this.loadAndUpdate();
     }
   }
 
@@ -309,17 +320,6 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   render() {
-    // Load data
-    this.oldBlob = '';
-    this.newBlob = '';
-    this.hunks = [];
-    this.loadData();
-
-    // Update the models if the editor is already created
-    if (this.editor) {
-      this.loadingPromise.then(() => this.updateEditor());
-    }
-
     return (
       <div className='patch-viewer'>
         <div className='patch-header'>

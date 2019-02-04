@@ -1,5 +1,7 @@
+import { remote, clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
+import * as openEditor from 'open-editor';
 import { RepoState, PatchType } from '../repo-state';
 
 export interface PatchItemProps { 
@@ -30,6 +32,7 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
     this.handleClick = this.handleClick.bind(this);
     this.handleStageClick = this.handleStageClick.bind(this);
     this.handleUnstageClick = this.handleUnstageClick.bind(this);
+    this.handleContextMenu = this.handleContextMenu.bind(this);
   }
 
   handleClick() {
@@ -45,7 +48,50 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
     event.stopPropagation();
     this.props.repo!.unstagePatch(this.props.patch);
   }
+
+  handleContextMenu(event: React.MouseEvent<HTMLLIElement>) {
+    const path = this.props.patch.newFile().path();
+    const template: Electron.MenuItemConstructorOptions[] = [];
+    if (this.props.type === PatchType.Unstaged) {
+      template.push({
+        label: 'Stage',
+        click: () => this.props.repo!.stagePatch(this.props.patch)
+      });
     }
+    if (this.props.type === PatchType.Staged) {
+      template.push({
+        label: 'Unstage',
+        click: () => this.props.repo!.unstagePatch(this.props.patch)
+      });
+    }
+    if (this.props.type === PatchType.Unstaged) {
+      template.push(
+        {
+          label: 'Discard changes',
+          click: () => this.props.repo!.discardPatch(this.props.patch)
+        },
+        {
+          type: 'separator'
+        },
+      );
+    }
+    template.push(
+      {
+        label: 'Copy file path to clipboard',
+        click: () => clipboard.writeText(path)
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Open in editor',
+        click: () => openEditor([path], {editor: 'code'})
+      }
+    );
+    const menu = remote.Menu.buildFromTemplate(template);
+    event.preventDefault();
+    menu.popup({});
+  }
 
   render() {
     // Buttons
@@ -64,7 +110,8 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
     const i = Math.max(path.lastIndexOf('/'), 0);
     return (
       <li className={this.props.selected ? 'selected-patch' : ''}  
-        onClick={this.handleClick}>
+        onClick={this.handleClick}
+        onContextMenu={this.handleContextMenu}>
         {getPatchIcon(this.props.patch)}
         <div className='ellipsis-middle'>
           <div className='left'>{path.substr(0, i)}</div>

@@ -46,6 +46,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     // Watch index and head 
     // TODO: there may be problems with index.lock
     fs.watch(path, async (error: string, filename: string) => {
+      console.log('repo', filename);
       if (filename === 'index') {
         this.refreshIndex();
       } else if (filename === 'HEAD') {
@@ -73,7 +74,8 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }, 200);
 
     // Watch references
-    node_watch(Path.join(path, 'refs'), {recursive: true}, async () => {
+    node_watch(Path.join(path, 'refs'), {recursive: true}, async (error: string, filename: string) => {
+      console.log('ref', filename);
       await this.refreshReferences();
       this.refreshIndex();
     });

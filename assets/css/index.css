@@ -402,3 +402,39 @@ ul.notification-queue li.shown {
 ul.notification-queue li:hover {
   background: #eee;
 }
+
+/* Margin buttons */
+
+.stage-line-button {
+  width: 19px;
+  height: 19px;
+  text-align: center;
+  color: white;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  border-radius: 5px;
+}
+.stage-line-button:hover {
+  background: green;
+}
+
+.stage-line-button:hover::before {
+  content: '+';
+}
+
+.unstage-line-button {
+  width: 19px;
+  height: 19px;
+  text-align: center;
+  color: white;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  border-radius: 5px;
+}
+.unstage-line-button:hover {
+  background: red;
+}
+
+.unstage-line-button:hover::before {
+  content: '-';
+}

@@ -60,12 +60,14 @@ export class RepoState {
   }
 
   async updateCommits() {
+    console.log('start');
     const names = await this.repo.getReferenceNames(Git.Reference.TYPE.OID);
     const referencesToUpdate = await this.getReferenceCommits(names);
     const newCommits = await this.getNewCommits(referencesToUpdate);
     await this.getParents(newCommits);
     this.removeUnreachableCommits();
     this.sortCommits();
+    console.log('end');
   }
 
   async getReferenceCommits(names: string[]) {

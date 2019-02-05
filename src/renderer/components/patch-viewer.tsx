@@ -39,10 +39,18 @@ function comparePatches(lhs: Git.ConvenientPatch, rhs: Git.ConvenientPatch) {
 
 // PatchViewer
 
+const LINE_HEIGHT = 19; // To improve
+
 enum ViewMode {
   Hunk,
   Inline,
   Split
+}
+
+enum Editor {
+  Original,
+  Modified,
+  Count
 }
 
 export interface PatchViewerProps { 
@@ -55,22 +63,25 @@ export interface PatchViewerProps {
 export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   editor: any;
   viewMode: ViewMode;
-  viewZoneIds: number[];
-  overlayWidgets: any[];
+  viewZoneIds: number[][];
+  overlayWidgets: any[][];
   actionDisposables: any[];
-  newLineNumbers: (i: number) => number;
+  lineNumbers: ((i: number) => number)[];
   oldBlob: string;
   newBlob: string;
   hunks: Git.ConvenientHunk[];
+  lines: Git.DiffLine[];
   loadingPromise: Promise<void>;
+  marginButtonsDirty: boolean;
 
   constructor(props: PatchViewerProps) {
     super(props);
     this.editor = null;
     this.viewMode = ViewMode.Hunk;
-    this.viewZoneIds = [];
-    this.overlayWidgets = [];
+    this.viewZoneIds = [[], []];
+    this.overlayWidgets = [[], []];
     this.actionDisposables = [];
+    this.marginButtonsDirty = false;
     this.setUpEditor = this.setUpEditor.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
     this.handleSelectedLinesStage = this.handleSelectedLinesStage.bind(this);
@@ -114,6 +125,22 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.props.repo.unstageLines(this.props.patch, await this.getSelectedLines(editor));
   }
 
+  handleMarginButtonClick(i: number, editor: Editor) {
+    let line: Git.DiffLine | undefined;
+    if (editor === Editor.Original) {
+      line = this.lines.find((line) => line.oldLineno() === this.lineNumbers[editor](i));
+    } else if (editor === Editor.Modified) {
+      line = this.lines.find((line) => line.newLineno() === this.lineNumbers[editor](i));
+    }
+    if (line) {
+      if (this.props.type === PatchType.Unstaged) {
+        this.props.repo.stageLines(this.props.patch, [line]);
+      } else if (this.props.type === PatchType.Staged) {
+        this.props.repo.unstageLines(this.props.patch, [line]);
+      }
+    }
+  }
+
   async loadAndUpdate() {
     await this.loadData();
     if (this.editor) {
@@ -143,6 +170,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.oldBlob = oldBlob;
     this.newBlob = newBlob;
     this.hunks = hunks;
+    // Load lines
+    this.lines = (await Promise.all(this.hunks.map((hunk) => hunk.lines())))
+      .reduce((acc, value) => acc.concat(value), []);
   }
 
   setUpEditor(element: HTMLDivElement) {
@@ -155,6 +185,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
         readOnly: true
       }
       this.editor = monaco.editor.createDiffEditor(element, options)
+      this.editor.onDidUpdateDiff(() => this.updateMarginButtons());
       this.loadAndUpdate();
     }
   }
@@ -176,18 +207,21 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
 
   resetEditor() {
     // Reset view zones
-    const editor = this.editor.getModifiedEditor();
-    editor.changeViewZones((changeAccessor: any) => {
-      for (let viewZoneId of this.viewZoneIds) {
-        changeAccessor.removeZone(viewZoneId);
+    const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
+    for (let i = 0; i < Editor.Count; ++i) {
+      const editor = editors[i];
+      editor.changeViewZones((changeAccessor: any) => {
+        for (let viewZoneId of this.viewZoneIds[i]) {
+          changeAccessor.removeZone(viewZoneId);
+        }
+      });
+      this.viewZoneIds[i] = [];
+      // Reset overlay widgets
+      for (let overlayWidget of this.overlayWidgets[i]) {
+        editor.removeOverlayWidget(overlayWidget);
       }
-    });
-    this.viewZoneIds = [];
-    // Reset overlay widgets
-    for (let overlayWidget of this.overlayWidgets) {
-      editor.removeOverlayWidget(overlayWidget);
+      this.overlayWidgets[i] = [];
     }
-    this.overlayWidgets = [];
     // Reset context menu
     for (let actionDisposable of this.actionDisposables) {
       actionDisposable.dispose();
@@ -195,6 +229,8 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.actionDisposables = [];
     // Reset line numbers
     this.setLineNumbers((i: number) => i, (i: number) => i); 
+    // Reset margin buttons
+    this.marginButtonsDirty = true;
   }
 
   setHunkModels() {
@@ -234,11 +270,11 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     // Set line numbers
     this.setLineNumbers(generateLineNumbers(oldStarts, oldOffsets), 
       generateLineNumbers(newStarts, newOffsets));
-    // Add view zones
     const editor = this.editor.getModifiedEditor();
+    // Add hunk widgets
     for (let i = 0; i < this.hunks.length; ++i) {
       this.createHunkWidget(editor, this.hunks[i], newStarts[i] - 1, 
-        `hunk.${this.overlayWidgets.length}`);
+        `hunk.${this.overlayWidgets[Editor.Modified].length}`);
     }
     // Customize context menu
     this.setContextMenu(editor);
@@ -279,19 +315,18 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     }
     overlayNode.appendChild(contentNode);
 
-    let overlayWidget = {
+    const overlayWidget = {
       getId: () => hunkId,
       getDomNode: () => overlayNode,
       getPosition: () => null
     };
     editor.addOverlayWidget(overlayWidget);
-    this.overlayWidgets.push(overlayWidget);
+    this.overlayWidgets[Editor.Modified].push(overlayWidget);
 
     // Used only to compute the position.
-    let zoneNode = document.createElement('div');
-
+    const zoneNode = document.createElement('div');
     editor.changeViewZones((changeAccessor: any) => {
-      this.viewZoneIds.push(changeAccessor.addZone({
+      this.viewZoneIds[Editor.Modified].push(changeAccessor.addZone({
         afterLineNumber: start,
         heightInLines: 2,
         domNode: zoneNode,
@@ -304,7 +339,6 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       }));
     });
   }
-
 
   setContextMenu(editor: any) {
     if (this.props.type === PatchType.Unstaged) {
@@ -324,6 +358,54 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       }));
     }
   } 
+
+  updateMarginButtons() {
+    if (this.marginButtonsDirty && this.props.type !== PatchType.Committed && this.viewMode === ViewMode.Hunk) {
+      this.createMarginButtons()
+      this.marginButtonsDirty = false;
+    }
+  }
+  
+  createMarginButtons() {
+    const className = this.props.type === PatchType.Unstaged ? 'stage-line-button' : 'unstage-line-button';
+    const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
+
+    const createMarginButton = (iEditor: Editor, i: number, prefix: string) => {
+      // Create an overlay widget
+      const overlayNode = document.createElement('div');
+      overlayNode.addEventListener('mousedown', this.handleMarginButtonClick.bind(this, i, iEditor));
+      overlayNode.classList.add(className);
+      const overlayWidget = {
+        getId: () => `${prefix}-${i}`,
+        getDomNode: () => overlayNode,
+        getPosition: () => null
+      };
+      editors[Editor.Modified].addOverlayWidget(overlayWidget);
+      this.overlayWidgets[Editor.Modified].push(overlayWidget);
+      // Create a view zone to compute the position
+      const zoneNode = document.createElement('div');
+      editors[iEditor].changeViewZones((changeAccessor: any) => {
+        this.viewZoneIds[iEditor].push(changeAccessor.addZone({
+          afterLineNumber: i,
+          heightInLines: 0,
+          domNode: zoneNode,
+          onDomNodeTop: (top: number) => {
+            overlayNode.style.top = top - LINE_HEIGHT + "px";
+          }
+        }));
+      });
+    }
+
+    for (let line of this.editor.getLineChanges()) {
+      for (let i = line.originalStartLineNumber; i <= line.originalEndLineNumber; ++i) {
+        createMarginButton(Editor.Original, i, 'old');
+      }
+      for (let i = line.modifiedStartLineNumber; i <= line.modifiedEndLineNumber; ++i) {
+        createMarginButton(Editor.Modified, i, 'new');
+      }
+    }
+  }
+
   setBlobModels() {
     this.setModels(this.oldBlob, this.newBlob);
   }
@@ -356,16 +438,14 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.editor.getModifiedEditor().updateOptions({
       lineNumbers: newLineNumbers
     });
-    this.newLineNumbers = newLineNumbers;
+    this.lineNumbers = [oldLineNumbers, newLineNumbers];
   }
 
   async getSelectedLines(editor: any) {
     const selection = editor.getSelection();
-    const lines = (await Promise.all(this.hunks.map((hunk) => hunk.lines())))
-      .reduce((acc, value) => acc.concat(value), []);
-    const start = lines.findIndex((line) => line.newLineno() === this.newLineNumbers(selection.startLineNumber));
-    const end = lines.findIndex((line) => line.newLineno() === this.newLineNumbers(selection.endLineNumber));
-    const selectedLines = lines.slice(start, end + 1);
+    const start = this.lines.findIndex((line) => line.newLineno() === this.lineNumbers[Editor.Modified](selection.startLineNumber));
+    const end = this.lines.findIndex((line) => line.newLineno() === this.lineNumbers[Editor.Modified](selection.endLineNumber));
+    const selectedLines = this.lines.slice(start, end + 1);
     console.log(selection.startLineNumber, selection.endLineNumber);
     console.log(selectedLines.map((line) => line.newLineno()));
     return selectedLines;

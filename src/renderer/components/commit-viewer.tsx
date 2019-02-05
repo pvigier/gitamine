@@ -24,7 +24,6 @@ export interface CommitViewerState {
 }
 
 export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitViewerState> {
-  commit: Git.Commit;
   div: React.RefObject<HTMLDivElement>;
 
   constructor(props: CommitViewerProps) {
@@ -34,6 +33,16 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
       patches: []
     }
     this.handlePatchSelect = this.handlePatchSelect.bind(this);
+  }
+
+  componentDidMount() {
+    this.updatePatches();
+  }
+
+  componentDidUpdate(prevProps: CommitViewerProps) {
+    if (this.props.commit !== prevProps.commit) {
+      this.updatePatches();
+    }
   }
 
   handlePatchSelect(patch: Git.ConvenientPatch) {
@@ -89,22 +98,17 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
   }
 
   render() {
-    // Update patches if necessary
-    if (this.commit !== this.props.commit) {
-      this.commit = this.props.commit; 
-      this.updatePatches();
-    }
-
-    const author = this.commit.author();
+    const commit = this.props.commit;
+    const author = commit.author();
     const authoredDate = new Date(author.when().time() * 1000);
     return (
       <div className='commit-viewer' ref={this.div}>
-        <h3>Commit: {CommitViewer.createShaButton(this.commit.sha())}</h3>
-        <h2>{this.commit.message()}</h2>
+        <h3>Commit: {CommitViewer.createShaButton(commit.sha())}</h3>
+        <h2>{commit.message()}</h2>
         <p>By {author.name()} &lt;<a href={`mailto:${author.email()}`}>{author.email()}</a>&gt;</p>
         <p>Authored {formatDate(authoredDate)}</p>
-        <p>Last modified {formatDate(this.commit.date())}</p>
-        <p>Parents: {CommitViewer.createShaButtons(this.commit.parents())}</p>
+        <p>Last modified {formatDate(commit.date())}</p>
+        <p>Parents: {CommitViewer.createShaButtons(commit.parents())}</p>
         <PatchList patches={this.state.patches}
           type={PatchType.Committed}
           selectedPatch={this.props.selectedPatch}

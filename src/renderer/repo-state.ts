@@ -213,7 +213,7 @@ export class RepoState {
 
   async checkoutReference(name: string) {
     const reference = await this.repo.getReference(name);
-    this.repo.checkoutRef(reference);
+    await this.repo.checkoutRef(reference);
   }
 
   // Index operations
@@ -280,13 +280,13 @@ export class RepoState {
   async discardHunk(patch: Git.ConvenientPatch, hunk: Git.ConvenientHunk) {
     const lines = await hunk.lines();
     const path = patch.newFile().path();
-    this.repo.discardLines(path, lines);
+    await this.repo.discardLines(path, lines);
   }
 
   async discardPatch(patch: Git.ConvenientPatch) {
     // This a bit hacky
     const path = patch.newFile().path();
-    Git.Checkout.head(this.repo, {
+    await Git.Checkout.head(this.repo, {
       baseline: await this.headCommit.getTree(),
       checkoutStrategy: Git.Checkout.STRATEGY.FORCE,
       paths: path

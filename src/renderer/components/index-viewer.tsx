@@ -32,6 +32,9 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.handleStagedPatchSelect = this.handleStagedPatchSelect.bind(this);
     this.handleSummaryChange = this.handleSummaryChange.bind(this);
     this.commit = this.commit.bind(this);
+  }
+
+  componentDidMount() {
     this.getPatches();
   }
 

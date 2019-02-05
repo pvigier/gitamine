@@ -50,6 +50,8 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   viewMode: ViewMode;
   viewZoneIds: number[];
   overlayWidgets: any[];
+  actionDisposables: any[];
+  newLineNumbers: (i: number) => number;
   oldBlob: string;
   newBlob: string;
   hunks: Git.ConvenientHunk[];
@@ -61,8 +63,11 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.viewMode = ViewMode.Hunk;
     this.viewZoneIds = [];
     this.overlayWidgets = [];
+    this.actionDisposables = [];
     this.setUpEditor = this.setUpEditor.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
+    this.handleSelectedLinesStage = this.handleSelectedLinesStage.bind(this);
+    this.handleSelectedLinesUnstage = this.handleSelectedLinesUnstage.bind(this);
   }
 
   componentDidMount() {
@@ -92,6 +97,14 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
         this.updateEditor();
       }
     }
+  }
+
+  async handleSelectedLinesStage(editor: any) {
+    this.props.repo.stageLines(this.props.patch, await this.getSelectedLines(editor));
+  }
+
+  async handleSelectedLinesUnstage(editor: any) {
+    this.props.repo.unstageLines(this.props.patch, await this.getSelectedLines(editor));
   }
 
   async loadAndUpdate() {
@@ -168,6 +181,11 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       editor.removeOverlayWidget(overlayWidget);
     }
     this.overlayWidgets = [];
+    // Reset context menu
+    for (let actionDisposable of this.actionDisposables) {
+      actionDisposable.dispose();
+    }
+    this.actionDisposables = [];
     // Reset line numbers
     this.setLineNumbers((i: number) => i, (i: number) => i); 
   }
@@ -216,6 +234,8 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       this.createHunkWidget(editor, this.hunks[i], newStarts[i] - 1, 
         `hunk.${this.overlayWidgets.length}`);
     }
+    // Customize context menu
+    this.setContextMenu(editor);
   }
 
   createHunkWidget(editor: any, hunk: Git.ConvenientHunk, start: number, hunkId: string) {
@@ -279,6 +299,25 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     });
   }
 
+
+  setContextMenu(editor: any) {
+    if (this.props.type === PatchType.Unstaged) {
+      this.actionDisposables.push(editor.addAction({
+        id: 'stage-selected-lines',
+        label: 'Stage selected lines',
+        contextMenuGroupId: 'navigation',
+        run: this.handleSelectedLinesStage
+      }));
+    }
+    else if (this.props.type === PatchType.Staged) {
+      this.actionDisposables.push(editor.addAction({
+        id: 'unstage-selected-lines',
+        label: 'Unstage selected lines',
+        contextMenuGroupId: 'navigation',
+        run: this.handleSelectedLinesUnstage
+      }));
+    }
+  } 
   setBlobModels() {
     this.setModels(this.oldBlob, this.newBlob);
   }
@@ -311,6 +350,19 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.editor.getModifiedEditor().updateOptions({
       lineNumbers: newLineNumbers
     });
+    this.newLineNumbers = newLineNumbers;
+  }
+
+  async getSelectedLines(editor: any) {
+    const selection = editor.getSelection();
+    const lines = (await Promise.all(this.hunks.map((hunk) => hunk.lines())))
+      .reduce((acc, value) => acc.concat(value), []);
+    const start = lines.findIndex((line) => line.newLineno() === this.newLineNumbers(selection.startLineNumber));
+    const end = lines.findIndex((line) => line.newLineno() === this.newLineNumbers(selection.endLineNumber));
+    const selectedLines = lines.slice(start, end + 1);
+    console.log(selection.startLineNumber, selection.endLineNumber);
+    console.log(selectedLines.map((line) => line.newLineno()));
+    return selectedLines;
   }
 
   render() {

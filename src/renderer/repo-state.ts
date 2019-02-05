@@ -230,10 +230,15 @@ export class RepoState {
     return await stagedDiff.patches();
   }
 
+  async stageLines(patch: Git.ConvenientPatch, lines: Git.DiffLine[]) {
+    // Does not work if the lines are from different hunks
+    const path = patch.newFile().path();
+    await this.repo.stageLines(path, lines, false);
+  }
+
   async stageHunk(patch: Git.ConvenientPatch, hunk: Git.ConvenientHunk) {
     const lines = await hunk.lines();
-    const path = patch.newFile().path();
-    this.repo.stageLines(path, lines, false);
+    await this.stageLines(patch, lines);
   }
 
   async stagePatch(patch: Git.ConvenientPatch) {
@@ -252,10 +257,15 @@ export class RepoState {
     await this.index.write();
   }
 
+  async unstageLines(patch: Git.ConvenientPatch, lines: Git.DiffLine[]) {
+    // Does not work if the lines are from different hunks
+    const path = patch.newFile().path();
+    await this.repo.stageLines(path, lines, true);
+  }
+
   async unstageHunk(patch: Git.ConvenientPatch, hunk: Git.ConvenientHunk) {
     const lines = await hunk.lines();
-    const path = patch.newFile().path();
-    this.repo.stageLines(path, lines, true);
+    await this.unstageLines(patch, lines);
   }
 
   async unstagePatch(patch: Git.ConvenientPatch) {

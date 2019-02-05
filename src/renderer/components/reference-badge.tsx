@@ -17,6 +17,7 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
   constructor(props: ReferenceBadgeProps) {
     super(props);
     this.handleContextMenu = this.handleContextMenu.bind(this);
+    this.handleDoubleClick = this.handleDoubleClick.bind(this);
   }
 
   handleContextMenu(event: React.MouseEvent<HTMLSpanElement>) {
@@ -35,6 +36,10 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
     menu.popup({});
   }
 
+  handleDoubleClick() {
+    this.props.repo.checkoutReference(this.props.name)
+  }
+
   getShortName() {
     return removeReferencePrefix(this.props.name);
   }
@@ -47,7 +52,7 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
       classNames.push('selected');
     }
     return (
-      <span className={classNames.join(' ')} style={style} onContextMenu={this.handleContextMenu}>
+      <span className={classNames.join(' ')} style={style} onContextMenu={this.handleContextMenu} onDoubleClick={this.handleDoubleClick}>
         {this.getShortName()}
       </span>
     );

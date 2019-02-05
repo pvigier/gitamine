@@ -2,7 +2,6 @@ import { clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
-import { PatchViewerMode } from './patch-viewer';
 import { PatchType } from '../repo-state';
 
 function shortenSha(sha: string) {
@@ -16,7 +15,7 @@ function formatDate(date: Date) {
 export interface CommitViewerProps { 
   commit: Git.Commit;
   selectedPatch: Git.ConvenientPatch | null;
-  onPatchSelect: (patch: Git.ConvenientPatch, mode: PatchViewerMode) => void;
+  onPatchSelect: (patch: Git.ConvenientPatch, type: PatchType) => void;
 }
 
 export interface CommitViewerState { 
@@ -46,7 +45,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
   }
 
   handlePatchSelect(patch: Git.ConvenientPatch) {
-    this.props.onPatchSelect(patch, PatchViewerMode.ReadOnly);
+    this.props.onPatchSelect(patch, PatchType.Committed);
   }
 
   resize(offset: number) {

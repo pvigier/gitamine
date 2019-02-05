@@ -6,9 +6,9 @@ import * as Git from 'nodegit';
 import { GraphViewer } from './graph-viewer';
 import { CommitViewer } from './commit-viewer';
 import { IndexViewer } from './index-viewer';
-import { PatchViewer, PatchViewerMode } from './patch-viewer';
+import { PatchViewer } from './patch-viewer';
 import { Splitter } from './splitter';
-import { RepoState } from "../repo-state";
+import { RepoState, PatchType } from "../repo-state";
 import { Toolbar } from './toolbar';
 
 export interface RepoDashboardProps { 
@@ -18,7 +18,7 @@ export interface RepoDashboardProps {
 export interface RepoDashboardState { 
   selectedCommit: Git.Commit | null;
   selectedPatch: Git.ConvenientPatch | null;
-  patchViewerMode: PatchViewerMode;
+  patchType: PatchType;
 }
 
 export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
@@ -39,7 +39,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     this.state = {
       selectedCommit: null,
       selectedPatch: null,
-      patchViewerMode: PatchViewerMode.ReadOnly
+      patchType: PatchType.Committed
     };
 
     const path = this.props.repo.path;
@@ -91,10 +91,10 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     });
   }
 
-  handlePatchSelect(patch: Git.ConvenientPatch | null, mode: PatchViewerMode) {
+  handlePatchSelect(patch: Git.ConvenientPatch | null, type: PatchType) {
     this.setState({
       selectedPatch: patch,
-      patchViewerMode: mode
+      patchType: type
     });
   }
 
@@ -115,8 +115,8 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       const indexViewer = this.rightViewer.current as IndexViewer;
       await this.props.repo.updateIndex();
       await indexViewer.refresh();
-      if (this.state.selectedPatch && this.state.patchViewerMode !== PatchViewerMode.ReadOnly) {
-        indexViewer.refreshSelectedPatch(this.state.patchViewerMode === PatchViewerMode.Stage);
+      if (this.state.selectedPatch && this.state.patchType !== PatchType.Committed) {
+        indexViewer.refreshSelectedPatch(this.state.patchType === PatchType.Unstaged);
       }
     }
   }
@@ -144,7 +144,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     if (this.state.selectedPatch) {
       leftViewer = <PatchViewer repo={this.props.repo} 
         patch={this.state.selectedPatch!} 
-        mode={this.state.patchViewerMode}
+        type={this.state.patchType}
         onEscapePressed={this.exitPatchViewer} /> 
     } else {
       leftViewer = <GraphViewer repo={this.props.repo} 

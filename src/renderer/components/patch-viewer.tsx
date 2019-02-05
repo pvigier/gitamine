@@ -2,7 +2,7 @@ import * as Path from 'path';
 import * as fs from 'fs';
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { RepoState } from '../repo-state'
+import { RepoState, PatchType } from '../repo-state'
 
 // Load Monaco
 
@@ -32,12 +32,6 @@ async function getBlob(repo: Git.Repository, file: Git.DiffFile) {
 
 // PatchViewer
 
-export enum PatchViewerMode {
-  ReadOnly,
-  Stage,
-  Unstage
-}
-
 enum ViewMode {
   Hunk,
   Inline,
@@ -47,7 +41,7 @@ enum ViewMode {
 export interface PatchViewerProps { 
   repo: RepoState;
   patch: Git.ConvenientPatch;
-  mode: PatchViewerMode;
+  type: PatchType;
   onEscapePressed: () => void;
 }
 
@@ -235,7 +229,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     const textNode = document.createElement('p');
     textNode.textContent = `@@ -${hunk.oldStart()},${hunk.oldLines()} +${hunk.newStart()},${hunk.newLines()}`;
     contentNode.appendChild(textNode);
-    if (this.props.mode === PatchViewerMode.Stage) {
+    if (this.props.type === PatchType.Unstaged) {
       const buttonsNode = document.createElement('div');
       // Discard button
       const discardButton = document.createElement('button');
@@ -248,7 +242,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       stageButton.addEventListener('click', repo.stageHunk.bind(repo, patch, hunk));
       buttonsNode.appendChild(stageButton);
       contentNode.appendChild(buttonsNode);
-    } else if (this.props.mode === PatchViewerMode.Unstage) {
+    } else if (this.props.type === PatchType.Staged) {
       const buttonsNode = document.createElement('div');
       // Unstage button
       const unstageButton = document.createElement('button');

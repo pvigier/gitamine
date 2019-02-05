@@ -1,13 +1,12 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
-import { PatchViewerMode } from './patch-viewer';
 import { RepoState, PatchType } from '../repo-state';
 
 export interface IndexViewerProps { 
   repo: RepoState;
   selectedPatch: Git.ConvenientPatch | null;
-  onPatchSelect: (patch: Git.ConvenientPatch | null, mode: PatchViewerMode) => void;
+  onPatchSelect: (patch: Git.ConvenientPatch | null, type: PatchType) => void;
 }
 
 export interface IndexViewerState {
@@ -40,12 +39,12 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
 
   handleUnstagedPatchSelect(patch: Git.ConvenientPatch) {
     this.iSelectedPatch = this.state.unstagedPatches.indexOf(patch); 
-    this.props.onPatchSelect(patch, PatchViewerMode.Stage);
+    this.props.onPatchSelect(patch, PatchType.Unstaged);
   }
 
   handleStagedPatchSelect(patch: Git.ConvenientPatch) {
     this.iSelectedPatch = this.state.stagedPatches.indexOf(patch); 
-    this.props.onPatchSelect(patch, PatchViewerMode.Unstage);
+    this.props.onPatchSelect(patch, PatchType.Staged);
   }
 
   handleSummaryChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -85,7 +84,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       return;
     }
     // Finally, if there nothing succeeded reset the selected patch
-    this.props.onPatchSelect(null, PatchViewerMode.ReadOnly);
+    this.props.onPatchSelect(null, PatchType.Committed);
   }
 
   resize(offset: number) {

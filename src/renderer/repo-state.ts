@@ -287,10 +287,14 @@ export class RepoState {
     await Git.Reset.default(this.repo, this.headCommit, paths);
   }
 
-  async discardHunk(patch: Git.ConvenientPatch, hunk: Git.ConvenientHunk) {
-    const lines = await hunk.lines();
+  async discardLines(patch: Git.ConvenientPatch, lines: Git.DiffLine[]) {
     const path = patch.newFile().path();
     await this.repo.discardLines(path, lines);
+  }
+
+  async discardHunk(patch: Git.ConvenientPatch, hunk: Git.ConvenientHunk) {
+    const lines = await hunk.lines();
+    await this.discardLines(patch, lines);
   }
 
   async discardPatch(patch: Git.ConvenientPatch) {

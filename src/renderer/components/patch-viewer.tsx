@@ -84,6 +84,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.marginButtonsDirty = false;
     this.setUpEditor = this.setUpEditor.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
+    this.handleSelectedLinesDiscard = this.handleSelectedLinesDiscard.bind(this);
     this.handleSelectedLinesStage = this.handleSelectedLinesStage.bind(this);
     this.handleSelectedLinesUnstage = this.handleSelectedLinesUnstage.bind(this);
   }
@@ -115,6 +116,10 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
         this.updateEditor();
       }
     }
+  }
+
+  async handleSelectedLinesDiscard(editor: any) {
+    this.props.repo.discardLines(this.props.patch, await this.getSelectedLines(editor));
   }
 
   async handleSelectedLinesStage(editor: any) {
@@ -342,18 +347,26 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
 
   setContextMenu(editor: any) {
     if (this.props.type === PatchType.Unstaged) {
-      this.actionDisposables.push(editor.addAction({
-        id: 'stage-selected-lines',
-        label: 'Stage selected lines',
-        contextMenuGroupId: 'navigation',
-        run: this.handleSelectedLinesStage
-      }));
+      this.actionDisposables.push(
+        editor.addAction({
+          id: 'discard-selected-lines',
+          label: 'Discard selected lines',
+          contextMenuGroupId: '1_modification',
+          run: this.handleSelectedLinesDiscard
+        }),
+        editor.addAction({
+          id: 'stage-selected-lines',
+          label: 'Stage selected lines',
+          contextMenuGroupId: '1_modification',
+          run: this.handleSelectedLinesStage
+        })
+      );
     }
     else if (this.props.type === PatchType.Staged) {
       this.actionDisposables.push(editor.addAction({
         id: 'unstage-selected-lines',
         label: 'Unstage selected lines',
-        contextMenuGroupId: 'navigation',
+        contextMenuGroupId: '1_modification',
         run: this.handleSelectedLinesUnstage
       }));
     }

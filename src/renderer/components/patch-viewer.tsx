@@ -30,6 +30,13 @@ async function getBlob(repo: Git.Repository, file: Git.DiffFile) {
   }
 }
 
+function comparePatches(lhs: Git.ConvenientPatch, rhs: Git.ConvenientPatch) {
+  return lhs.oldFile().id().equal(rhs.oldFile().id()) &&
+    lhs.newFile().id().equal(rhs.newFile().id()) &&
+    lhs.status() === rhs.status() &&
+    lhs.size() === rhs.size();
+}
+
 // PatchViewer
 
 enum ViewMode {
@@ -79,7 +86,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   componentDidUpdate(prevProps: PatchViewerProps) {
-    if (this.props.patch !== prevProps.patch) {
+    if (this.props.type !== prevProps.type || !comparePatches(this.props.patch, prevProps.patch)) {
       this.loadAndUpdate();
     }
   }
@@ -190,8 +197,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.setLineNumbers((i: number) => i, (i: number) => i); 
   }
 
-  setHunkModels()
-  {
+  setHunkModels() {
     function generateLineNumbers(starts: number[], offsets: number[]) {
       return (i: number) => {
         let j = 0;

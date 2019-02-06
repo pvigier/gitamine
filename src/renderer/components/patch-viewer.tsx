@@ -296,7 +296,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     const repo = this.props.repo;
     const patch = this.props.patch;
 
-    const overlayNode = document.createElement('div');
+    /*const overlayNode = document.createElement('div');
     overlayNode.classList.add('overlay-zone');
 
     const contentNode = document.createElement('div');
@@ -333,28 +333,28 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       getPosition: () => null
     };
     editors[Editor.Modified].addOverlayWidget(overlayWidget);
-    this.overlayWidgets[Editor.Modified].push(overlayWidget);
+    this.overlayWidgets[Editor.Modified].push(overlayWidget);*/
 
+    // Used only to offset lines
+    /*editors[Editor.Original].changeViewZones((changeAccessor: any) => {
+      this.viewZoneIds[Editor.Original].push(changeAccessor.addZone({
+        afterLineNumber: firstHunk ? 0 : hunk.oldStart() - 1,
+        heightInLines: 2,
+        domNode: document.createElement('div'),
+      }));
+    });*/
     // Used only to compute the position.
     editors[Editor.Modified].changeViewZones((changeAccessor: any) => {
       this.viewZoneIds[Editor.Modified].push(changeAccessor.addZone({
         afterLineNumber: firstHunk ? 0 : hunk.newStart() - 1,
         heightInLines: 2,
         domNode: document.createElement('div'),
-        onDomNodeTop: (top: number) => {
+        /*onDomNodeTop: (top: number) => {
           overlayNode.style.top = top + "px";
         },
         onComputedHeight: (height: number) => {
           overlayNode.style.height = height + "px";
-        }
-      }));
-    });
-    // Used only to offset lines
-    editors[Editor.Original].changeViewZones((changeAccessor: any) => {
-      this.viewZoneIds[Editor.Original].push(changeAccessor.addZone({
-        afterLineNumber: firstHunk ? 0 : hunk.oldStart() - 1,
-        heightInLines: 2,
-        domNode: document.createElement('div'),
+        }*/
       }));
     });
   }
@@ -387,6 +387,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   } 
 
   updateMarginButtons() {
+    for (let line of this.editor.getLineChanges()) {
+      console.log(line);
+    }
     if (this.marginButtonsDirty && this.props.type !== PatchType.Committed && this.viewMode === ViewMode.Hunk) {
       this.createMarginButtons()
       this.marginButtonsDirty = false;

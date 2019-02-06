@@ -28,6 +28,7 @@ export class RepoState {
   headCommit: Git.Commit;
   graph: CommitGraph;
   onNotification: (message: string) => void;
+  updatePromise: Promise<void>; // Used to queue updates
 
   constructor(repo: Git.Repository, onNotification: (message: string) => void, onReady: () => void) {
     this.repo = repo;
@@ -41,6 +42,7 @@ export class RepoState {
     this.children = new Map<string, string[]>();
     this.graph = new CommitGraph();
     this.onNotification = onNotification;
+    this.updatePromise = new Promise<void>((resolve) => resolve());
 
     this.init().then(onReady);
   }
@@ -49,6 +51,12 @@ export class RepoState {
     await this.updateCommits();
     await this.updateHead();
     await this.updateGraph();
+  }
+
+  async requestUpdateCommits() {
+    // Start an update only if the previous ones have finished
+    this.updatePromise = this.updatePromise.then(() => this.updateCommits());
+    await this.updatePromise;
   }
 
   async updateCommits() {

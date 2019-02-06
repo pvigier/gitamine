@@ -130,7 +130,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
 
   async refreshReferences() {
     // TODO: update only references that changed
-    await this.props.repo.updateCommits();
+    await this.props.repo.requestUpdateCommits();
     await this.props.repo.updateHead();
     await this.props.repo.updateGraph();
     if (this.graphViewer.current) {

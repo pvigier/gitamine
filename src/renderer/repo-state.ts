@@ -305,4 +305,10 @@ export class RepoState {
       this.onNotification('Unable to set an author for this commit. Please check you configure correctly your account in "Preferences".');
     }
   }
+
+  // Reference operations
+
+  async removeReference(name: string) {
+    await Git.Reference.remove(this.repo, name);
+  }
 }

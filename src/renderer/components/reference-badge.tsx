@@ -27,6 +27,10 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
         {
           label: `Checkout to ${this.getShortName()}`,
           click: () => this.props.repo.checkoutReference(this.props.name)
+        },
+        {
+          label: `Remove ${this.getShortName()}`,
+          click: () => this.props.repo.removeReference(this.props.name)
         }
       );
     }

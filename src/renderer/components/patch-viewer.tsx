@@ -61,6 +61,7 @@ export interface PatchViewerProps {
 }
 
 export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
+  divEditor: React.RefObject<HTMLDivElement>;
   editor: any;
   viewMode: ViewMode;
   viewZoneIds: number[][];
@@ -75,6 +76,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
 
   constructor(props: PatchViewerProps) {
     super(props);
+    this.divEditor = React.createRef();
     this.editor = null;
     this.viewMode = ViewMode.Hunk;
     this.viewZoneIds = [[], []];
@@ -90,6 +92,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
 
   componentDidMount() {
     window.addEventListener('keyup', this.handleKeyUp);
+    this.setUpEditor();
   }
 
   componentWillUnmount() {
@@ -145,6 +148,20 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     }
   }
 
+  setUpEditor() {
+    if (this.divEditor.current) {
+      const options = {
+        //theme: 'vs-dark',
+        automaticLayout: true,
+        renderSideBySide: false,
+        readOnly: true
+      }
+      this.editor = monaco.editor.createDiffEditor(this.divEditor.current, options)
+      this.editor.onDidUpdateDiff(() => this.updateMarginButtons());
+      this.loadAndUpdate();
+    }
+  }
+
   async loadAndUpdate() {
     await this.loadData();
     if (this.editor) {
@@ -179,21 +196,6 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       .reduce((acc, value) => acc.concat(value), []);
   }
 
-  setUpEditor(element: HTMLDivElement) {
-    // Get a DOM ref on the div that will contain monaco
-    if (element) {
-      const options = {
-        //theme: 'vs-dark',
-        automaticLayout: true,
-        renderSideBySide: false,
-        readOnly: true
-      }
-      this.editor = monaco.editor.createDiffEditor(element, options)
-      this.editor.onDidUpdateDiff(() => this.updateMarginButtons());
-      this.loadAndUpdate();
-    }
-  }
-
   updateEditor() {
     // Update editor options
     this.editor.updateOptions({
@@ -202,10 +204,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     // Reset editor
     this.resetEditor();
     // Update models
+    this.setModels();
     if (this.viewMode === ViewMode.Hunk) {
-      this.setHunkModels(); 
-    } else {
-      this.setBlobModels();
+      this.customizeHunkView(); 
     }
   }
 
@@ -235,7 +236,28 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.marginButtonsDirty = true;
   }
 
-  setHunkModels() {
+  setModels() {
+    function updateOrCreateModel(prefix: string, path: string, value: string) {
+      const uri = monaco.Uri.parse(`file://${prefix}/${path}`);
+      let model = monaco.editor.getModel(uri);
+      if (model) {
+        model.setValue(value);
+      } else {
+        model = monaco.editor.createModel(value, undefined, uri);
+      }
+      return model;
+    }
+    
+    const patch = this.props.patch;
+    const originalModel = updateOrCreateModel('a', patch.oldFile().path(), this.oldBlob);
+    const modifiedModel = updateOrCreateModel('b', patch.newFile().path(), this.newBlob);
+    this.editor.setModel({
+      original: originalModel, 
+      modified: modifiedModel
+    });
+  }
+
+  customizeHunkView() {
     function createRange(start: number, end: number) {
       return {
         startLineNumber: start,
@@ -256,8 +278,6 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     }
     oldHiddenAreas.push(createRange(oldStart, Infinity));
     newHiddenAreas.push(createRange(newStart, Infinity));
-    // Set models
-    this.setModels(this.oldBlob, this.newBlob);
     // Set hunks
     const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
     editors[Editor.Original].setHiddenAreas(oldHiddenAreas);
@@ -412,31 +432,6 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     }
   }
 
-  setBlobModels() {
-    this.setModels(this.oldBlob, this.newBlob);
-  }
-
-  setModels(oldString: string, newString: string) {
-    function updateOrCreateModel(prefix: string, path: string, value: string) {
-      const uri = monaco.Uri.parse(`file://${prefix}/${path}`);
-      let model = monaco.editor.getModel(uri);
-      if (model) {
-        model.setValue(value);
-      } else {
-        model = monaco.editor.createModel(value, undefined, uri);
-      }
-      return model;
-    }
-    
-    const patch = this.props.patch;
-    const originalModel = updateOrCreateModel('a', patch.oldFile().path(), oldString);
-    const modifiedModel = updateOrCreateModel('b', patch.newFile().path(), newString);
-    this.editor.setModel({
-      original: originalModel, 
-      modified: modifiedModel
-    });
-  }
-
   async getSelectedLines(editor: any) {
     const selection = editor.getSelection();
     const start = this.lines.findIndex((line) => line.newLineno() === selection.startLineNumber);
@@ -465,7 +460,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
             onInput={this.handleViewModeChange.bind(this, ViewMode.Split)} />
           <label htmlFor="split-mode">Split</label>
         </div>
-        <div className='patch-editor' ref={this.setUpEditor} />
+        <div className='patch-editor' ref={this.divEditor} />
       </div>
     );
   }

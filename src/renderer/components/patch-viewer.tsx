@@ -66,7 +66,6 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   viewZoneIds: number[][];
   overlayWidgets: any[][];
   actionDisposables: any[];
-  lineNumbers: ((i: number) => number)[];
   oldBlob: string;
   newBlob: string;
   hunks: Git.ConvenientHunk[];
@@ -133,9 +132,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   handleMarginButtonClick(i: number, editor: Editor) {
     let line: Git.DiffLine | undefined;
     if (editor === Editor.Original) {
-      line = this.lines.find((line) => line.oldLineno() === this.lineNumbers[editor](i));
+      line = this.lines.find((line) => line.oldLineno() === i);
     } else if (editor === Editor.Modified) {
-      line = this.lines.find((line) => line.newLineno() === this.lineNumbers[editor](i));
+      line = this.lines.find((line) => line.newLineno() === i);
     }
     if (line) {
       if (this.props.type === PatchType.Unstaged) {
@@ -232,60 +231,48 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       actionDisposable.dispose();
     }
     this.actionDisposables = [];
-    // Reset line numbers
-    this.setLineNumbers((i: number) => i, (i: number) => i); 
     // Reset margin buttons
     this.marginButtonsDirty = true;
   }
 
   setHunkModels() {
-    function generateLineNumbers(starts: number[], offsets: number[]) {
-      return (i: number) => {
-        let j = 0;
-        while (i >= starts[j + 1]) {
-          ++j;
-        }
-        return i + offsets[j];
+    function createRange(start: number, end: number) {
+      return {
+        startLineNumber: start,
+        endLineNumber: end 
       }
     }
 
-    // Extract hunks from files
-    const oldLines = this.oldBlob.split('\n');
-    const oldHunks: string[] = [];
-    const oldOffsets: number[] = [];
-    const oldStarts = [1];
-    const newLines = this.newBlob.split('\n');
-    const newHunks: string[] = [];
-    const newOffsets: number[] = [];
-    const newStarts = [1];
+    // Compute hidden areas
+    let oldStart = 1;
+    const oldHiddenAreas = [];
+    let newStart = 1;
+    const newHiddenAreas = [];
     for (let hunk of this.hunks) {
-      const oldStart = hunk.oldStart();
-      const oldLength = hunk.oldLines();
-      oldHunks.push(oldLines.slice(oldStart - 1, oldStart - 1 + oldLength).join('\n'));
-      oldOffsets.push(oldStart - oldStarts[oldStarts.length - 1]);
-      oldStarts.push(oldStarts[oldStarts.length - 1] + oldLength);
-      const newStart = hunk.newStart();
-      const newLength = hunk.newLines();
-      newHunks.push(newLines.slice(newStart - 1, newStart - 1 + newLength).join('\n'));
-      newOffsets.push(newStart - newStarts[newStarts.length - 1]);
-      newStarts.push(newStarts[newStarts.length - 1] + newLength);
+      oldHiddenAreas.push(createRange(oldStart, hunk.oldStart() - 1));
+      oldStart = hunk.oldStart() + hunk.oldLines();
+      newHiddenAreas.push(createRange(newStart, hunk.newStart() - 1));
+      newStart = hunk.newStart() + hunk.newLines();
     }
+    oldHiddenAreas.push(createRange(oldStart, Infinity));
+    newHiddenAreas.push(createRange(newStart, Infinity));
     // Set models
-    this.setModels(oldHunks.join('\n'), newHunks.join('\n'));
-    // Set line numbers
-    this.setLineNumbers(generateLineNumbers(oldStarts, oldOffsets), 
-      generateLineNumbers(newStarts, newOffsets));
-    const editor = this.editor.getModifiedEditor();
+    this.setModels(this.oldBlob, this.newBlob);
+    // Set hunks
+    const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
+    editors[Editor.Original].setHiddenAreas(oldHiddenAreas);
+    editors[Editor.Modified].setHiddenAreas(newHiddenAreas);
     // Add hunk widgets
-    for (let i = 0; i < this.hunks.length; ++i) {
-      this.createHunkWidget(editor, this.hunks[i], newStarts[i] - 1, 
-        `hunk.${this.overlayWidgets[Editor.Modified].length}`);
+    for (let i = 0; i < this.hunks.length; ++i) { 
+      const id = `hunk.${this.overlayWidgets[Editor.Modified].length}`;
+      this.createHunkWidget(this.hunks[i], id, i === 0);
     }
     // Customize context menu
-    this.setContextMenu(editor);
+    this.setContextMenu(editors[Editor.Modified]);
   }
 
-  createHunkWidget(editor: any, hunk: Git.ConvenientHunk, start: number, hunkId: string) {
+  createHunkWidget(hunk: Git.ConvenientHunk, hunkId: string, firstHunk: boolean) {
+    const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
     const repo = this.props.repo;
     const patch = this.props.patch;
 
@@ -325,22 +312,29 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       getDomNode: () => overlayNode,
       getPosition: () => null
     };
-    editor.addOverlayWidget(overlayWidget);
+    editors[Editor.Modified].addOverlayWidget(overlayWidget);
     this.overlayWidgets[Editor.Modified].push(overlayWidget);
 
     // Used only to compute the position.
-    const zoneNode = document.createElement('div');
-    editor.changeViewZones((changeAccessor: any) => {
+    editors[Editor.Modified].changeViewZones((changeAccessor: any) => {
       this.viewZoneIds[Editor.Modified].push(changeAccessor.addZone({
-        afterLineNumber: start,
+        afterLineNumber: firstHunk ? 0 : hunk.newStart() - 1,
         heightInLines: 2,
-        domNode: zoneNode,
+        domNode: document.createElement('div'),
         onDomNodeTop: (top: number) => {
           overlayNode.style.top = top + "px";
         },
         onComputedHeight: (height: number) => {
           overlayNode.style.height = height + "px";
         }
+      }));
+    });
+    // Used only to offset lines
+    editors[Editor.Original].changeViewZones((changeAccessor: any) => {
+      this.viewZoneIds[Editor.Original].push(changeAccessor.addZone({
+        afterLineNumber: firstHunk ? 0 : hunk.oldStart() - 1,
+        heightInLines: 2,
+        domNode: document.createElement('div'),
       }));
     });
   }
@@ -396,12 +390,11 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       editors[Editor.Modified].addOverlayWidget(overlayWidget);
       this.overlayWidgets[Editor.Modified].push(overlayWidget);
       // Create a view zone to compute the position
-      const zoneNode = document.createElement('div');
       editors[iEditor].changeViewZones((changeAccessor: any) => {
         this.viewZoneIds[iEditor].push(changeAccessor.addZone({
           afterLineNumber: i,
           heightInLines: 0,
-          domNode: zoneNode,
+          domNode: document.createElement('div'),
           onDomNodeTop: (top: number) => {
             overlayNode.style.top = top - LINE_HEIGHT + "px";
           }
@@ -444,23 +437,11 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     });
   }
 
-  setLineNumbers(oldLineNumbers: (i: number) => number, newLineNumbers: (i: number) => number) {
-    this.editor.getOriginalEditor().updateOptions({
-      lineNumbers: oldLineNumbers
-    });
-    this.editor.getModifiedEditor().updateOptions({
-      lineNumbers: newLineNumbers
-    });
-    this.lineNumbers = [oldLineNumbers, newLineNumbers];
-  }
-
   async getSelectedLines(editor: any) {
     const selection = editor.getSelection();
-    const start = this.lines.findIndex((line) => line.newLineno() === this.lineNumbers[Editor.Modified](selection.startLineNumber));
-    const end = this.lines.findIndex((line) => line.newLineno() === this.lineNumbers[Editor.Modified](selection.endLineNumber));
+    const start = this.lines.findIndex((line) => line.newLineno() === selection.startLineNumber);
+    const end = this.lines.findIndex((line) => line.newLineno() === selection.endLineNumber);
     const selectedLines = this.lines.slice(start, end + 1);
-    console.log(selection.startLineNumber, selection.endLineNumber);
-    console.log(selectedLines.map((line) => line.newLineno()));
     return selectedLines;
   }
 

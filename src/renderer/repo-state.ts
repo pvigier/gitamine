@@ -214,8 +214,12 @@ export class RepoState {
   // Head operations
 
   async checkoutReference(name: string) {
-    const reference = await this.repo.getReference(name);
-    await this.repo.checkoutRef(reference);
+    try {
+      const reference = await this.repo.getReference(name);
+      await this.repo.checkoutRef(reference);
+    } catch(e) {
+      this.onNotification(`Unable to checkout to ${name}: ${e.message}`);
+    }
   }
 
   // Index operations
@@ -317,6 +321,10 @@ export class RepoState {
   // Reference operations
 
   async removeReference(name: string) {
-    await Git.Reference.remove(this.repo, name);
+    try {
+      await Git.Reference.remove(this.repo, name);
+    } catch (e) {
+      this.onNotification(`Unable to remove reference ${name}: ${e.message}`);
+    }
   }
 }

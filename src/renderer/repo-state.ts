@@ -26,7 +26,6 @@ export class RepoState {
   children: Map<string, string[]>;
   head: string;
   headCommit: Git.Commit;
-  index: Git.Index;
   graph: CommitGraph;
   onNotification: (message: string) => void;
 
@@ -49,7 +48,6 @@ export class RepoState {
   async init() {
     await this.updateCommits();
     await this.updateHead();
-    await this.updateIndex();
     await this.updateGraph();
   }
 
@@ -201,10 +199,6 @@ export class RepoState {
     this.headCommit = await this.repo.getHeadCommit();
   }
 
-  async updateIndex() {
-    this.index = await this.repo.refreshIndex();
-  }
-
   updateGraph() {
     this.graph.computePositions(this);
   }
@@ -219,13 +213,13 @@ export class RepoState {
   // Index operations
 
   async getUnstagedPatches() {
-    const unstagedDiff = await Git.Diff.indexToWorkdir(this.repo, this.index, diffOptions);
+    const unstagedDiff = await Git.Diff.indexToWorkdir(this.repo, null, diffOptions);
     await unstagedDiff.findSimilar({});
     return await unstagedDiff.patches();
   }
 
   async getStagedPatches() {
-    const stagedDiff = await Git.Diff.treeToIndex(this.repo, await this.headCommit.getTree(), this.index, diffOptions);
+    const stagedDiff = await Git.Diff.treeToIndex(this.repo, await this.headCommit.getTree(), null, diffOptions);
     await stagedDiff.findSimilar({});
     return await stagedDiff.patches();
   }
@@ -242,19 +236,21 @@ export class RepoState {
   }
 
   async stagePatch(patch: Git.ConvenientPatch) {
+    const index = await this.repo.index();
     if (patch.isDeleted()) {
-      await this.index.removeByPath(patch.newFile().path())
-      await this.index.write();
+      await index.removeByPath(patch.newFile().path())
+      await index.write();
     } else {
-      await this.index.addByPath(patch.newFile().path())
-      await this.index.write();
+      await index.addByPath(patch.newFile().path())
+      await index.write();
     }
   }
 
   async stageAll(patches: Git.ConvenientPatch[]) {
+    const index = await this.repo.index();
     const paths = patches.map((patch) => patch.newFile().path());
-    await this.index.addAll(paths, Git.Index.ADD_OPTION.ADD_DEFAULT);
-    await this.index.write();
+    await index.addAll(paths, Git.Index.ADD_OPTION.ADD_DEFAULT);
+    await index.write();
   }
 
   async unstageLines(patch: Git.ConvenientPatch, lines: Git.DiffLine[]) {
@@ -299,7 +295,8 @@ export class RepoState {
     try {
       const author = Git.Signature.now(name, email);
       try {
-        const oid = await this.index.writeTree();
+        const index = await this.repo.index();
+        const oid = await index.writeTree();
         await this.repo.createCommit('HEAD', author, author, message, oid, [this.headCommit]);
       } catch (e) {
         this.onNotification(`Unable to commit: ${e.message}`);

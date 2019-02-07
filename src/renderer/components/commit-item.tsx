@@ -32,7 +32,20 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
       },
       {
         label: 'Reset to this commit',
-        click: () => console.log('reset')
+        submenu: [
+          {
+            label: 'Soft',
+            click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.SOFT)
+          },
+          {
+            label: 'Mixed',
+            click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.MIXED)
+          },
+          {
+            label: 'Hard',
+            click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.HARD)
+          }
+        ]
       },
       {
         type: 'separator'

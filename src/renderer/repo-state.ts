@@ -224,6 +224,10 @@ export class RepoState {
     }
   }
 
+  async reset(target: Git.Commit, resetType: Git.Reset.TYPE) {
+    Git.Reset.reset(this.repo, target, resetType, {});
+  }
+
   // Index operations
 
   async getUnstagedPatches() {

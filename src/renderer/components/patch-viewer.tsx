@@ -2,7 +2,7 @@ import * as Path from 'path';
 import * as fs from 'fs';
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { RepoState, PatchType } from '../repo-state'
+import { RepoState, PatchType } from '../helpers/repo-state'
 
 // Load Monaco
 

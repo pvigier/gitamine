@@ -2,7 +2,7 @@ import { remote, clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import * as openEditor from 'open-editor';
-import { RepoState, PatchType } from '../repo-state';
+import { RepoState, PatchType } from '../helpers/repo-state';
 
 export interface PatchItemProps { 
   repo?: RepoState;

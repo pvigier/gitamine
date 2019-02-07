@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RepoState } from "../repo-state";
+import { RepoState } from "../helpers/repo-state";
 
 export class ToolbarProps {
   repo: RepoState;

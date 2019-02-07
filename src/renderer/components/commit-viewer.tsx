@@ -2,7 +2,7 @@ import { clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
-import { PatchType } from '../repo-state';
+import { PatchType } from '../helpers/repo-state';
 
 function shortenSha(sha: string) {
   return sha.substr(0, 6);

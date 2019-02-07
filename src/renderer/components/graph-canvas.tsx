@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { RepoState } from '../repo-state';
-import { getBranchColor, EdgeType } from '../commit-graph';
+import { RepoState } from '../helpers/repo-state';
+import { getBranchColor, EdgeType } from '../helpers/commit-graph';
 
 const RADIUS = 11;
 const OFFSET_X = 2 * RADIUS;

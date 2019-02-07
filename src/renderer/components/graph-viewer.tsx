@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { GraphCanvas } from './graph-canvas';
-import { RepoState } from "../repo-state";
+import { RepoState } from "../helpers/repo-state";
 import { CommitList } from './commit-list';
 
 export interface GraphViewerProps { 

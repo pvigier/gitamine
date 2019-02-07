@@ -1,10 +1,10 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { RepoDashboard } from './repo-dashboard';
-import { RepoState } from '../repo-state';
+import { RepoState } from '../helpers/repo-state';
 import { NotificationQueue } from './notification-queue';
 import { WelcomeDashboard } from './welcome-dashboard';
-import { Field, Settings } from '../settings';
+import { Field, Settings } from '../helpers/settings';
 
 export interface AppState {
   repos: RepoState[]; 

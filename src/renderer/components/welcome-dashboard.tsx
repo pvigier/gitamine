@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import * as React from 'react';
-import { Field, Settings } from '../settings';
+import { Field, Settings } from '../helpers/settings';
 
 export class WelcomeDashboardProps {
   onRecentlyOpenedRepoClick: (path: string) => void

@@ -8,7 +8,7 @@ import { CommitViewer } from './commit-viewer';
 import { IndexViewer } from './index-viewer';
 import { PatchViewer } from './patch-viewer';
 import { Splitter } from './splitter';
-import { RepoState, PatchType } from "../repo-state";
+import { RepoState, PatchType } from "../helpers/repo-state";
 import { Toolbar } from './toolbar';
 
 export interface RepoDashboardProps { 

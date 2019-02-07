@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchItem } from './patch-item';
-import { RepoState, PatchType } from '../repo-state';
+import { RepoState, PatchType } from '../helpers/repo-state';
 
 export interface PatchListProps { 
   repo?: RepoState

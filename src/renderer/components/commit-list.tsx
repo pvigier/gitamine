@@ -2,8 +2,8 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { CommitItem } from './commit-item';
 import { IndexItem } from './index-item';
-import { RepoState } from "../repo-state";
-import { getBranchColor } from '../commit-graph';
+import { RepoState } from "../helpers/repo-state";
+import { getBranchColor } from '../helpers/commit-graph';
 
 const ITEM_HEIGHT = 28;
 

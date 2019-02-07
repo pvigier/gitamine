@@ -2,7 +2,7 @@ import { remote, clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { ReferenceBadge } from './reference-badge';
-import { RepoState } from "../repo-state";
+import { RepoState } from "../helpers/repo-state";
 
 export interface CommitItemProps { 
   repo: RepoState;

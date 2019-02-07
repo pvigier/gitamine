@@ -1,6 +1,6 @@
 import { remote } from 'electron';
 import * as React from 'react';
-import { RepoState } from "../repo-state";
+import { RepoState } from "../helpers/repo-state";
 
 function removeReferencePrefix(name: string) {
   return name.substr(name.indexOf('/', name.indexOf('/') + 1) + 1);

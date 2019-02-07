@@ -1,4 +1,4 @@
-import { Field, Settings } from './settings';
+import { Field, Settings } from './helpers/settings';
 
 
 // Manage tabs

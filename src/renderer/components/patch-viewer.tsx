@@ -271,13 +271,21 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     let newStart = 1;
     const newHiddenAreas = [];
     for (let hunk of this.hunks) {
-      oldHiddenAreas.push(createRange(oldStart, hunk.oldStart() - 1));
+      if (hunk.oldStart() - 1 >= oldStart) {
+        oldHiddenAreas.push(createRange(oldStart, hunk.oldStart() - 1));
+      }
       oldStart = hunk.oldStart() + hunk.oldLines();
-      newHiddenAreas.push(createRange(newStart, hunk.newStart() - 1));
+      if (hunk.newStart() - 1 >= newStart) {
+        newHiddenAreas.push(createRange(newStart, hunk.newStart() - 1));
+      }
       newStart = hunk.newStart() + hunk.newLines();
     }
-    oldHiddenAreas.push(createRange(oldStart, Infinity));
-    newHiddenAreas.push(createRange(newStart, Infinity));
+    if (oldStart <= this.oldBlob.split('\n').length) {
+      oldHiddenAreas.push(createRange(oldStart, Infinity));
+    }
+    if (newStart <= this.newBlob.split('\n').length) {
+      newHiddenAreas.push(createRange(newStart, Infinity));
+    }
     // Set hunks
     const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
     editors[Editor.Original].setHiddenAreas(oldHiddenAreas);

@@ -312,19 +312,13 @@ export class RepoState {
   }
 
   async commit(message: string) {
-    const name = Settings.get(Field.Name);
-    const email = Settings.get(Field.Email);
     try {
-      const author = Git.Signature.now(name, email);
-      try {
-        const index = await this.repo.index();
-        const oid = await index.writeTree();
-        await this.repo.createCommit('HEAD', author, author, message, oid, [this.headCommit]);
-      } catch (e) {
-        this.onNotification(`Unable to commit: ${e.message}`);
-      }
+      const author = this.getSignature();
+      const index = await this.repo.index();
+      const oid = await index.writeTree();
+      await this.repo.createCommit('HEAD', author, author, message, oid, [this.headCommit]);
     } catch (e) {
-      this.onNotification('Unable to set an author for this commit. Please check you configure correctly your account in "Preferences".');
+      this.onNotification(`Unable to commit: ${e.message}`);
     }
   }
 
@@ -367,6 +361,17 @@ export class RepoState {
 
   // Credentials
 
+  getSignature() {
+    try {
+      const name = Settings.get(Field.Name);
+      const email = Settings.get(Field.Email);
+      return Git.Signature.now(name, email);
+    } catch (e) {
+      this.onNotification('Unable to set an author for this commit. Please check you configure correctly your account in "Preferences".');
+      throw e;
+    }
+  }
+
   getCredentialsCallback() {
     return {
       callbacks: {
@@ -375,5 +380,25 @@ export class RepoState {
         }
       }
     }
+  }
+
+  // Stash
+
+  async stash() {
+    try {
+      const stasher = this.getSignature();
+      await Git.Stash.save(this.repo, stasher, '', Git.Stash.FLAGS.DEFAULT);
+    } catch(e) {
+      this.onNotification(`Unable to stash: ${e.message}`);
+    }
+  }
+
+  async popStash() {
+    try {
+      await Git.Stash.pop(this.repo, 0);
+    } catch(e) {
+      this.onNotification(`Unable to pop stash: ${e.message}`);
+    }
+
   }
 }

@@ -345,4 +345,35 @@ export class RepoState {
       this.onNotification(`Unable to remove reference ${name}: ${e.message}`);
     }
   }
+
+  async fetchAll() {
+    try {
+      await this.repo.fetchAll(this.getCredentialsCallback());
+    } catch (e) {
+      this.onNotification(`Unable to fetch all: ${e.message}`);
+    }
+  }
+
+  async push() {
+    try {
+      console.log(this.head);
+      const remote = await this.repo.getRemote('origin');
+      console.log(await remote.getPushRefspecs());
+      await remote.push([`${this.head}:${this.head}`], this.getCredentialsCallback())
+    } catch (e) {
+      this.onNotification(`Unable to push: ${e.message}`);
+    }
+  }
+
+  // Credentials
+
+  getCredentialsCallback() {
+    return {
+      callbacks: {
+        credentials: (url: string, userName: string) => {
+          return Git.Cred.sshKeyFromAgent(userName);
+        }
+      }
+    }
+  }
 }

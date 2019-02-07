@@ -20,21 +20,27 @@ if (module.hot) { module.hot.accept(render); }
 
 // Events
 
-ipcRenderer.on('clone-repo', async (event: Electron.Event, [path, url]: [string, string]) => {
+ipcRenderer.on('clone-repo', (event: Electron.Event, [path, url]: [string, string]) => {
   if (app) {
     app.cloneRepo(path, url);
   }
 });
 
-ipcRenderer.on('init-repo', async (event: Electron.Event, path: string) => {
+ipcRenderer.on('init-repo', (event: Electron.Event, path: string) => {
   if (app) {
     app.initRepo(path);
   }
 });
 
-ipcRenderer.on('open-repo', async (event: Electron.Event, path: string) => {
+ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
   if (app) {
     app.openRepo(path);
+  }
+});
+
+ipcRenderer.on('create-branch', (event: Electron.Event, name: string, sha: string) => {
+  if (app) {
+    app.getCurrentRepo().createBranch(name, sha);
   }
 });
 

@@ -1,4 +1,4 @@
-import { remote, clipboard } from 'electron';
+import { remote, clipboard, BrowserWindow } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { ReferenceBadge } from './reference-badge';
@@ -28,7 +28,7 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
     const template = [
       {
         label: 'Create branch here',
-        click: () => console.log('branch')
+        click: () => this.openCreateBranchWindow()
       },
       {
         label: 'Reset to this commit',
@@ -58,6 +58,26 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
     const menu = remote.Menu.buildFromTemplate(template);
     event.preventDefault();
     menu.popup({});
+  }
+
+  openCreateBranchWindow() {
+    let window: BrowserWindow | null = new remote.BrowserWindow({
+      show: false,
+      width: 400,
+      height: 320,
+      parent: remote.getCurrentWindow(),
+      modal: true
+    });
+
+    window.loadURL(`file://${__dirname}/../../../assets/html/create-branch.html`);
+
+    window.once('ready-to-show', () => {
+      window!.show();
+      window!.webContents.send('create-branch-data', this.props.commit.sha());
+    });
+    window.on('close', () => { 
+      window = null
+    });
   }
 
   render() {

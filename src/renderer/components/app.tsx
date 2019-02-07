@@ -66,6 +66,10 @@ export class App extends React.PureComponent<{}, AppState> {
     }); 
   }
 
+  getCurrentRepo() {
+    return this.state.repos[0];
+  }
+
   showNotification(message: string) {
     if (this.notificationQueue.current) {
       this.notificationQueue.current.addNotification(message);

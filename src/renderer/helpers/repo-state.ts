@@ -330,6 +330,14 @@ export class RepoState {
 
   // Reference operations
 
+  async createBranch(name: string, sha: string)  {
+    try {
+      await this.repo.createBranch(name, this.shaToCommit.get(sha)!, false);
+    } catch (e) {
+      this.onNotification(`Unable to create branch ${name}: ${e.message}`);
+    }
+  }
+
   async removeReference(name: string) {
     try {
       await Git.Reference.remove(this.repo, name);

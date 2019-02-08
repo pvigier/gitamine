@@ -1,5 +1,7 @@
 import * as Path from 'path';
+import * as fs from 'fs'
 import * as Git from 'nodegit';
+import * as ignore from 'ignore'
 import { CommitGraph } from './commit-graph';
 import { Field, Settings } from './settings';
 
@@ -30,6 +32,7 @@ export class RepoState {
   graph: CommitGraph;
   onNotification: (message: string) => void;
   updatePromise: Promise<void>; // Used to queue updates
+  ig: any;
 
   constructor(repo: Git.Repository, onNotification: (message: string) => void) {
     this.repo = repo;
@@ -45,12 +48,14 @@ export class RepoState {
     this.graph = new CommitGraph();
     this.onNotification = onNotification;
     this.updatePromise = new Promise<void>((resolve) => resolve());
+    this.ig = ignore();
   }
 
   async init() {
     await this.updateCommits();
     await this.updateHead();
     await this.updateGraph();
+    this.updateIgnore();
   }
 
   async requestUpdateCommits() {
@@ -439,5 +444,19 @@ export class RepoState {
     } catch(e) {
       this.onNotification(`Unable to pop stash: ${e.message}`);
     }
+  }
+
+  // Ignore
+
+  updateIgnore() {
+    const path = Path.join(this.path, '../.gitignore');
+    if (fs.existsSync(path)) {
+      this.ig = ignore().add(fs.readFileSync(path).toString())
+    }
+  }
+
+  isIgnored(path: string) {
+    // .gitignore is never ignored
+    return path && path !== '.gitignore' && this.ig.ignores(path);
   }
 }

@@ -51,19 +51,18 @@ export class App extends React.PureComponent<{}, AppState> {
   }
 
   addRepo(repo: Git.Repository) {
-    const repoState = new RepoState(repo, this.showNotification, () => { 
-      this.setState((state: AppState): AppState => ({
-        repos: [repoState]
-      }));
-      // Update settings
-      const recentlyOpened: string[] = Settings.get(Field.RecentlyOpened, []);
-      // Make sure that there is no duplicate
-      const iPath = recentlyOpened.indexOf(repoState.path);
-      if (iPath !== -1) {
-        recentlyOpened.splice(iPath, 1);
-      }
-      Settings.set(Field.RecentlyOpened, [repoState.path, ...recentlyOpened.slice(0, 2)]);
-    }); 
+    const repoState = new RepoState(repo, this.showNotification);
+    this.setState({
+      repos: [repoState]
+    });
+    // Update settings
+    const recentlyOpened: string[] = Settings.get(Field.RecentlyOpened, []);
+    // Make sure that there is no duplicate
+    const iPath = recentlyOpened.indexOf(repoState.path);
+    if (iPath !== -1) {
+      recentlyOpened.splice(iPath, 1);
+    }
+    Settings.set(Field.RecentlyOpened, [repoState.path, ...recentlyOpened.slice(0, 2)]);
   }
 
   getCurrentRepo() {

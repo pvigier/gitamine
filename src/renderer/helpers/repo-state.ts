@@ -31,7 +31,7 @@ export class RepoState {
   onNotification: (message: string) => void;
   updatePromise: Promise<void>; // Used to queue updates
 
-  constructor(repo: Git.Repository, onNotification: (message: string) => void, onReady: () => void) {
+  constructor(repo: Git.Repository, onNotification: (message: string) => void) {
     this.repo = repo;
     this.path = this.repo.path(); 
     this.name = Path.parse(Path.dirname(this.path)).name;
@@ -45,8 +45,6 @@ export class RepoState {
     this.graph = new CommitGraph();
     this.onNotification = onNotification;
     this.updatePromise = new Promise<void>((resolve) => resolve());
-
-    this.init().then(onReady);
   }
 
   async init() {
@@ -241,15 +239,21 @@ export class RepoState {
   // Index operations
 
   async getUnstagedPatches() {
-    const unstagedDiff = await Git.Diff.indexToWorkdir(this.repo, null, diffOptions);
-    await unstagedDiff.findSimilar({});
-    return await unstagedDiff.patches();
+    if (this.headCommit) {
+      const unstagedDiff = await Git.Diff.indexToWorkdir(this.repo, null, diffOptions);
+      await unstagedDiff.findSimilar({});
+      return await unstagedDiff.patches();
+    }
+    return [];
   }
 
   async getStagedPatches() {
-    const stagedDiff = await Git.Diff.treeToIndex(this.repo, await this.headCommit.getTree(), null, diffOptions);
-    await stagedDiff.findSimilar({});
-    return await stagedDiff.patches();
+    if (this.headCommit) {
+      const stagedDiff = await Git.Diff.treeToIndex(this.repo, await this.headCommit.getTree(), null, diffOptions);
+      await stagedDiff.findSimilar({});
+      return await stagedDiff.patches();
+    }
+    return [];
   }
 
   async stageLines(patch: Git.ConvenientPatch, lines: Git.DiffLine[]) {

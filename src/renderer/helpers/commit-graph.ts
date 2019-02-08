@@ -39,6 +39,8 @@ export class CommitGraph {
 
   constructor() {
     this.positions = new Map<string, [number, number]>();
+    this.width = 0;
+    this.edges = new IntervalTree<Edge>();
   }
 
   computePositions(repo: RepoState) {

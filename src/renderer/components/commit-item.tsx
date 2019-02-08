@@ -10,6 +10,7 @@ export interface CommitItemProps {
   commit: Git.Commit;
   selected: boolean;
   color: string;
+  stashIndex: number;
   onCommitSelect: (commit: Git.Commit) => void;
 }
 
@@ -25,36 +26,54 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
   }
 
   handleContextMenu(event: React.MouseEvent<HTMLLIElement>) {
-    const template = [
-      {
-        label: 'Create branch here',
-        click: () => this.openCreateBranchWindow()
-      },
-      {
-        label: 'Reset to this commit',
-        submenu: [
-          {
-            label: 'Soft',
-            click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.SOFT)
-          },
-          {
-            label: 'Mixed',
-            click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.MIXED)
-          },
-          {
-            label: 'Hard',
-            click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.HARD)
-          }
-        ]
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Copy commit sha to clipboard',
-        click: () => clipboard.writeText(this.props.commit.sha())
-      },
-    ]
+    const template: Electron.MenuItemConstructorOptions[] = [];
+    if (this.props.stashIndex === -1) {
+      template.push(
+        {
+          label: 'Create branch here',
+          click: () => this.openCreateBranchWindow()
+        },
+        {
+          label: 'Reset to this commit',
+          submenu: [
+            {
+              label: 'Soft',
+              click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.SOFT)
+            },
+            {
+              label: 'Mixed',
+              click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.MIXED)
+            },
+            {
+              label: 'Hard',
+              click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.HARD)
+            }
+          ]
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Copy commit sha to clipboard',
+          click: () => clipboard.writeText(this.props.commit.sha())
+        },
+      );
+    } else {
+      template.push(
+        {
+          label: 'Apply stash',
+          click: () => this.props.repo.applyStash(this.props.stashIndex)
+        },
+        {
+          label: 'Pop stash',
+          click: () => this.props.repo.popStash(this.props.stashIndex)
+        },
+        {
+          label: 'Drop stash',
+          click: () => this.props.repo.dropStash(this.props.stashIndex)
+        },
+      )
+    }
     const menu = remote.Menu.buildFromTemplate(template);
     event.preventDefault();
     menu.popup({});

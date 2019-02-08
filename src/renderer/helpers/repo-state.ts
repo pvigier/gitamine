@@ -24,7 +24,7 @@ export class RepoState {
   shaToCommit: Map<string, Git.Commit>;
   references: Map<string, Git.Commit>;
   shaToReferences: Map<string, string[]>;
-  stashes: Git.Commit[]; // Use a Set?
+  stashes: Git.Commit[]; // Use a dictionary?
   parents: Map<string, string[]>;
   children: Map<string, string[]>;
   head: string;
@@ -438,11 +438,27 @@ export class RepoState {
     }
   }
 
-  async popStash() {
+  async applyStash(index: number) {
     try {
-      await Git.Stash.pop(this.repo, 0);
+      await Git.Stash.apply(this.repo, index);
+    } catch(e) {
+      this.onNotification(`Unable to apply stash: ${e.message}`);
+    }
+  }
+
+  async popStash(index = 0) {
+    try {
+      await Git.Stash.pop(this.repo, index);
     } catch(e) {
       this.onNotification(`Unable to pop stash: ${e.message}`);
+    }
+  }
+
+  async dropStash(index: number) {
+    try {
+      await Git.Stash.drop(this.repo, index);
+    } catch(e) {
+      this.onNotification(`Unable to drop stash: ${e.message}`);
     }
   }
 

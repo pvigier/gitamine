@@ -1,6 +1,6 @@
 import * as Path from 'path';
 import * as fs from 'fs';
-import * as node_watch from 'node-watch';
+import * as chokidar from 'chokidar';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { GraphViewer } from './graph-viewer';
@@ -41,44 +41,6 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       selectedPatch: null,
       patchType: PatchType.Committed
     };
-
-    const path = this.props.repo.path;
-    // Watch index and head 
-    // TODO: there may be problems with index.lock
-    fs.watch(path, async (error: string, filename: string) => {
-      console.log('repo', filename);
-      if (filename === 'index') {
-        this.refreshIndex();
-      } else if (filename === 'HEAD') {
-        await this.refreshHead();
-        this.refreshIndex();
-      }
-    });
-
-    // Watch working directory
-    const regex = /(.*\.git(\/.*|$))|(.*\.git(\\.*|$))/; // Exclude .git folders
-    node_watch(Path.dirname(path), 
-      {recursive: true, filter: (f: string) => !regex.test(f)}, 
-      (error: string, filename: string) => {
-        console.log('wd', filename);
-        // TODO: check if the file is ignored
-        this.dirtyWordingDirectory = true;
-      }
-    );
-    // To prevent from updating too often
-    setInterval(async () => {
-      if (this.dirtyWordingDirectory) {
-        this.refreshIndex();
-        this.dirtyWordingDirectory = false;
-      }
-    }, 200);
-
-    // Watch references
-    node_watch(Path.join(path, 'refs'), {recursive: true}, async (error: string, filename: string) => {
-      console.log('ref', filename);
-      await this.refreshReferences();
-      this.refreshIndex();
-    });
   }
 
   async componentDidMount() {
@@ -90,6 +52,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     if (this.graphViewer.current) {
       this.graphViewer.current.updateGraph();
     }
+    this.setWatchers();
   }
 
   handleCommitSelect(commit: Git.Commit) {
@@ -121,6 +84,58 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     if (this.rightViewer.current) {
       this.rightViewer.current.resize(offset);
     }
+  }
+  
+  setWatchers() {
+    const path = this.props.repo.path;
+    // Watch index and head 
+    // fs.watch seems sufficient for that, I should try with chokidar
+    fs.watch(path, async (error: string, filename: string) => {
+      console.log('repo', filename);
+      if (filename === 'index') {
+        this.refreshIndex();
+      } else if (filename === 'HEAD') {
+        await this.refreshHead();
+        this.refreshIndex();
+      }
+    });
+
+    // Watch working directory
+    // It seems to work much better on big repo with polling
+    const wdPath = Path.dirname(path);
+    const workingDirectoryWatcher = chokidar.watch(wdPath, {
+      ignoreInitial: true,
+      ignored: [/(.*\.git(\/.*|$))/, (path: string) => this.props.repo.isIgnored(Path.relative(wdPath, path))],
+      followSymlinks: false,
+      usePolling: true,
+      interval: 200,
+      binaryInterval: 500
+    });
+    workingDirectoryWatcher.on('all', async (event: string, path: string) => {
+      console.log('wd', event, path);
+      if (path.endsWith('.gitignore')) {
+        this.props.repo.updateIgnore();
+      }
+      this.dirtyWordingDirectory = true;
+    });
+    // To prevent from updating too often
+    setInterval(async () => {
+      if (this.dirtyWordingDirectory) {
+        this.refreshIndex();
+        this.dirtyWordingDirectory = false;
+      }
+    }, 200);
+
+    // Watch references
+    const referencesWatcher = chokidar.watch(Path.join(path, 'refs'), {
+      ignoreInitial: true,
+      followSymlinks: false
+    });
+    referencesWatcher.on('all', async (event: string, path: string) => {
+      console.log('refs', event, path);
+      await this.refreshReferences();
+      this.refreshIndex();
+    });
   }
 
   async refreshIndex() {

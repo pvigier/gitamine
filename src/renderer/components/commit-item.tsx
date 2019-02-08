@@ -2,7 +2,7 @@ import { remote, clipboard, BrowserWindow } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { ReferenceBadge } from './reference-badge';
-import { RepoState } from "../helpers/repo-state";
+import { RepoState, Stash } from '../helpers/repo-state';
 
 export interface CommitItemProps { 
   repo: RepoState;
@@ -10,7 +10,7 @@ export interface CommitItemProps {
   commit: Git.Commit;
   selected: boolean;
   color: string;
-  stashIndex: number;
+  stash: Stash | undefined;
   onCommitSelect: (commit: Git.Commit) => void;
 }
 
@@ -27,7 +27,7 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
 
   handleContextMenu(event: React.MouseEvent<HTMLLIElement>) {
     const template: Electron.MenuItemConstructorOptions[] = [];
-    if (this.props.stashIndex === -1) {
+    if (!this.props.stash) {
       template.push(
         {
           label: 'Create branch here',
@@ -62,15 +62,15 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
       template.push(
         {
           label: 'Apply stash',
-          click: () => this.props.repo.applyStash(this.props.stashIndex)
+          click: () => this.props.repo.applyStash(this.props.stash!.index)
         },
         {
           label: 'Pop stash',
-          click: () => this.props.repo.popStash(this.props.stashIndex)
+          click: () => this.props.repo.popStash(this.props.stash!.index)
         },
         {
           label: 'Drop stash',
-          click: () => this.props.repo.dropStash(this.props.stashIndex)
+          click: () => this.props.repo.dropStash(this.props.stash!.index)
         },
       )
     }
@@ -99,6 +99,15 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
     });
   }
 
+  formatStashMessage() {
+    const message = `WIP o${this.props.stash!.message.substr(1)}`
+    if (message.indexOf(':') === message.length - 1) {
+      return message.substr(0, message.length - 1);
+    } else {
+      return message;
+    }
+  }
+
   render() {
     const badges = this.props.references.map((name) => (
       <ReferenceBadge name={name} 
@@ -111,7 +120,7 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
       <li className={this.props.selected ? 'selected-commit' : ''} 
         onClick={this.handleClick}
         onContextMenu={this.handleContextMenu}>
-        {badges}{this.props.commit.message()}
+        {badges}{this.props.stash ? this.formatStashMessage() : this.props.commit.message()}
       </li>
     );
   }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { RepoState } from '../helpers/repo-state';
-import { getBranchColor, EdgeType } from '../helpers/commit-graph';
+import { getBranchColor, EdgeType, NodeType } from '../helpers/commit-graph';
 
 const RADIUS = 11;
 const OFFSET_X = 2 * RADIUS;
@@ -83,7 +83,8 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
     if (positions.size > 0) {
       let [x0, y0] = this.computeNodeCenterCoordinates(0, 0);
       y0 += RADIUS;
-      const [x1, y1] = this.computeNodeCenterCoordinates(...positions.get(repo.headCommit.sha())!);
+      const node = positions.get(repo.headCommit.sha())!;
+      const [x1, y1] = this.computeNodeCenterCoordinates(node[0], node[1]);
 
       // Set the style
       ctx.lineWidth = LINE_WIDTH;
@@ -91,7 +92,6 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
       ctx.strokeStyle = getBranchColor(0);
 
       // Draw the edge
-      const [x, y] = this.computeNodeCenterCoordinates(0, 0);
       ctx.beginPath();
       ctx.moveTo(x0, y0);
       ctx.lineTo(x1, y1);
@@ -106,11 +106,15 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
     const positions = this.props.repo.commits.slice(Math.max(this.start, 0), this.end).map((commit) => 
       this.props.repo.graph.positions.get(commit.sha())!
     );
-    for (let [i, j] of positions) {
+    for (let [i, j, type] of positions) {
       const [x, y] = this.computeNodeCenterCoordinates(i, j);
       ctx.fillStyle = getBranchColor(j);
       ctx.beginPath();
-      ctx.arc(x, y, RADIUS, 0, 2 * Math.PI, true);
+      if (type === NodeType.Commit) {
+        ctx.arc(x, y, RADIUS, 0, 2 * Math.PI, true);
+      } else {
+        ctx.fillRect(x - RADIUS, y - RADIUS, 2 * RADIUS, 2 * RADIUS);
+      }
       ctx.fill();
     }
   }

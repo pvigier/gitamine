@@ -16,6 +16,18 @@ export enum PatchType {
   Committed
 }
 
+export class Stash {
+  index: number;
+  message: string;
+  commit: Git.Commit;
+
+  constructor(index: number, message: string, commit: Git.Commit) {
+    this.index = index;
+    this.message = message;
+    this.commit = commit;
+  }
+}
+
 export class RepoState {
   repo: Git.Repository;
   path: string;
@@ -24,7 +36,7 @@ export class RepoState {
   shaToCommit: Map<string, Git.Commit>;
   references: Map<string, Git.Commit>;
   shaToReferences: Map<string, string[]>;
-  stashes: Git.Commit[]; // Use a dictionary?
+  stashes: Map<string, Stash>; // Use a dictionary?
   parents: Map<string, string[]>;
   children: Map<string, string[]>;
   head: string;
@@ -42,7 +54,7 @@ export class RepoState {
     this.shaToCommit = new Map<string, Git.Commit>();
     this.references = new Map<string, Git.Commit>();
     this.shaToReferences = new Map<string, string[]>();
-    this.stashes = [];
+    this.stashes = new Map<string, Stash>();
     this.parents = new Map<string, string[]>();
     this.children = new Map<string, string[]>();
     this.graph = new CommitGraph();
@@ -68,7 +80,7 @@ export class RepoState {
     console.log('start');
     const referencesToUpdate = await this.updateReferences();
     const stashesToUpdate = await this.updateStashes();
-    console.log('stashes to update:', stashesToUpdate.map((c) => c.sha()));
+    console.log('stashes to update:', stashesToUpdate.map((s) => s.commit.sha()));
     const newCommits = await this.getNewCommits(referencesToUpdate, stashesToUpdate);
     await this.getParents(newCommits);
     this.removeUnreachableCommits();
@@ -96,27 +108,27 @@ export class RepoState {
   }
 
   async updateStashes() {
-    const stashCommits = await this.getStashCommits();
-    const stashesToUpdate: Git.Commit[] = [];
-    for (let commit of stashCommits) {
-      if (!this.stashes.find((c) => c.sha() === commit.sha())) {
-        stashesToUpdate.push(commit);
+    const stashes = await this.getStashes();
+    const stashesToUpdate: Stash[] = [];
+    for (let [sha, stash] of stashes) {
+      if (!this.stashes.has(sha)) {
+        stashesToUpdate.push(stash);
       }
     }
-    this.stashes = stashCommits;
-    console.log('stashes:', this.stashes.map((c) => c.sha()));
+    this.stashes = stashes;
+    console.log('stashes:', this.stashes.keys());
     return stashesToUpdate;
   }
 
-  async getNewCommits(references: string[], stashes: Git.Commit[]) {
+  async getNewCommits(references: string[], stashes: Stash[]) {
     const walker = Git.Revwalk.create(this.repo);
     // Set the reference commits as start of the walk
     for (let name of references) {
       walker.pushRef(name); 
     }
     // Set the stash commits as start of the walk
-    for (let commit of stashes) {
-      walker.push(commit.id());
+    for (let stash of stashes) {
+      walker.push(stash.commit.id());
     }
     // TODO: find a way to stop earlier the exploration
     const commits = await walker.getCommitsUntil(() => true);
@@ -150,7 +162,10 @@ export class RepoState {
   removeUnreachableCommits() {
     // Find unreachable commits by doing a DFS
     const alreadyAdded = new Map<string, boolean>();
-    const frontier = [...this.references.values(), ...this.stashes];
+    const frontier: Git.Commit[] = [
+      ...this.references.values(), 
+      ...Array.from(this.stashes.values(), (stash: Stash) => stash.commit)
+    ];
     for (let commit of frontier) {
       alreadyAdded.set(commit.sha(), true);
     }
@@ -421,12 +436,18 @@ export class RepoState {
 
   // Stash
 
-  async getStashCommits() {
+  async getStashes() {
     const oids: Git.Oid[] = [];
+    const messages: string[] = [];
     await Git.Stash.foreach(this.repo, (index: Git.Index, message: string, oid: Git.Oid) => {
       oids.push(oid);
+      messages.push(message);
     });
-    return await Promise.all(oids.map((oid) => this.repo.getCommit(oid)));
+    let commits = await Promise.all(oids.map((oid) => this.repo.getCommit(oid)));
+    // Return the second parent of stash commits
+    commits = await Promise.all(commits.map((commit) => commit.parent(1)));
+    return new Map<string, Stash>(commits.map((commit, index) => 
+      [commit.sha(), new Stash(index, messages[index], commit)] as [string, Stash]));
   }
 
   async stash() {

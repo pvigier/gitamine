@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { CommitItem } from './commit-item';
 import { IndexItem } from './index-item';
-import { RepoState } from "../helpers/repo-state";
+import { RepoState } from '../helpers/repo-state';
 import { getBranchColor } from '../helpers/commit-graph';
 
 const ITEM_HEIGHT = 28;
@@ -118,7 +118,6 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
     items.push(...commits.map((commit: Git.Commit) => {
       const commitSha = commit.sha();
       const color = getBranchColor(this.props.repo.graph.positions.get(commitSha)![1]);
-      const stashIndex = this.props.repo.stashes.findIndex((stashCommit) => stashCommit.sha() === commitSha);
       return (
         <CommitItem 
           repo={this.props.repo} 
@@ -127,7 +126,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
           selected={this.props.selectedCommit === commit} 
           onCommitSelect={this.props.onCommitSelect} 
           color={color}
-          stashIndex={stashIndex}
+          stash={this.props.repo.stashes.get(commitSha)}
           key={commit.sha()} />
       );
     }));

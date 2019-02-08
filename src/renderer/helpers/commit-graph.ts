@@ -25,6 +25,13 @@ export function getBranchColor(j: number) {
   return BRANCH_COLORS[j % BRANCH_COLORS.length];
 }
 
+export enum NodeType {
+  Commit,
+  Stash
+}
+
+export type Node = [number, number, NodeType];
+
 export enum EdgeType {
   Normal,
   Merge
@@ -33,12 +40,12 @@ export enum EdgeType {
 export type Edge = [[number, number], [number, number], EdgeType];
 
 export class CommitGraph {
-  positions: Map<string, [number, number]>
+  positions: Map<string, Node>
   width: number;
   edges: IntervalTree<Edge>;
 
   constructor() {
-    this.positions = new Map<string, [number, number]>();
+    this.positions = new Map<string, Node>();
     this.width = 0;
     this.edges = new IntervalTree<Edge>();
   }
@@ -102,7 +109,7 @@ export class CommitGraph {
           branches[branches.indexOf(childSha)] = null;
         }
       }
-      this.positions.set(commit.sha(), [i, j]);
+      this.positions.set(commitSha, [i, j, repo.stashes.has(commitSha) ? NodeType.Stash : NodeType.Commit]);
       ++i;
     }
     this.width = branches.length;

@@ -17,7 +17,7 @@
     "git"
   ],
   "author": "Pierre Vigier",
-  "license": "GPL",
+  "license": "GPL-3.0-or-later",
   "config": {
     "forge": {
       "make_targets": {

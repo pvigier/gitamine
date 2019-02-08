@@ -258,6 +258,8 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   customizeHunkView() {
+    const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
+
     function createRange(start: number, end: number) {
       return {
         startLineNumber: start,
@@ -265,31 +267,6 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       }
     }
 
-    // Compute hidden areas
-    let oldStart = 1;
-    const oldHiddenAreas = [];
-    let newStart = 1;
-    const newHiddenAreas = [];
-    for (let hunk of this.hunks) {
-      if (hunk.oldStart() - 1 >= oldStart) {
-        oldHiddenAreas.push(createRange(oldStart, hunk.oldStart() - 1));
-      }
-      oldStart = hunk.oldStart() + hunk.oldLines();
-      if (hunk.newStart() - 1 >= newStart) {
-        newHiddenAreas.push(createRange(newStart, hunk.newStart() - 1));
-      }
-      newStart = hunk.newStart() + hunk.newLines();
-    }
-    if (oldStart <= this.oldBlob.split('\n').length) {
-      oldHiddenAreas.push(createRange(oldStart, Infinity));
-    }
-    if (newStart <= this.newBlob.split('\n').length) {
-      newHiddenAreas.push(createRange(newStart, Infinity));
-    }
-    // Set hunks
-    const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
-    editors[Editor.Original].setHiddenAreas(oldHiddenAreas);
-    editors[Editor.Modified].setHiddenAreas(newHiddenAreas);
     // Add hunk widgets
     for (let i = 0; i < this.hunks.length; ++i) { 
       const id = `hunk.${this.overlayWidgets[Editor.Modified].length}`;
@@ -297,6 +274,35 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     }
     // Customize context menu
     this.setContextMenu(editors[Editor.Modified]);
+    // Set hunks
+    // We must wait that the line numbers are updated after the addition of hunk widgets
+    // 300ms seems to work but this is a bit hacky
+    setTimeout(() => {
+      // Compute hidden areas
+      let oldStart = 1;
+      const oldHiddenAreas = [];
+      let newStart = 1;
+      const newHiddenAreas = [];
+      for (let hunk of this.hunks) {
+        if (hunk.oldStart() - 1 >= oldStart) {
+          oldHiddenAreas.push(createRange(oldStart, hunk.oldStart() - 1));
+        }
+        oldStart = hunk.oldStart() + hunk.oldLines();
+        if (hunk.newStart() - 1 >= newStart) {
+          newHiddenAreas.push(createRange(newStart, hunk.newStart() - 1));
+        }
+        newStart = hunk.newStart() + hunk.newLines();
+      }
+      if (oldStart <= this.oldBlob.split('\n').length) {
+        oldHiddenAreas.push(createRange(oldStart, Infinity));
+      }
+      if (newStart <= this.newBlob.split('\n').length) {
+        newHiddenAreas.push(createRange(newStart, Infinity));
+      }
+      // Hide areas
+      editors[Editor.Original].setHiddenAreas(oldHiddenAreas);
+      editors[Editor.Modified].setHiddenAreas(newHiddenAreas);
+    }, 300);
   }
 
   createHunkWidget(hunk: Git.ConvenientHunk, hunkId: string, firstHunk: boolean) {
@@ -355,14 +361,6 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
         onComputedHeight: (height: number) => {
           overlayNode.style.height = height + "px";
         }
-      }));
-    });
-    // Used only to offset lines
-    editors[Editor.Original].changeViewZones((changeAccessor: any) => {
-      this.viewZoneIds[Editor.Original].push(changeAccessor.addZone({
-        afterLineNumber: firstHunk ? 0 : hunk.oldStart() - 1,
-        heightInLines: 2,
-        domNode: document.createElement('div'),
       }));
     });
   }

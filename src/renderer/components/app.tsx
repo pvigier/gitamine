@@ -5,6 +5,7 @@ import { RepoState } from '../helpers/repo-state';
 import { NotificationQueue } from './notification-queue';
 import { WelcomeDashboard } from './welcome-dashboard';
 import { Field, Settings } from '../helpers/settings';
+import { ThemeManager } from '../helpers/theme-manager';
 
 export interface AppState {
   repos: RepoState[]; 
@@ -12,15 +13,21 @@ export interface AppState {
 
 export class App extends React.PureComponent<{}, AppState> {
   notificationQueue: React.RefObject<NotificationQueue>;
+  themeManager: ThemeManager;
 
   constructor(props: {}) {
     super(props);
     this.notificationQueue = React.createRef();
+    this.themeManager = new ThemeManager();
     this.state = {
       repos: []
     };
     this.openRepo = this.openRepo.bind(this);
     this.showNotification = this.showNotification.bind(this);
+  }
+
+  componentDidMount() {
+    this.themeManager.updateTheme();
   }
 
   async cloneRepo(url: string, path: string) {

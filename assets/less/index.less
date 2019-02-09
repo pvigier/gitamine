@@ -1,11 +1,14 @@
 /* Theme's variables */
 
 :root {
-  --bg-color: white;
-  --hover-color: #eee;
-  --selected-color: #ccc;
-  --splitter-color: #ccc;
-  --border-color: black;
+  --background-color: #ffffff;
+  --toolbar-color: #ffffff;
+  --list-background-color: #ffffff;
+  --hover-color: #eeeeee;
+  --selected-color: #cccccc;
+  --splitter-color: #cccccc;
+  --border-color: #000000;
+  --font-color: #000000;
   --font-famliy: Arial, Helvetica, sans-serif;
   --font-size: 14px;
 }
@@ -15,6 +18,8 @@
 html, body {
   margin: 0;
   overflow: hidden;
+  background-color: var(--background-color);
+  color: var(--font-color);
   font-family: var(--font-famliy);
   font-size: var(--font-size);
 }
@@ -61,6 +66,7 @@ div.repo-toolbar {
   height: @toolbar-height;
   display: table;
   text-align: center;
+  background-color: var(--toolbar-color);
 
   h1 {
     display: table-cell;
@@ -131,6 +137,7 @@ div.commit-list {
     padding-left: 0px;
     list-style: none;
     line-height: @commit-list-item-height;
+    background-color: var(--list-background-color);
 
     li {
       white-space: nowrap;
@@ -281,7 +288,7 @@ div.commit-viewer {
   min-width: @commit-viewer-min-width;
   display: flex;
   flex-direction: column;
-  background: var(--bg-color);
+  background: var(--background-color);
   z-index: 2;
 
   h3 {
@@ -325,6 +332,7 @@ ul.patch-list {
   padding-left: 0px;
   list-style: none;
   overflow-y: auto;
+  background-color: var(--list-background-color);
 
   li {
     padding: 4px;
@@ -441,7 +449,7 @@ ul.notification-queue {
     margin-left: 50%;
     transition: margin-left 1s 0s;
     border: 1px solid var(--border-color);
-    background: white;
+    background: var(--background-color);
     box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, 0.2);
 
     &.shown {
@@ -458,7 +466,7 @@ ul.notification-queue {
 
 .tooltip-bottom {
   position: relative;
-  border-bottom: 1px dotted black;
+  border-bottom: 1px dotted var(--font-color);
 
   .tooltip-text {
     visibility: hidden;

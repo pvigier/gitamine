@@ -1,10 +1,13 @@
 /* Theme's variables */
 :root {
-  --bg-color: white;
-  --hover-color: #eee;
-  --selected-color: #ccc;
-  --splitter-color: #ccc;
-  --border-color: black;
+  --background-color: #ffffff;
+  --toolbar-color: #ffffff;
+  --list-background-color: #ffffff;
+  --hover-color: #eeeeee;
+  --selected-color: #cccccc;
+  --splitter-color: #cccccc;
+  --border-color: #000000;
+  --font-color: #000000;
   --font-famliy: Arial, Helvetica, sans-serif;
   --font-size: 14px;
 }
@@ -13,6 +16,8 @@ html,
 body {
   margin: 0;
   overflow: hidden;
+  background-color: var(--background-color);
+  color: var(--font-color);
   font-family: var(--font-famliy);
   font-size: var(--font-size);
 }
@@ -44,6 +49,7 @@ div.repo-toolbar {
   height: 50px;
   display: table;
   text-align: center;
+  background-color: var(--toolbar-color);
 }
 div.repo-toolbar h1 {
   display: table-cell;
@@ -94,6 +100,7 @@ div.commit-list ul {
   padding-left: 0px;
   list-style: none;
   line-height: 22px;
+  background-color: var(--list-background-color);
 }
 div.commit-list ul li {
   white-space: nowrap;
@@ -209,7 +216,7 @@ div.commit-viewer {
   min-width: 300px;
   display: flex;
   flex-direction: column;
-  background: var(--bg-color);
+  background: var(--background-color);
   z-index: 2;
 }
 div.commit-viewer h3 {
@@ -243,6 +250,7 @@ ul.patch-list {
   padding-left: 0px;
   list-style: none;
   overflow-y: auto;
+  background-color: var(--list-background-color);
 }
 ul.patch-list li {
   padding: 4px;
@@ -336,7 +344,7 @@ ul.notification-queue li {
   margin-left: 50%;
   transition: margin-left 1s 0s;
   border: 1px solid var(--border-color);
-  background: white;
+  background: var(--background-color);
   box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, 0.2);
 }
 ul.notification-queue li.shown {
@@ -348,7 +356,7 @@ ul.notification-queue li:hover {
 /* Tooltips */
 .tooltip-bottom {
   position: relative;
-  border-bottom: 1px dotted black;
+  border-bottom: 1px dotted var(--font-color);
 }
 .tooltip-bottom .tooltip-text {
   visibility: hidden;

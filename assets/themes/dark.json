@@ -1,0 +1,17 @@
+{
+  "css": {
+    "background-color": "#323232",
+    "toolbar-color": "#3c3c3c",
+    "list-background-color": "#141414",
+    "hover-color": "#1e1e1e",
+    "selected-color": "#282828",
+    "splitter-color": "#282828",
+    "border-color": "#191919",
+    "font-color": "#c8c8c8",
+    "font-famliy": "Arial, Helvetica, sans-serif",
+    "font-size": "14px"
+  },
+  "monaco": {
+    "theme": "vs-dark"
+  }
+}

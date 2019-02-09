@@ -8,11 +8,13 @@ import { CommitViewer } from './commit-viewer';
 import { IndexViewer } from './index-viewer';
 import { PatchViewer } from './patch-viewer';
 import { Splitter } from './splitter';
-import { RepoState, PatchType } from "../helpers/repo-state";
 import { Toolbar } from './toolbar';
+import { RepoState, PatchType } from '../helpers/repo-state';
+import { ThemeManager } from '../helpers/theme-manager';
 
 export interface RepoDashboardProps { 
   repo: RepoState;
+  themeManager: ThemeManager;
 }
 
 export interface RepoDashboardState { 
@@ -172,6 +174,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       leftViewer = <PatchViewer repo={this.props.repo} 
         patch={this.state.selectedPatch!} 
         type={this.state.patchType}
+        editorTheme={this.props.themeManager.getEditorTheme()}
         onEscapePressed={this.exitPatchViewer} /> 
     } else {
       leftViewer = <GraphViewer repo={this.props.repo} 

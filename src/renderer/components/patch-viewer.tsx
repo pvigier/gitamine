@@ -57,6 +57,7 @@ export interface PatchViewerProps {
   repo: RepoState;
   patch: Git.ConvenientPatch;
   type: PatchType;
+  editorTheme: string;
   onEscapePressed: () => void;
 }
 
@@ -151,7 +152,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   setUpEditor() {
     if (this.divEditor.current) {
       const options = {
-        //theme: 'vs-dark',
+        theme: this.props.editorTheme,
         automaticLayout: true,
         renderSideBySide: false,
         readOnly: true

@@ -85,7 +85,10 @@ export class App extends React.PureComponent<{}, AppState> {
   render() {
     const repoDashboards = this.state.repos.length === 0 ?
       <WelcomeDashboard onRecentlyOpenedRepoClick={this.openRepo} /> :
-      this.state.repos.map((repo: RepoState) => <RepoDashboard repo={repo} key={repo.path} />);
+      this.state.repos.map((repo: RepoState) => <RepoDashboard 
+        repo={repo} 
+        themeManager={this.themeManager}
+        key={repo.path} />);
     return (
       <div id='app'>
         {repoDashboards}

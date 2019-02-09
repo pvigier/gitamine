@@ -29,4 +29,8 @@ export class ThemeManager {
       document.body.style.setProperty(`--${key}`, this.theme.css[key]);
     }
   }
+
+  getEditorTheme() {
+    return this.theme.monaco['theme'];
+  }
 }

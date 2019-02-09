@@ -67,6 +67,8 @@ div.repo-toolbar {
   display: table;
   text-align: center;
   background-color: var(--toolbar-color);
+  box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, 0.2);
+  z-index: 3;
 
   h1 {
     display: table-cell;
@@ -437,7 +439,7 @@ ul.notification-queue {
   top: 0;
   left: calc(100% - @notification-item-width);
   width: 2 * @notification-item-width;
-  z-index: 2;
+  z-index: 4;
   list-style: none;
   margin: 16px 0px;
   padding: 0px;

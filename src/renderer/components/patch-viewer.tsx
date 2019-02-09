@@ -311,7 +311,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     const patch = this.props.patch;
 
     const overlayNode = document.createElement('div');
-    overlayNode.classList.add('overlay-zone');
+    overlayNode.classList.add('hunk-widget');
 
     const contentNode = document.createElement('div');
     const textNode = document.createElement('p');
@@ -447,24 +447,33 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   render() {
+    const path = this.props.patch.newFile().path();
+    const i = Math.max(path.lastIndexOf('/'), 0);
     return (
       <div className='patch-viewer'>
         <div className='patch-header'>
-          <h2>{this.props.patch.newFile().path()}</h2>
+          <h2>
+            <div className='ellipsis-middle'>
+              <div className='left'>{path.substr(0, i)}</div>
+              <div className='right'>{path.substr(i)}</div>
+            </div>
+          </h2>
         </div>
-        <div className="view-mode-selector">
-          <input type="radio" id="hunk-mode" name="view-mode-selector" 
-            defaultChecked={this.viewMode === ViewMode.Hunk}
-            onInput={this.handleViewModeChange.bind(this, ViewMode.Hunk)} />
-          <label htmlFor="hunk-mode">Hunk</label >
-          <input type="radio" id="inline-mode" name="view-mode-selector" 
-            defaultChecked={this.viewMode === ViewMode.Inline}
-            onInput={this.handleViewModeChange.bind(this, ViewMode.Inline)} />
-          <label htmlFor="inline-mode">Inline</label>
-          <input type="radio" id="split-mode" name="view-mode-selector"
-            defaultChecked={this.viewMode === ViewMode.Split}
-            onInput={this.handleViewModeChange.bind(this, ViewMode.Split)} />
-          <label htmlFor="split-mode">Split</label>
+        <div className="patch-toolbar">
+          <div className="view-mode-selector">
+            <input type="radio" id="hunk-mode" name="view-mode-selector" 
+              defaultChecked={this.viewMode === ViewMode.Hunk}
+              onInput={this.handleViewModeChange.bind(this, ViewMode.Hunk)} />
+            <label htmlFor="hunk-mode">Hunk</label >
+            <input type="radio" id="inline-mode" name="view-mode-selector" 
+              defaultChecked={this.viewMode === ViewMode.Inline}
+              onInput={this.handleViewModeChange.bind(this, ViewMode.Inline)} />
+            <label htmlFor="inline-mode">Inline</label>
+            <input type="radio" id="split-mode" name="view-mode-selector"
+              defaultChecked={this.viewMode === ViewMode.Split}
+              onInput={this.handleViewModeChange.bind(this, ViewMode.Split)} />
+            <label htmlFor="split-mode">Split</label>
+          </div>
         </div>
         <div className='patch-editor' ref={this.divEditor} />
       </div>

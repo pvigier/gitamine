@@ -118,7 +118,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     return (
       <div className='commit-viewer' ref={this.div}>
         <h2>Index</h2>
-        <div className='button-inline'>
+        <div className='patch-list-header'>
           <p>Unstaged files ({this.state.unstagedPatches.length})</p>
           <button disabled={this.state.unstagedPatches.length === 0}
             onClick={repo.stageAll.bind(repo, this.state.unstagedPatches)}>
@@ -130,7 +130,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           type={PatchType.Unstaged}
           selectedPatch={this.props.selectedPatch}
           onPatchSelect={this.handleUnstagedPatchSelect} />
-        <div className='button-inline'>
+        <div className='patch-list-header'>
           <p>Staged files ({this.state.stagedPatches.length})</p>
           <button disabled={this.state.stagedPatches.length === 0}
             onClick={repo.unstageAll.bind(repo, this.state.stagedPatches)}>

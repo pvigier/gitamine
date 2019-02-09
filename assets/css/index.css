@@ -1,72 +1,77 @@
+/* Theme's variables */
+:root {
+  --bg-color: white;
+  --hover-color: #eee;
+  --selected-color: #ccc;
+  --splitter-color: #ccc;
+  --border-color: black;
+  --font-famliy: Arial, Helvetica, sans-serif;
+  --font-size: 14px;
+}
 /* Body */
-
-html, body {
+html,
+body {
   margin: 0;
   overflow: hidden;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-famliy);
+  font-size: var(--font-size);
 }
-
 div#container {
   height: 100vh;
   width: 100vw;
-} 
-
+}
 div#app {
   height: 100%;
 }
-
+/* General */
+h1 {
+  font-size: 20px;
+}
+h2 {
+  font-size: 16px;
+}
+button {
+  margin: 4px 8px;
+}
 /* Repo dashboard */
-
 div.repo-dashboard {
   height: 100%;
   display: flex;
   flex-direction: column;
 }
-
-/* Repo toolbar */ 
-
+/* Repo toolbar */
 div.repo-toolbar {
   height: 50px;
   display: table;
   text-align: center;
 }
-
 div.repo-toolbar h1 {
   display: table-cell;
   vertical-align: middle;
   margin: 0px;
-  font-size: 20px;
 }
-
 div.repo-toolbar div.toolbar-buttons {
   display: table-cell;
   vertical-align: middle;
 }
-
 /* Repo content */
-
 div.repo-content {
   flex: 1;
   display: flex;
 }
-
 /* Graph viewer */
-
 div.graph-viewer {
   flex: 1;
   min-width: 300px;
   position: relative;
 }
-
 /* Commit graph */
-
 div.commit-graph {
   width: 50%;
   height: 100%;
   overflow-x: scroll;
   overflow-y: hidden;
 }
-
 div.commit-graph canvas {
   position: sticky;
   margin-left: auto;
@@ -74,9 +79,7 @@ div.commit-graph canvas {
   z-index: 2;
   pointer-events: none;
 }
-
 /* Commit list */
-
 div.commit-list {
   width: 100%;
   height: calc(100% - 15px);
@@ -86,15 +89,13 @@ div.commit-list {
   overflow-y: scroll;
   text-align: left;
 }
-
 div.commit-list ul {
   margin: 0px;
   padding-left: 0px;
   list-style: none;
   line-height: 22px;
 }
-
-div.commit-list li {
+div.commit-list ul li {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -104,17 +105,13 @@ div.commit-list li {
   padding-bottom: 3px;
   font-size: 13px;
 }
-
-div.commit-list li:hover {
-  background: #eee;
+div.commit-list ul li:hover {
+  background: var(--hover-color);
 }
-
-div.commit-list li.selected-commit {
-  background: #ccc;
+div.commit-list ul li.selected-commit {
+  background: var(--selected-color);
 }
-
-/* Reference badge */ 
-
+/* Reference badge */
 div.commit-list li span.reference {
   border-radius: 5px;
   padding: 2px;
@@ -122,289 +119,54 @@ div.commit-list li span.reference {
   background-color: var(--branch-color);
   color: white;
 }
-
 div.commit-list li span.reference:hover {
   filter: brightness(1.05);
 }
-
 div.commit-list li span.reference.selected {
   filter: brightness(1.1);
 }
-
 /* Patch viewer */
-
 div.patch-viewer {
   flex: 1;
   min-width: 300px;
   z-index: 1;
 }
-
-div.patch-header {
+div.patch-viewer div.patch-header {
   height: 30px;
-  display: table;
 }
-
-div.patch-header h2 {
+div.patch-viewer div.patch-header h2 {
   margin: 0px;
-  padding: 0px 8px;
-  display: table-cell;
-  vertical-align: middle;
-  font-size: 16px;
+  padding: 6px 8px;
 }
-
-div.patch-editor {
-  height: calc(100% - 50px);
+div.patch-viewer div.patch-toolbar {
+  height: 20px;
 }
-
-/* Splitter */
-
-div.splitter {
-  width: 4px;
-  background: #ccc;
-  cursor: col-resize;
+div.patch-viewer div.patch-editor {
+  height: calc(100% - 30px - 20px);
 }
-
-/* Commit viewer */
-
-div.commit-viewer {
-  width: 300px;
-  min-width: 300px;
-  display: flex;
-  flex-direction: column;
-  font-size: 14px;
-  background: white;
-  z-index: 2;
-}
-
-div.commit-viewer h3 {
-    margin: 4px 0;
-    text-align: center;
-    font-size: 14px;
-    font-weight: normal;
-}
-
-div.commit-viewer h2 {
-    margin: 8px;
-    font-size: 16px;
-}
-
-div.commit-viewer p {
-  margin: 4px 8px;
-}
-
-div.commit-viewer div.button-inline {
-  display: flex;
-  position: relative;
-} 
-
-div.commit-viewer div.button-inline button {
-  position: absolute;
-  right: 8px;
-} 
-
-div.commit-viewer > input, button {
-  margin: 4px 8px;
-}
-
-/* Patch list */
-
-ul.patch-list {
-  flex: 1;
-  margin: 8px;
-  border: 1px;
-  border-style: solid;
-  padding-left: 0px;
-  list-style: none;
-  overflow-y: auto;
-}
-
-ul.patch-list li {
-  padding: 4px;
-  display: flex;
-  position: relative;
-  user-select: none;
-}
-
-ul.patch-list li:hover {
-  background: #eee;
-}
-
-ul.patch-list li.selected-patch {
-  background: #ccc;
-}
-
-ul.patch-list li span.icon {
-  padding-right: 4px;
-}
-
-ul.patch-list li div.buttons {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  top: 0;
-  text-align: right;
-  line-height: 25px; /* Height of the list element */
-}
-
-ul.patch-list li div.buttons button {
-  display: none;
-  margin-right: 2px;
-  padding: 0px 2px;
-}
-
-ul.patch-list li div.buttons:hover button {
-  display: inline;
-}
-
-/* Patch icons */
-
-span.patch-add::before {
-  content: '+';
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: bold;
-  color: green;
-}
-
-span.patch-delete::before {
-  content: '-';
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: bold;
-  color: red;
-}
-
-span.patch-modify::before {
-  content: '\2026';
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: bold;
-  color: orange;
-}
-
-span.patch-rename::before {
-  content: '/';
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: bold;
-  color: dodgerblue;
-}
-
-/* Ellipsis middle */
-
-div.ellipsis-middle {
-  display: flex;
-  overflow: hidden;
-}
-
-div.ellipsis-middle div.left {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-div.ellipsis-middle div.right {
-  max-width: 100%;
-  flex-shrink: 0;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* Overlay zones */
-
-div.overlay-zone {
+/* Hunk widget */
+div.hunk-widget {
   width: 100%;
 }
-
-div.overlay-zone > div {
+div.hunk-widget > div {
   display: flex;
   position: absolute;
   bottom: 0px;
   width: 100%;
   border-bottom: 1px solid;
 }
-
-div.overlay-zone > div > div {
+div.hunk-widget > div > div {
   position: absolute;
   right: 18px;
   bottom: 2px;
 }
-
-div.overlay-zone p {
+div.hunk-widget p {
   margin: 0px;
 }
-
-div.overlay-zone button {
+div.hunk-widget button {
   margin: 0px 2px;
 }
-
-/* Tooltips */
-
-.tooltip-bottom {
-  position: relative;
-  border-bottom: 1px dotted black;
-}
-
-.tooltip-bottom .tooltip-text {
-  visibility: hidden;
-  background-color: black;
-  color: #fff;
-  border-radius: 5px;
-  padding: 5px;
-  position: absolute;
-  z-index: 1;
-  left: 50%;
-  top: calc(100% + 8px);
-  transform: translateX(-50%);
-}
-
-.tooltip-bottom .tooltip-text::after {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: transparent transparent black transparent;
-}
-
-.tooltip-bottom:hover .tooltip-text {
-  visibility: visible;
-}
-
-/* Notifications */
-
-ul.notification-queue {
-  position: absolute;
-  top: 0;
-  left: calc(100% - 400px);
-  width: 800px;
-  z-index: 2;
-  list-style: none;
-  margin: 16px 0px;
-  padding: 0px;
-}
-
-ul.notification-queue li {
-  width: calc(50% - 32px - 2px);
-  padding: 16px;
-  margin: 8px 0px;
-  margin-left: 50%;
-  transition: margin-left 1s 0s;
-  border: 1px solid;
-  background: white;
-  box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-ul.notification-queue li.shown {
-  margin-left: 0px;
-}
-
-ul.notification-queue li:hover {
-  background: #eee;
-}
-
 /* Margin buttons */
-
 .stage-line-button {
   width: 19px;
   height: 19px;
@@ -417,11 +179,9 @@ ul.notification-queue li:hover {
 .stage-line-button:hover {
   background: green;
 }
-
 .stage-line-button:hover::before {
   content: '+';
 }
-
 .unstage-line-button {
   width: 19px;
   height: 19px;
@@ -434,7 +194,184 @@ ul.notification-queue li:hover {
 .unstage-line-button:hover {
   background: red;
 }
-
 .unstage-line-button:hover::before {
   content: '-';
+}
+/* Splitter */
+div.splitter {
+  width: 4px;
+  background: var(--splitter-color);
+  cursor: col-resize;
+}
+/* Commit viewer */
+div.commit-viewer {
+  width: 300px;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-color);
+  z-index: 2;
+}
+div.commit-viewer h3 {
+  margin: 4px 0;
+  text-align: center;
+  font-size: var(--font-size);
+  font-weight: normal;
+}
+div.commit-viewer h2 {
+  margin: 8px;
+}
+div.commit-viewer p {
+  margin: 4px 8px;
+}
+div.commit-viewer div.patch-list-header {
+  display: flex;
+  position: relative;
+}
+div.commit-viewer div.patch-list-header button {
+  position: absolute;
+  right: 8px;
+}
+div.commit-viewer > input {
+  margin: 4px 8px;
+}
+/* Patch list */
+ul.patch-list {
+  flex: 1;
+  margin: 8px;
+  border: 1px solid var(--border-color);
+  padding-left: 0px;
+  list-style: none;
+  overflow-y: auto;
+}
+ul.patch-list li {
+  padding: 4px;
+  display: flex;
+  position: relative;
+  user-select: none;
+}
+ul.patch-list li:hover {
+  background: var(--hover-color);
+}
+ul.patch-list li.selected-patch {
+  background: var(--selected-color);
+}
+ul.patch-list li span.icon {
+  padding-right: 4px;
+}
+ul.patch-list li div.buttons {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  text-align: right;
+  line-height: 25px;
+}
+ul.patch-list li div.buttons button {
+  display: none;
+  margin-right: 2px;
+  padding: 0px 2px;
+}
+ul.patch-list li div.buttons:hover button {
+  display: inline;
+}
+/* Patch icons */
+span.patch-add::before {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  content: '+';
+  color: green;
+}
+span.patch-delete::before {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  content: '-';
+  color: red;
+}
+span.patch-modify::before {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  content: '\2026';
+  color: orange;
+}
+span.patch-rename::before {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  content: '/';
+  color: dodgerblue;
+}
+/* Ellipsis middle */
+div.ellipsis-middle {
+  display: flex;
+  overflow: hidden;
+}
+div.ellipsis-middle div.left {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+div.ellipsis-middle div.right {
+  max-width: 100%;
+  flex-shrink: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+/* Notifications */
+ul.notification-queue {
+  position: absolute;
+  top: 0;
+  left: calc(100% - 400px);
+  width: 800px;
+  z-index: 2;
+  list-style: none;
+  margin: 16px 0px;
+  padding: 0px;
+}
+ul.notification-queue li {
+  width: calc(50% - 2 * (16px + 1px));
+  padding: 16px;
+  margin: 8px 0px;
+  margin-left: 50%;
+  transition: margin-left 1s 0s;
+  border: 1px solid var(--border-color);
+  background: white;
+  box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, 0.2);
+}
+ul.notification-queue li.shown {
+  margin-left: 0px;
+}
+ul.notification-queue li:hover {
+  background: var(--hover-color);
+}
+/* Tooltips */
+.tooltip-bottom {
+  position: relative;
+  border-bottom: 1px dotted black;
+}
+.tooltip-bottom .tooltip-text {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translateX(-50%);
+}
+.tooltip-bottom .tooltip-text::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent black transparent;
+}
+.tooltip-bottom:hover .tooltip-text {
+  visibility: visible;
 }

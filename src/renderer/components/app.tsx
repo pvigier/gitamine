@@ -26,8 +26,12 @@ export class App extends React.PureComponent<{}, AppState> {
     this.showNotification = this.showNotification.bind(this);
   }
 
-  async componentDidMount() {
-    await this.themeManager.loadTheme();
+  componentDidMount() {
+    this.updateTheme();
+  }
+
+  async updateTheme(name?: string) {
+    await this.themeManager.loadTheme(name);
     this.themeManager.updateCssVariables();
   }
 

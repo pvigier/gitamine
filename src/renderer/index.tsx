@@ -20,6 +20,12 @@ if (module.hot) { module.hot.accept(render); }
 
 // Events
 
+ipcRenderer.on('update-theme', (event: Electron.Event, theme: string) => {
+  if (app) {
+    app.updateTheme(theme);
+  }
+});
+
 ipcRenderer.on('clone-repo', (event: Electron.Event, [path, url]: [string, string]) => {
   if (app) {
     app.cloneRepo(path, url);

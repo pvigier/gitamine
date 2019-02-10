@@ -5,8 +5,8 @@ import { Settings, Field } from './settings';
 export class ThemeManager {
   theme: any;
 
-  async loadTheme() {
-    const name = Settings.get(Field.Theme, 'light');
+  async loadTheme(name?: string) {
+    name = name || Settings.get(Field.Theme, 'light');
     const path = Path.join(__dirname, `../../assets/themes/${name}.json`);
     const json = await new Promise<string>((resolve, reject) => {
       fs.readFile(path, (error, data) => {

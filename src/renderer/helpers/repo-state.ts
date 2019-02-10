@@ -10,6 +10,10 @@ const diffOptions = {
   Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
 }
 
+const findSimilarOptions = {
+  flags: Git.Diff.FIND.ALL
+}
+
 export enum PatchType {
   Unstaged,
   Staged,
@@ -261,7 +265,7 @@ export class RepoState {
   async getUnstagedPatches() {
     if (this.headCommit) {
       const unstagedDiff = await Git.Diff.indexToWorkdir(this.repo, null, diffOptions);
-      await unstagedDiff.findSimilar({});
+      await unstagedDiff.findSimilar(findSimilarOptions);
       return await unstagedDiff.patches();
     }
     return [];
@@ -270,7 +274,7 @@ export class RepoState {
   async getStagedPatches() {
     if (this.headCommit) {
       const stagedDiff = await Git.Diff.treeToIndex(this.repo, await this.headCommit.getTree(), null, diffOptions);
-      await stagedDiff.findSimilar({});
+      await stagedDiff.findSimilar(findSimilarOptions);
       return await stagedDiff.patches();
     }
     return [];
@@ -291,6 +295,10 @@ export class RepoState {
     const index = await this.repo.index();
     if (patch.isDeleted()) {
       await index.removeByPath(patch.newFile().path())
+      await index.write();
+    } else if (patch.isRenamed()) {
+      await index.removeByPath(patch.oldFile().path())
+      await index.addByPath(patch.newFile().path())
       await index.write();
     } else {
       await index.addByPath(patch.newFile().path())
@@ -318,6 +326,9 @@ export class RepoState {
 
   async unstagePatch(patch: Git.ConvenientPatch) {
     await Git.Reset.default(this.repo, this.headCommit, patch.newFile().path());
+    if (patch.isRenamed()) {
+      await Git.Reset.default(this.repo, this.headCommit, patch.oldFile().path());
+    }
   }
 
   async unstageAll(patches: Git.ConvenientPatch[]) {

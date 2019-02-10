@@ -72,7 +72,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   handlePatchSelect(patch: Git.ConvenientPatch | null, type: PatchType) {
     this.setState({
       selectedPatch: patch,
-      patchType: type
+      patchType: patch && patch.isModified() ? type : PatchType.Committed
     });
   }
 

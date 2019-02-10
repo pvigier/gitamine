@@ -10,7 +10,7 @@ import { PatchViewer } from './patch-viewer';
 import { Splitter } from './splitter';
 import { Toolbar } from './toolbar';
 import { RepoState, PatchType } from '../helpers/repo-state';
-import { ThemeManager } from '../helpers/theme-manager';
+import { ThemeManager } from '../../shared/theme-manager';
 
 export interface RepoDashboardProps { 
   repo: RepoState;

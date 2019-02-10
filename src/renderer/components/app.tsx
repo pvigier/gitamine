@@ -4,8 +4,8 @@ import { RepoDashboard } from './repo-dashboard';
 import { RepoState } from '../helpers/repo-state';
 import { NotificationQueue } from './notification-queue';
 import { WelcomeDashboard } from './welcome-dashboard';
-import { Field, Settings } from '../helpers/settings';
-import { ThemeManager } from '../helpers/theme-manager';
+import { Field, Settings } from '../../shared/settings';
+import { ThemeManager } from '../../shared/theme-manager';
 
 export interface AppState {
   repos: RepoState[]; 
@@ -26,8 +26,9 @@ export class App extends React.PureComponent<{}, AppState> {
     this.showNotification = this.showNotification.bind(this);
   }
 
-  componentDidMount() {
-    this.themeManager.updateTheme();
+  async componentDidMount() {
+    await this.themeManager.loadTheme();
+    this.themeManager.updateCssVariables();
   }
 
   async cloneRepo(url: string, path: string) {

@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as Git from 'nodegit';
 import * as ignore from 'ignore'
 import { CommitGraph } from './commit-graph';
-import { Field, Settings } from './settings';
+import { Field, Settings } from '../../shared/settings';
 
 const diffOptions = {
   flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 

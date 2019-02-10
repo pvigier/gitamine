@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { enableLiveReload } from 'electron-compile';
 import { setMenu, openCloneRepoWindow, openInitRepoWindow, openOpenRepoWindow } from './menu';
+import { ThemeManager } from '../shared/theme-manager';
 
 // Live reloading
 const isDevMode = process.execPath.match(/[\\/]electron/);
@@ -13,11 +14,15 @@ if (isDevMode) {
 let mainWindow: BrowserWindow | null = null;
 
 const createWindow = async () => {
+  const themeManager = new ThemeManager();
+  await themeManager.loadTheme();
+
   // Create the browser window
   mainWindow = new BrowserWindow({
     show: false,
     width: 800,
     height: 600,
+    backgroundColor: themeManager.getBackgroundColor()
   });
 
   // Set the menu

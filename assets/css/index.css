@@ -1,6 +1,6 @@
 /* Theme's variables */
 :root {
-  --background-color: #ffffff;
+  --background-color: rgba(0, 0, 0, 0);
   --toolbar-color: #ffffff;
   --list-background-color: #ffffff;
   --hover-color: #eeeeee;

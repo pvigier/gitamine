@@ -5,13 +5,9 @@ import { Settings, Field } from './settings';
 export class ThemeManager {
   theme: any;
 
-  async updateTheme() {
-    await this.loadTheme(Settings.get(Field.Theme, 'dark'));
-    this.updateCssVariables();
-  }
-
-  async loadTheme(name: string) {
-    const path = Path.join(__dirname, `../../../assets/themes/${name}.json`);
+  async loadTheme() {
+    const name = Settings.get(Field.Theme, 'light');
+    const path = Path.join(__dirname, `../../assets/themes/${name}.json`);
     const json = await new Promise<string>((resolve, reject) => {
       fs.readFile(path, (error, data) => {
         if (error) {
@@ -28,6 +24,10 @@ export class ThemeManager {
     for (let key in this.theme.css) {
       document.body.style.setProperty(`--${key}`, this.theme.css[key]);
     }
+  }
+
+  getBackgroundColor() {
+    return this.theme.css['background-color'];
   }
 
   getEditorTheme() {

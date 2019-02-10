@@ -2,7 +2,7 @@ import { RepoState } from './repo-state'
 import IntervalTree from 'node-interval-tree';
 
 const BRANCH_COLORS = [
-  'DarkBlue', 
+  'dodgerblue', 
   'DarkCyan', 
   'DarkGoldenRod', 
   'DarkGrey', 

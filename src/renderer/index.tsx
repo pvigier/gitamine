@@ -49,8 +49,7 @@ ipcRenderer.on('create-branch', (event: Electron.Event, name: string, sha: strin
 function handleError(e: any) {
   if (e.code === 'ENOTDIR' || e.code === 'ENOENT') {
     console.log(e);
-  }
-  else {
+  } else {
     console.error(e);
   }
 }

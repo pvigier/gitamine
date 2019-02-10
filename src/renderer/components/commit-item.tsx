@@ -6,8 +6,9 @@ import { RepoState, Stash } from '../helpers/repo-state';
 
 export interface CommitItemProps { 
   repo: RepoState;
-  references: string[];
   commit: Git.Commit;
+  head: string;
+  references: string[];
   selected: boolean;
   color: string;
   stash: Stash | undefined;
@@ -112,7 +113,7 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
     const badges = this.props.references.map((name) => (
       <ReferenceBadge name={name} 
         color={this.props.color} 
-        selected={name === this.props.repo.head} 
+        selected={name === this.props.head} 
         repo={this.props.repo}
         key={name} />
     ));

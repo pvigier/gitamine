@@ -170,13 +170,15 @@ div.commit-list li span.reference {
   margin-right: 2px;
   background-color: var(--branch-color);
   color: white;
+  user-select: none;
+  filter: brightness(0.8);
 
   &:hover {
-    filter: brightness(1.05);
+    filter: brightness(1);
   }
 
   &.selected {
-    filter: brightness(1.1);
+    filter: brightness(1);
   }
 }
 

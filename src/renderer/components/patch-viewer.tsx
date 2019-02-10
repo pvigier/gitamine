@@ -259,8 +259,117 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   customizeHunkView() {
-    const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
+    // We must wait the the editor has finished to add the hunk widgets
+    // before hiding areas otherwise there are problems with line numbers.
+    // However there are no simple ways to know that the editor has finished
+    // updating. Here, we hide areas when the editor has not updated since 200ms.
+    let isSetHiddenAreasScheduled = false;
+    let lastUpdate: number;
 
+    const startScheduling = () => {
+      lastUpdate = Date.now();
+      if (!isSetHiddenAreasScheduled) {
+        isSetHiddenAreasScheduled = true;
+        scheduleSetHiddenAreas();
+      }
+    }
+    const scheduleSetHiddenAreas = () => {
+      if (Date.now() - lastUpdate < 200) {
+        setTimeout(scheduleSetHiddenAreas, 50);
+      } else {
+        // Remove listeners
+        for (let listenerDisposable of listenerDisposables) {
+          listenerDisposable.dispose();
+        }
+        // Set hidden areas
+        this.setHiddenAreas();
+      }
+    }
+
+    // Listen to onDidChangeModelDecorations events
+    // Apparently, the original editor is always updated first
+    // so one listener should be sufficient
+    const listenerDisposables = [
+      this.editor.getOriginalEditor().onDidChangeModelDecorations(startScheduling),
+      this.editor.getModifiedEditor().onDidChangeModelDecorations(startScheduling),
+    ];
+    // Add hunk widgets
+    this.createHunkWidgets();
+    // Customize context menu
+    this.setContextMenu(this.editor.getModifiedEditor());
+  }
+
+  createHunkWidgets() {
+    // Create widgets
+    const overlayWidgets: any[] = [];
+    for (let i = 0; i < this.hunks.length; ++i) { 
+      const hunk = this.hunks[i];
+      const id = `hunk.${this.overlayWidgets[Editor.Modified].length}`;
+      const repo = this.props.repo;
+      const patch = this.props.patch;
+
+      const overlayNode = document.createElement('div');
+      overlayNode.classList.add('hunk-widget');
+
+      const contentNode = document.createElement('div');
+      const textNode = document.createElement('p');
+      textNode.textContent = `@@ -${hunk.oldStart()},${hunk.oldLines()} +${hunk.newStart()},${hunk.newLines()}`;
+      contentNode.appendChild(textNode);
+      if (this.props.type === PatchType.Unstaged) {
+        const buttonsNode = document.createElement('div');
+        // Discard button
+        const discardButton = document.createElement('button');
+        discardButton.textContent = 'Discard';
+        discardButton.addEventListener('click', repo.discardHunk.bind(repo, patch, hunk));
+        buttonsNode.appendChild(discardButton);
+        // Stage button
+        const stageButton = document.createElement('button');
+        stageButton.textContent = 'Stage';
+        stageButton.addEventListener('click', repo.stageHunk.bind(repo, patch, hunk));
+        buttonsNode.appendChild(stageButton);
+        contentNode.appendChild(buttonsNode);
+      } else if (this.props.type === PatchType.Staged) {
+        const buttonsNode = document.createElement('div');
+        // Unstage button
+        const unstageButton = document.createElement('button');
+        unstageButton.textContent = 'Unstage';
+        unstageButton.addEventListener('click', repo.unstageHunk.bind(repo, patch, hunk));
+        buttonsNode.appendChild(unstageButton);
+        contentNode.appendChild(buttonsNode);
+      }
+      overlayNode.appendChild(contentNode);
+
+      overlayWidgets.push({
+        getId: () => id,
+        getDomNode: () => overlayNode,
+        getPosition: () => null
+      });
+      this.overlayWidgets[Editor.Modified].push(overlayWidgets[overlayWidgets.length - 1]);
+    }
+    // Add the widgets (we batch the calls)
+    const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
+    editors[Editor.Modified].changeViewZones((changeAccessor: any) => {
+      for (let i = 0; i < this.hunks.length; ++i) {
+        const overlayWidget = overlayWidgets[i];
+        editors[Editor.Modified].addOverlayWidget(overlayWidget);
+
+        // Used only to compute the position.
+        this.viewZoneIds[Editor.Modified].push(changeAccessor.addZone({
+          afterLineNumber: i === 0 ? 0 : this.hunks[i].newStart() - 1,
+          heightInLines: 2,
+          domNode: document.createElement('div'),
+          onDomNodeTop: (top: number) => {
+            overlayWidget.getDomNode().style.top = top + "px";
+          },
+          onComputedHeight: (height: number) => {
+            overlayWidget.getDomNode().style.height = height + "px";
+          }
+        }));
+      }
+    });
+  }
+
+  setHiddenAreas() {
     function createRange(start: number, end: number) {
       return {
         startLineNumber: start,
@@ -268,102 +377,30 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       }
     }
 
-    // Add hunk widgets
-    for (let i = 0; i < this.hunks.length; ++i) { 
-      const id = `hunk.${this.overlayWidgets[Editor.Modified].length}`;
-      this.createHunkWidget(this.hunks[i], id, i === 0);
+    // Compute hidden areas
+    let oldStart = 1;
+    const oldHiddenAreas = [];
+    let newStart = 1;
+    const newHiddenAreas = [];
+    for (let hunk of this.hunks) {
+      if (hunk.oldStart() - 1 >= oldStart) {
+        oldHiddenAreas.push(createRange(oldStart, hunk.oldStart() - 1));
+      }
+      oldStart = hunk.oldStart() + hunk.oldLines();
+      if (hunk.newStart() - 1 >= newStart) {
+        newHiddenAreas.push(createRange(newStart, hunk.newStart() - 1));
+      }
+      newStart = hunk.newStart() + hunk.newLines();
     }
-    // Customize context menu
-    this.setContextMenu(editors[Editor.Modified]);
-    // Set hunks
-    // We must wait that the line numbers are updated after the addition of hunk widgets
-    // 300ms seems to work but this is a bit hacky
-    setTimeout(() => {
-      // Compute hidden areas
-      let oldStart = 1;
-      const oldHiddenAreas = [];
-      let newStart = 1;
-      const newHiddenAreas = [];
-      for (let hunk of this.hunks) {
-        if (hunk.oldStart() - 1 >= oldStart) {
-          oldHiddenAreas.push(createRange(oldStart, hunk.oldStart() - 1));
-        }
-        oldStart = hunk.oldStart() + hunk.oldLines();
-        if (hunk.newStart() - 1 >= newStart) {
-          newHiddenAreas.push(createRange(newStart, hunk.newStart() - 1));
-        }
-        newStart = hunk.newStart() + hunk.newLines();
-      }
-      if (oldStart <= this.oldBlob.split('\n').length) {
-        oldHiddenAreas.push(createRange(oldStart, Infinity));
-      }
-      if (newStart <= this.newBlob.split('\n').length) {
-        newHiddenAreas.push(createRange(newStart, Infinity));
-      }
-      // Hide areas
-      editors[Editor.Original].setHiddenAreas(oldHiddenAreas);
-      editors[Editor.Modified].setHiddenAreas(newHiddenAreas);
-    }, 300);
-  }
-
-  createHunkWidget(hunk: Git.ConvenientHunk, hunkId: string, firstHunk: boolean) {
-    const editors = [this.editor.getOriginalEditor(), this.editor.getModifiedEditor()];
-    const repo = this.props.repo;
-    const patch = this.props.patch;
-
-    const overlayNode = document.createElement('div');
-    overlayNode.classList.add('hunk-widget');
-
-    const contentNode = document.createElement('div');
-    const textNode = document.createElement('p');
-    textNode.textContent = `@@ -${hunk.oldStart()},${hunk.oldLines()} +${hunk.newStart()},${hunk.newLines()}`;
-    contentNode.appendChild(textNode);
-    if (this.props.type === PatchType.Unstaged) {
-      const buttonsNode = document.createElement('div');
-      // Discard button
-      const discardButton = document.createElement('button');
-      discardButton.textContent = 'Discard';
-      discardButton.addEventListener('click', repo.discardHunk.bind(repo, patch, hunk));
-      buttonsNode.appendChild(discardButton);
-      // Stage button
-      const stageButton = document.createElement('button');
-      stageButton.textContent = 'Stage';
-      stageButton.addEventListener('click', repo.stageHunk.bind(repo, patch, hunk));
-      buttonsNode.appendChild(stageButton);
-      contentNode.appendChild(buttonsNode);
-    } else if (this.props.type === PatchType.Staged) {
-      const buttonsNode = document.createElement('div');
-      // Unstage button
-      const unstageButton = document.createElement('button');
-      unstageButton.textContent = 'Unstage';
-      unstageButton.addEventListener('click', repo.unstageHunk.bind(repo, patch, hunk));
-      buttonsNode.appendChild(unstageButton);
-      contentNode.appendChild(buttonsNode);
+    if (oldStart <= this.oldBlob.split('\n').length) {
+      oldHiddenAreas.push(createRange(oldStart, Infinity));
     }
-    overlayNode.appendChild(contentNode);
-
-    const overlayWidget = {
-      getId: () => hunkId,
-      getDomNode: () => overlayNode,
-      getPosition: () => null
-    };
-    editors[Editor.Modified].addOverlayWidget(overlayWidget);
-    this.overlayWidgets[Editor.Modified].push(overlayWidget);
-
-    // Used only to compute the position.
-    editors[Editor.Modified].changeViewZones((changeAccessor: any) => {
-      this.viewZoneIds[Editor.Modified].push(changeAccessor.addZone({
-        afterLineNumber: firstHunk ? 0 : hunk.newStart() - 1,
-        heightInLines: 2,
-        domNode: document.createElement('div'),
-        onDomNodeTop: (top: number) => {
-          overlayNode.style.top = top + "px";
-        },
-        onComputedHeight: (height: number) => {
-          overlayNode.style.height = height + "px";
-        }
-      }));
-    });
+    if (newStart <= this.newBlob.split('\n').length) {
+      newHiddenAreas.push(createRange(newStart, Infinity));
+    }
+    // Hide areas
+    this.editor.getOriginalEditor().setHiddenAreas(oldHiddenAreas);
+    this.editor.getModifiedEditor().setHiddenAreas(newHiddenAreas);
   }
 
   setContextMenu(editor: any) {

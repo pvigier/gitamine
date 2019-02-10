@@ -3,6 +3,10 @@ import * as Git from 'nodegit';
 import { PatchItem } from './patch-item';
 import { RepoState, PatchType } from '../helpers/repo-state';
 
+function generatePatchKey(patch: Git.ConvenientPatch) {
+  return `${patch.status()}${patch.oldFile().path()}${patch.newFile().path()}`;
+}
+
 export interface PatchListProps { 
   repo?: RepoState
   patches: Git.ConvenientPatch[];
@@ -40,7 +44,7 @@ export class PatchList extends React.PureComponent<PatchListProps, {}> {
         type={this.props.type}
         selected={patch === this.props.selectedPatch} 
         onPatchSelect={this.props.onPatchSelect} 
-        key={path} />;
+        key={generatePatchKey(patch)} />;
     });
 
     return (

@@ -33,7 +33,10 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
   render() {
     return (
       <div className='repo-toolbar'>
-        <h1>{this.props.repo.name}</h1>
+        <div className='repo-title'>
+          <h1>{this.props.repo.name}</h1>
+        </div>
+        <div className='separator' />
         <div className='toolbar-buttons'>
           <button onClick={this.handleFetchButtonClick}>Fetch</button>
           <button onClick={this.handlePushButtonClick}>Push</button>

@@ -65,21 +65,41 @@ div.repo-dashboard {
 
 div.repo-toolbar {
   height: @toolbar-height;
-  display: table;
+  display: flex;
   text-align: center;
   background-color: var(--toolbar-color);
   box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, 0.2);
   z-index: 3;
 
-  h1 {
-    display: table-cell;
-    vertical-align: middle;
-    margin: 0px;
+  div.repo-title {
+    display: table;
+    height: 100%;
+    margin-right: 25px;
+    background-color: var(--list-background-color);
+    padding: 0px 16px;
+
+    h1 {
+      display: table-cell;
+      vertical-align: middle;
+      margin: 0px;
+    }
+  }
+
+  div.separator {
+    border-width: 25px 0px 25px 20px;
+    border-style: solid;
+    border-color: transparent transparent transparent var(--list-background-color);
+    margin-left: -25px;
   }
 
   div.toolbar-buttons {
-    display: table-cell;
-    vertical-align: middle;
+    flex: 1;
+    padding: 4px 0px;
+    
+    button {
+      height: 100%;
+      margin: 0px 4px;
+    }
   }
 }
 
@@ -321,7 +341,7 @@ div.commit-viewer {
     
     button {
       position: absolute;
-      right: 8px;
+      right: 0px;
     } 
   } 
 

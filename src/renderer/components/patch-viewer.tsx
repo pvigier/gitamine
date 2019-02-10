@@ -325,10 +325,12 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
         // Discard button
         const discardButton = document.createElement('button');
         discardButton.textContent = 'Discard';
+        discardButton.className = 'red-button';
         discardButton.addEventListener('click', repo.discardHunk.bind(repo, patch, hunk));
         buttonsNode.appendChild(discardButton);
         // Stage button
         const stageButton = document.createElement('button');
+        stageButton.className = 'green-button';
         stageButton.textContent = 'Stage';
         stageButton.addEventListener('click', repo.stageHunk.bind(repo, patch, hunk));
         buttonsNode.appendChild(stageButton);
@@ -337,6 +339,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
         const buttonsNode = document.createElement('div');
         // Unstage button
         const unstageButton = document.createElement('button');
+        unstageButton.className = 'red-button';
         unstageButton.textContent = 'Unstage';
         unstageButton.addEventListener('click', repo.unstageHunk.bind(repo, patch, hunk));
         buttonsNode.appendChild(unstageButton);

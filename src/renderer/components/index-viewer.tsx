@@ -120,7 +120,8 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
         <h2>Index</h2>
         <div className='patch-list-header'>
           <p>Unstaged files ({this.state.unstagedPatches.length})</p>
-          <button disabled={this.state.unstagedPatches.length === 0}
+          <button className='green-button'
+            disabled={this.state.unstagedPatches.length === 0}
             onClick={repo.stageAll.bind(repo, this.state.unstagedPatches)}>
             Stage all changes
           </button>
@@ -132,7 +133,8 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           onPatchSelect={this.handleUnstagedPatchSelect} />
         <div className='patch-list-header'>
           <p>Staged files ({this.state.stagedPatches.length})</p>
-          <button disabled={this.state.stagedPatches.length === 0}
+          <button className='red-button'
+            disabled={this.state.stagedPatches.length === 0}
             onClick={repo.unstageAll.bind(repo, this.state.stagedPatches)}>
             Unstage all changes
            </button>
@@ -145,7 +147,9 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
         <input placeholder={'Summary'} 
           value={this.state.summary} 
           onChange={this.handleSummaryChange} />
-        <button onClick={this.commit} disabled={this.state.summary.length === 0}>
+        <button className='green-button'
+          onClick={this.commit} 
+          disabled={this.state.summary.length === 0}>
           Commit
         </button>
       </div>

@@ -9,7 +9,12 @@
     "border-color": "#e6e6e6",
     "font-color": "#000000",
     "font-famliy": "Arial, Helvetica, sans-serif",
-    "font-size": "14px"
+    "font-size": "14px",
+    "button-font-color": "#ffffff",
+    "green-button-border-color": "#006400",
+    "green-button-background-color": "#008000",
+    "red-button-border-color": "#8b0000",
+    "red-button-background-color": "#a70000"
   },
   "monaco": {
     "theme": "vs-light"

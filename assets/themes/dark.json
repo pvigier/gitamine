@@ -7,9 +7,14 @@
     "selected-color": "#282828",
     "splitter-color": "#282828",
     "border-color": "#191919",
-    "font-color": "#c8c8c8",
+    "font-color": "#dcdcdc",
     "font-famliy": "Arial, Helvetica, sans-serif",
-    "font-size": "14px"
+    "font-size": "14px",
+    "button-font-color": "#dcdcdc",
+    "green-button-border-color": "#008000",
+    "green-button-background-color": "#006400",
+    "red-button-border-color": "#a70000",
+    "red-button-background-color": "#8b0000"
   },
   "monaco": {
     "theme": "vs-dark"

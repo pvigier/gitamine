@@ -1,4 +1,4 @@
-/* Theme's variables */
+/* Theme's variables (default value should correspond to the default theme) */
 :root {
   --background-color: rgba(0, 0, 0, 0);
   --toolbar-color: #ffffff;
@@ -10,6 +10,7 @@
   --font-color: #000000;
   --font-famliy: Arial, Helvetica, sans-serif;
   --font-size: 14px;
+  --button-font-color: #ffffff;
 }
 /* Body */
 html,
@@ -389,4 +390,47 @@ ul.notification-queue li:hover {
 }
 .tooltip-bottom:hover .tooltip-text {
   visibility: visible;
+}
+/* Buttons */
+button {
+  background-color: var(--list-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  color: var(--font-color);
+  outline: 0px;
+}
+button:hover {
+  background-color: var(--hover-color);
+}
+button:active {
+  background-color: var(--selected-color);
+}
+button:disabled {
+  cursor: not-allowed;
+}
+.green-button {
+  color: var(--button-font-color);
+  background-color: var(--green-button-background-color);
+  border-color: var(--green-button-border-color);
+}
+.green-button:hover {
+  background-color: var(--green-button-background-color);
+  border-color: var(--green-button-background-color);
+}
+.green-button:active {
+  background-color: var(--green-button-border-color);
+  border-color: var(--green-button-background-color);
+}
+.red-button {
+  color: var(--button-font-color);
+  background-color: var(--red-button-background-color);
+  border-color: var(--red-button-border-color);
+}
+.red-button:hover {
+  background-color: var(--red-button-background-color);
+  border-color: var(--red-button-background-color);
+}
+.red-button:active {
+  background-color: var(--red-button-border-color);
+  border-color: var(--red-button-background-color);
 }

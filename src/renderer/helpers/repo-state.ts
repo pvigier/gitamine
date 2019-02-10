@@ -5,6 +5,10 @@ import * as ignore from 'ignore'
 import { CommitGraph } from './commit-graph';
 import { Field, Settings } from '../../shared/settings';
 
+export function getRepoName(path: string) {
+  return Path.parse(Path.dirname(path)).name;
+}
+
 const diffOptions = {
   flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 
   Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
@@ -53,7 +57,7 @@ export class RepoState {
   constructor(repo: Git.Repository, onNotification: (message: string) => void) {
     this.repo = repo;
     this.path = this.repo.path(); 
-    this.name = Path.parse(Path.dirname(this.path)).name;
+    this.name = getRepoName(this.path);
     this.commits = [];
     this.shaToCommit = new Map<string, Git.Commit>();
     this.references = new Map<string, Git.Commit>();

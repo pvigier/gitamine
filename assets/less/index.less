@@ -491,6 +491,45 @@ ul.notification-queue {
   }
 }
 
+/* Welcome dashboard */
+
+div.welcome-dashboard {
+  margin-top: 100px;
+  text-align: center;
+
+  h1 {
+    margin-bottom: 20px;
+  }
+
+  div.actions {
+    width: 600px;
+    margin: auto;
+    display: flex; 
+
+    div.action {
+      width: 174px;
+      background-color: var(--list-background-color);
+      margin: 8px;
+      padding: 4px;
+      border: 1px solid var(--border-color);
+      border-radius: 3px; 
+      overflow-wrap: break-word;
+      
+      p {
+        text-align: left;
+      }
+
+      &:hover {
+        background-color: var(--hover-color);
+      }
+
+      &:active {
+        background-color: var(--selected-color);
+      }
+    }
+  }
+}
+
 /* Tooltips */
 
 .tooltip-bottom {

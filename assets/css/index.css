@@ -378,6 +378,37 @@ ul.notification-queue li.shown {
 ul.notification-queue li:hover {
   background: var(--hover-color);
 }
+/* Welcome dashboard */
+div.welcome-dashboard {
+  margin-top: 100px;
+  text-align: center;
+}
+div.welcome-dashboard h1 {
+  margin-bottom: 20px;
+}
+div.welcome-dashboard div.actions {
+  width: 600px;
+  margin: auto;
+  display: flex;
+}
+div.welcome-dashboard div.actions div.action {
+  width: 174px;
+  background-color: var(--list-background-color);
+  margin: 8px;
+  padding: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  overflow-wrap: break-word;
+}
+div.welcome-dashboard div.actions div.action p {
+  text-align: left;
+}
+div.welcome-dashboard div.actions div.action:hover {
+  background-color: var(--hover-color);
+}
+div.welcome-dashboard div.actions div.action:active {
+  background-color: var(--selected-color);
+}
 /* Tooltips */
 .tooltip-bottom {
   position: relative;

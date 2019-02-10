@@ -206,6 +206,10 @@ div.patch-viewer {
 
   div.patch-editor {
     height: calc(100% - @patch-header-height - @patch-toolbar-height);
+
+    &.hidden {
+      visibility: hidden;
+    }
   }
 }
 

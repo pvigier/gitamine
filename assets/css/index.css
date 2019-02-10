@@ -155,6 +155,9 @@ div.patch-viewer div.patch-toolbar {
 div.patch-viewer div.patch-editor {
   height: calc(100% - 30px - 20px);
 }
+div.patch-viewer div.patch-editor.hidden {
+  visibility: hidden;
+}
 /* Hunk widget */
 div.hunk-widget {
   width: 100%;

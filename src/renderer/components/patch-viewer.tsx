@@ -197,7 +197,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       .reduce((acc, value) => acc.concat(value), []);
   }
 
-  updateEditor() {
+  async updateEditor() {
+    // Hide the editor during update
+    this.divEditor.current!.classList.add('hidden');
     // Update editor options
     this.editor.updateOptions({
       renderSideBySide: this.viewMode === ViewMode.Split
@@ -207,8 +209,10 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     // Update models
     this.setModels();
     if (this.viewMode === ViewMode.Hunk) {
-      this.customizeHunkView(); 
+      await this.customizeHunkView(); 
     }
+    // Show the editor
+    this.divEditor.current!.classList.remove('hidden');
   }
 
   resetEditor() {
@@ -259,44 +263,45 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   customizeHunkView() {
-    // We must wait the the editor has finished to add the hunk widgets
-    // before hiding areas otherwise there are problems with line numbers.
-    // However there are no simple ways to know that the editor has finished
-    // updating. Here, we hide areas when the editor has not updated since 200ms.
-    let isSetHiddenAreasScheduled = false;
-    let lastUpdate: number;
+    return new Promise<void>((resolve) => {
+      // We must wait the the editor has finished to add the hunk widgets
+      // before hiding areas otherwise there are problems with line numbers.
+      // However there are no simple ways to know that the editor has finished
+      // updating. Here, we hide areas when the editor has not updated since 200ms.
+      let isSetHiddenAreasScheduled = false;
+      let lastUpdate: number;
 
-    const startScheduling = () => {
-      lastUpdate = Date.now();
-      if (!isSetHiddenAreasScheduled) {
-        isSetHiddenAreasScheduled = true;
-        scheduleSetHiddenAreas();
-      }
-    }
-    const scheduleSetHiddenAreas = () => {
-      if (Date.now() - lastUpdate < 200) {
-        setTimeout(scheduleSetHiddenAreas, 50);
-      } else {
-        // Remove listeners
-        for (let listenerDisposable of listenerDisposables) {
-          listenerDisposable.dispose();
+      const startScheduling = () => {
+        lastUpdate = Date.now();
+        if (!isSetHiddenAreasScheduled) {
+          isSetHiddenAreasScheduled = true;
+          scheduleSetHiddenAreas();
         }
-        // Set hidden areas
-        this.setHiddenAreas();
       }
-    }
+      const scheduleSetHiddenAreas = () => {
+        if (Date.now() - lastUpdate < 200) {
+          setTimeout(scheduleSetHiddenAreas, 50);
+        } else {
+          // Remove listeners
+          listenerDisposables.forEach((listenerDisposable) => listenerDisposable.dispose());
+          // Set hidden areas
+          this.setHiddenAreas();
+          resolve();
+        }
+      }
 
-    // Listen to onDidChangeModelDecorations events
-    // Apparently, the original editor is always updated first
-    // so one listener should be sufficient
-    const listenerDisposables = [
-      this.editor.getOriginalEditor().onDidChangeModelDecorations(startScheduling),
-      this.editor.getModifiedEditor().onDidChangeModelDecorations(startScheduling),
-    ];
-    // Add hunk widgets
-    this.createHunkWidgets();
-    // Customize context menu
-    this.setContextMenu(this.editor.getModifiedEditor());
+      // Listen to onDidChangeModelDecorations events
+      // Apparently, the original editor is always updated first
+      // so one listener should be sufficient
+      const listenerDisposables = [
+        this.editor.getOriginalEditor().onDidChangeModelDecorations(startScheduling),
+        this.editor.getModifiedEditor().onDidChangeModelDecorations(startScheduling),
+      ];
+      // Add hunk widgets
+      this.createHunkWidgets();
+      // Customize context menu
+      this.setContextMenu(this.editor.getModifiedEditor());
+    });
   }
 
   createHunkWidgets() {

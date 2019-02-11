@@ -185,8 +185,10 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
     let rightViewer;
     if (this.state.selectedCommit) {
-      rightViewer = <CommitViewer commit={this.state.selectedCommit} 
+      rightViewer = <CommitViewer repo={this.props.repo}
+        commit={this.state.selectedCommit} 
         selectedPatch={this.state.selectedPatch} 
+        onCommitSelect={this.handleCommitSelect}
         onPatchSelect={this.handlePatchSelect} 
         ref={this.rightViewer as React.RefObject<CommitViewer>} />
     } else {

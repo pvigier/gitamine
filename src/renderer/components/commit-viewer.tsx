@@ -2,7 +2,7 @@ import { clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
-import { PatchType } from '../helpers/repo-state';
+import { PatchType, RepoState } from '../helpers/repo-state';
 
 function shortenSha(sha: string) {
   return sha.substr(0, 6);
@@ -13,8 +13,10 @@ function formatDate(date: Date) {
 }
 
 export interface CommitViewerProps { 
+  repo: RepoState;
   commit: Git.Commit;
   selectedPatch: Git.ConvenientPatch | null;
+  onCommitSelect: (commit: Git.Commit) => void;
   onPatchSelect: (patch: Git.ConvenientPatch, type: PatchType) => void;
 }
 
@@ -78,18 +80,27 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
       tooltipSpan.textContent = 'Copied';
     }
     return (
-      <span className='tooltip-bottom' key={sha} onMouseEnter={handleHover} onClick={handleClick}>
+      <span className='tooltip-bottom sha-button' onMouseEnter={handleHover} onClick={handleClick}>
         {shortenSha(sha)}
         <span className='tooltip-text'>Copy</span>
       </span>
     );
   }
 
-  static createShaButtons(shas: Git.Oid[]) {
+  createNavigationButton(commit: Git.Commit) {
+    return (
+      <span className='tooltip-bottom sha-button' key={commit.sha()} onClick={() => this.props.onCommitSelect(commit)}>
+        {shortenSha(commit.sha())}
+        <span className='tooltip-text'>Navigate</span>
+      </span>
+    );
+  }
+
+  createNavigationButtons(oids: Git.Oid[]) {
     const buttons = [];
-    for (let i = 0; i < shas.length; ++i) {
-      buttons.push(CommitViewer.createShaButton(shas[i].tostrS()))
-      if (i < shas.length - 1) {
+    for (let i = 0; i < oids.length; ++i) {
+      buttons.push(this.createNavigationButton(this.props.repo.shaToCommit.get(oids[i].tostrS())!));
+      if (i < oids.length - 1) {
         buttons.push(', ');
       }
     }
@@ -107,7 +118,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
         <p>By {author.name()} &lt;<a href={`mailto:${author.email()}`}>{author.email()}</a>&gt;</p>
         <p>Authored {formatDate(authoredDate)}</p>
         <p>Last modified {formatDate(commit.date())}</p>
-        <p>Parents: {CommitViewer.createShaButtons(commit.parents())}</p>
+        <p>Parents: {this.createNavigationButtons(commit.parents())}</p>
         <PatchList patches={this.state.patches}
           type={PatchType.Committed}
           selectedPatch={this.props.selectedPatch}

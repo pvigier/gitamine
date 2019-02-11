@@ -197,7 +197,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
     return (
       <div className='repo-dashboard'>
-        <Toolbar repo={this.props.repo} />
+        <Toolbar repo={this.props.repo} selectedCommit={this.state.selectedCommit} />
         <div className='repo-content'>
           {leftViewer}
           <Splitter onPanelResize={this.handlePanelResize} />

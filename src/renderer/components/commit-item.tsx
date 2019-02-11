@@ -1,8 +1,9 @@
-import { remote, clipboard, BrowserWindow } from 'electron';
+import { remote, clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { ReferenceBadge } from './reference-badge';
 import { RepoState, Stash } from '../helpers/repo-state';
+import { openCreateBranchWindow } from '../helpers/open-create-branch-window';
 
 export interface CommitItemProps { 
   repo: RepoState;
@@ -32,7 +33,7 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
       template.push(
         {
           label: 'Create branch here',
-          click: () => this.openCreateBranchWindow()
+          click: () => openCreateBranchWindow(this.props.commit.sha())
         },
         {
           label: 'Reset to this commit',
@@ -78,26 +79,6 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
     const menu = remote.Menu.buildFromTemplate(template);
     event.preventDefault();
     menu.popup({});
-  }
-
-  openCreateBranchWindow() {
-    let window: BrowserWindow | null = new remote.BrowserWindow({
-      show: false,
-      width: 400,
-      height: 320,
-      parent: remote.getCurrentWindow(),
-      modal: true
-    });
-
-    window.loadURL(`file://${__dirname}/../../../assets/html/create-branch.html`);
-
-    window.once('ready-to-show', () => {
-      window!.show();
-      window!.webContents.send('create-branch-data', this.props.commit.sha());
-    });
-    window.on('close', () => { 
-      window = null
-    });
   }
 
   formatStashMessage() {

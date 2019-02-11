@@ -232,7 +232,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.resetEditor();
     // Update models
     this.setModels();
-    if (this.viewMode === ViewMode.Hunk) {
+    if (this.viewMode === ViewMode.Hunk && this.props.patch.isModified()) {
       await this.customizeHunkView(); 
     }
     // Show the editor

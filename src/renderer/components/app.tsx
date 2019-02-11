@@ -9,6 +9,7 @@ import { ThemeManager } from '../../shared/theme-manager';
 
 export interface AppState {
   repos: RepoState[]; 
+  editorTheme: string;
 }
 
 export class App extends React.PureComponent<{}, AppState> {
@@ -20,7 +21,8 @@ export class App extends React.PureComponent<{}, AppState> {
     this.notificationQueue = React.createRef();
     this.themeManager = new ThemeManager();
     this.state = {
-      repos: []
+      repos: [],
+      editorTheme: 'vs-light'
     };
     this.openRepo = this.openRepo.bind(this);
     this.showNotification = this.showNotification.bind(this);
@@ -33,6 +35,9 @@ export class App extends React.PureComponent<{}, AppState> {
   async updateTheme(name?: string) {
     await this.themeManager.loadTheme(name);
     this.themeManager.updateCssVariables();
+    this.setState({
+      editorTheme: this.themeManager.getEditorTheme()
+    });
   }
 
   async cloneRepo(url: string, path: string) {
@@ -92,7 +97,7 @@ export class App extends React.PureComponent<{}, AppState> {
       <WelcomeDashboard onRecentlyOpenedRepoClick={this.openRepo} /> :
       this.state.repos.map((repo: RepoState) => <RepoDashboard 
         repo={repo} 
-        themeManager={this.themeManager}
+        editorTheme={this.state.editorTheme}
         key={repo.path} />);
     return (
       <div id='app'>

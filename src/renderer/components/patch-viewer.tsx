@@ -103,6 +103,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   componentDidUpdate(prevProps: PatchViewerProps) {
     if (this.props.type !== prevProps.type || !comparePatches(this.props.patch, prevProps.patch)) {
       this.loadAndUpdate();
+    } 
+    if (this.props.editorTheme !== prevProps.editorTheme) {
+      monaco.editor.setTheme(this.props.editorTheme); 
     }
   }
 
@@ -453,7 +456,11 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       // Create an overlay widget
       const overlayNode = document.createElement('div');
       overlayNode.addEventListener('mousedown', this.handleMarginButtonClick.bind(this, i, iEditor));
-      overlayNode.classList.add(className);
+      overlayNode.classList.add(className, 'tooltip-right');
+      const tooltipNode = document.createElement('span');
+      tooltipNode.classList.add('tooltip-text');
+      tooltipNode.textContent = this.props.type === PatchType.Unstaged ? 'Stage this line' : 'Unstage this line';
+      overlayNode.appendChild(tooltipNode);
       const overlayWidget = {
         getId: () => `${prefix}-${i}`,
         getDomNode: () => overlayNode,

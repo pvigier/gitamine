@@ -84,6 +84,12 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
       let [x0, y0] = this.computeNodeCenterCoordinates(0, 0);
       y0 += RADIUS;
       const node = positions.get(repo.headCommit.sha())!;
+      if (!node) {
+        console.error(`Unable to draw index edge: position of head is undefined.\n` + 
+          `Head\'s sha: ${repo.headCommit.sha()}.\n` + 
+          `Branch: ${repo.head}`);
+        return;
+      }
       const [x1, y1] = this.computeNodeCenterCoordinates(node[0], node[1]);
 
       // Set the style

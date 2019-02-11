@@ -14,6 +14,7 @@ import { RepoState, PatchType } from '../helpers/repo-state';
 export interface RepoDashboardProps { 
   repo: RepoState;
   editorTheme: string;
+  onRepoClose: () => void;
 }
 
 export interface RepoDashboardState { 
@@ -199,7 +200,9 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
     return (
       <div className='repo-dashboard'>
-        <Toolbar repo={this.props.repo} selectedCommit={this.state.selectedCommit} />
+        <Toolbar repo={this.props.repo} 
+          selectedCommit={this.state.selectedCommit} 
+          onRepoClose={this.props.onRepoClose} />
         <div className='repo-content'>
           {leftViewer}
           <Splitter onPanelResize={this.handlePanelResize} />

@@ -82,6 +82,16 @@ export class App extends React.PureComponent<{}, AppState> {
     Settings.set(Field.RecentlyOpened, [repoState.path, ...recentlyOpened.slice(0, 2)]);
   }
 
+  closeRepo(i: number) {
+    this.setState((prevState) => {
+      const repos = prevState.repos.slice();
+      repos.splice(i, 1);
+      return {
+        repos: repos
+      };
+    });
+  }
+
   getCurrentRepo() {
     return this.state.repos[0];
   }
@@ -95,9 +105,10 @@ export class App extends React.PureComponent<{}, AppState> {
   render() {
     const repoDashboards = this.state.repos.length === 0 ?
       <WelcomeDashboard onRecentlyOpenedRepoClick={this.openRepo} /> :
-      this.state.repos.map((repo: RepoState) => <RepoDashboard 
+      this.state.repos.map((repo, i) => <RepoDashboard 
         repo={repo} 
         editorTheme={this.state.editorTheme}
+        onRepoClose={() => this.closeRepo(i)}
         key={repo.path} />);
     return (
       <div id='app'>

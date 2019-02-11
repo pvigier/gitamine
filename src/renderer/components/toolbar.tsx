@@ -6,6 +6,7 @@ import { openCreateBranchWindow } from '../helpers/open-create-branch-window';
 export class ToolbarProps {
   repo: RepoState;
   selectedCommit: Git.Commit | null;
+  onRepoClose: () => void;
 }
 
 export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
@@ -56,6 +57,7 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
           <button onClick={this.handleStashButtonClick}>Stash</button>
           <button onClick={this.handlePopButtonClick}>Pop</button>
         </div>
+        <button onClick={this.props.onRepoClose}>Close</button>
       </div>
     );
   }

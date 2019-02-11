@@ -130,6 +130,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     // Watch references
     const referencesWatcher = chokidar.watch(Path.join(path, 'refs'), {
       ignoreInitial: true,
+      ignored: /.*\.lock$/,
       followSymlinks: false
     });
     referencesWatcher.on('all', async (event: string, path: string) => {

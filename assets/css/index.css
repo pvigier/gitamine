@@ -267,13 +267,21 @@ div.commit-viewer p {
 div.commit-viewer .sha-button {
   border-bottom: 1px dotted var(--font-color);
 }
-div.commit-viewer div.patch-list-header {
+div.commit-viewer div.section-header {
   display: flex;
   position: relative;
 }
-div.commit-viewer div.patch-list-header button {
+div.commit-viewer div.section-header button {
   position: absolute;
   right: 0px;
+}
+div.commit-viewer div.section-header .amend-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: absolute;
+  right: 0px;
+  margin: 4px 8px;
 }
 div.commit-viewer > input {
   margin: 4px 8px;

@@ -12,6 +12,7 @@ export interface IndexViewerProps {
 export interface IndexViewerState {
   unstagedPatches: Git.ConvenientPatch[];
   stagedPatches: Git.ConvenientPatch[];
+  amend: boolean;
   summary: string;
 }
 
@@ -25,10 +26,12 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.state = {
       unstagedPatches: [],
       stagedPatches: [],
+      amend: false,
       summary: ''
     }
     this.handleUnstagedPatchSelect = this.handleUnstagedPatchSelect.bind(this);
     this.handleStagedPatchSelect = this.handleStagedPatchSelect.bind(this);
+    this.handleAmendChange = this.handleAmendChange.bind(this);
     this.handleSummaryChange = this.handleSummaryChange.bind(this);
     this.commit = this.commit.bind(this);
   }
@@ -45,6 +48,16 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   handleStagedPatchSelect(patch: Git.ConvenientPatch) {
     this.iSelectedPatch = this.state.stagedPatches.indexOf(patch); 
     this.props.onPatchSelect(patch, PatchType.Staged);
+  }
+
+  handleAmendChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const newState = {
+      amend: event.target.checked
+    } as IndexViewerState
+    if (newState.amend && !this.state.summary) {
+      newState.summary = this.props.repo.headCommit.summary();
+    }
+    this.setState(newState);
   }
 
   handleSummaryChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -106,8 +119,13 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
 
   async commit() {
     if (this.state.summary.length > 0) {
-      await this.props.repo.commit(this.state.summary);
+      if (this.state.amend) {
+        await this.props.repo.amend(this.state.summary);
+      } else {
+        await this.props.repo.commit(this.state.summary);
+      }
       this.setState({
+        amend: false,
         summary: ''
       });
     }
@@ -118,7 +136,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     return (
       <div className='commit-viewer' ref={this.div}>
         <h2>Index</h2>
-        <div className='patch-list-header'>
+        <div className='section-header'>
           <p>Unstaged files ({this.state.unstagedPatches.length})</p>
           <button className='green-button'
             disabled={this.state.unstagedPatches.length === 0}
@@ -131,7 +149,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           type={PatchType.Unstaged}
           selectedPatch={this.props.selectedPatch}
           onPatchSelect={this.handleUnstagedPatchSelect} />
-        <div className='patch-list-header'>
+        <div className='section-header'>
           <p>Staged files ({this.state.stagedPatches.length})</p>
           <button className='red-button'
             disabled={this.state.stagedPatches.length === 0}
@@ -144,13 +162,20 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           type={PatchType.Staged}
           selectedPatch={this.props.selectedPatch}
           onPatchSelect={this.handleStagedPatchSelect} />
+        <div className='section-header'>
+          <p>Commit message</p>
+          <div className='amend-container'>
+            <input type='checkbox' id='amend' name='amend' checked={this.state.amend} onChange={this.handleAmendChange} />
+            <label htmlFor='amend'>Amend</label> 
+          </div>
+        </div>
         <input placeholder={'Summary'} 
           value={this.state.summary} 
           onChange={this.handleSummaryChange} />
         <button className='green-button'
           onClick={this.commit} 
           disabled={this.state.summary.length === 0}>
-          Commit
+          {this.state.amend ? 'Amend' : 'Commit'}
         </button>
       </div>
     );

@@ -371,6 +371,16 @@ export class RepoState {
     }
   }
 
+  async amend(message: string) {
+    try {
+      const index = await this.repo.index();
+      const oid = await index.writeTree();
+      this.headCommit.amend('HEAD', this.headCommit.author(), this.getSignature(), this.headCommit.messageEncoding(), message, oid);
+    } catch (e) {
+      this.onNotification(`Unable to amend: ${e.message}`);
+    }
+  }
+
   // Reference operations
 
   async getReferenceCommits() {

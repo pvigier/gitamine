@@ -175,7 +175,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         patch={this.state.selectedPatch!} 
         type={this.state.patchType}
         editorTheme={this.props.editorTheme}
-        onEscapePressed={this.exitPatchViewer} /> 
+        onClose={this.exitPatchViewer} /> 
     } else {
       leftViewer = <GraphViewer repo={this.props.repo} 
         selectedCommit={this.state.selectedCommit} 

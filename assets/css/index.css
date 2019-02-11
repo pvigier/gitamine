@@ -162,16 +162,23 @@ div.patch-viewer {
 }
 div.patch-viewer div.patch-header {
   height: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 div.patch-viewer div.patch-header h2 {
   margin: 0px;
   padding: 6px 8px;
 }
 div.patch-viewer div.patch-toolbar {
-  height: 20px;
+  height: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 div.patch-viewer div.patch-editor {
-  height: calc(100% - 30px - 20px);
+  height: calc(100% - 30px - 30px);
+  align-items: center;
 }
 div.patch-viewer div.patch-editor.hidden {
   visibility: hidden;
@@ -277,8 +284,6 @@ div.commit-viewer div.section-header button {
 }
 div.commit-viewer div.section-header .amend-container {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   position: absolute;
   right: 0px;
   margin: 4px 8px;

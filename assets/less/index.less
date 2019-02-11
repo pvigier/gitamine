@@ -206,7 +206,7 @@ div.commit-list li span.reference {
 /* Patch viewer */
 
 @patch-header-height: 30px;
-@patch-toolbar-height: 20px;
+@patch-toolbar-height: 30px;
 
 div.patch-viewer {
   .left-viewer();
@@ -214,6 +214,9 @@ div.patch-viewer {
 
   div.patch-header {
     height: @patch-header-height;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
     h2 {
       margin: 0px;
@@ -223,10 +226,14 @@ div.patch-viewer {
 
   div.patch-toolbar {
     height: @patch-toolbar-height;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   div.patch-editor {
     height: calc(100% - @patch-header-height - @patch-toolbar-height);
+    align-items: center;
 
     &.hidden {
       visibility: hidden;

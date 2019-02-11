@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { RepoState, PatchType } from '../helpers/repo-state'
+import { openInEditor } from '../helpers/open-in-editor';
 
 // Load Monaco
 
@@ -58,7 +59,7 @@ export interface PatchViewerProps {
   patch: Git.ConvenientPatch;
   type: PatchType;
   editorTheme: string;
-  onEscapePressed: () => void;
+  onClose: () => void;
 }
 
 export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
@@ -89,6 +90,10 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     this.handleSelectedLinesDiscard = this.handleSelectedLinesDiscard.bind(this);
     this.handleSelectedLinesStage = this.handleSelectedLinesStage.bind(this);
     this.handleSelectedLinesUnstage = this.handleSelectedLinesUnstage.bind(this);
+    this.handleFileDiscard = this.handleFileDiscard.bind(this);
+    this.handleFileStage = this.handleFileStage.bind(this);
+    this.handleFileUnstage = this.handleFileUnstage.bind(this);
+    this.handleOpenInEditor = this.handleOpenInEditor.bind(this);
   }
 
   componentDidMount() {
@@ -111,7 +116,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
 
   handleKeyUp(event: KeyboardEvent) {
     if (event.keyCode === 27) {
-      this.props.onEscapePressed();
+      this.props.onClose();
     }
   }
 
@@ -134,6 +139,22 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
 
   async handleSelectedLinesUnstage(editor: any) {
     this.props.repo.unstageLines(this.props.patch, await this.getSelectedLines(editor));
+  }
+
+  handleFileDiscard() {
+    this.props.repo.discardPatch(this.props.patch);
+  }
+
+  handleFileStage() {
+    this.props.repo.stagePatch(this.props.patch);
+  }
+
+  handleFileUnstage() {
+    this.props.repo.unstagePatch(this.props.patch);
+  }
+
+  handleOpenInEditor() {
+    openInEditor(this.props.patch.newFile().path());
   }
 
   handleMarginButtonClick(i: number, editor: Editor) {
@@ -502,6 +523,17 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   render() {
     const path = this.props.patch.newFile().path();
     const i = Math.max(path.lastIndexOf('/'), 0);
+    const rightButtons = [];
+    if (this.props.type === PatchType.Unstaged) {
+      rightButtons.push(
+        <button className='red-button' onClick={this.handleFileDiscard} key='discard'>Discard file</button>,
+        <button className='green-button' onClick={this.handleFileStage} key='stage'>Stage file</button>
+      );
+    } else if (this.props.type === PatchType.Staged) {
+      rightButtons.push(
+        <button className='red-button' onClick={this.handleFileUnstage} key='unstage'>Unstage file</button>
+      );
+    }
     return (
       <div className='patch-viewer'>
         <div className='patch-header'>
@@ -511,8 +543,12 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
               <div className='right'>{path.substr(i)}</div>
             </div>
           </h2>
+          <button onClick={this.props.onClose}>Close</button>
         </div>
         <div className="patch-toolbar">
+          <div>
+            <button onClick={this.handleOpenInEditor}>Open in editor</button>
+          </div>
           <div className="view-mode-selector">
             <input type="radio" id="hunk-mode" name="view-mode-selector" 
               defaultChecked={this.viewMode === ViewMode.Hunk}
@@ -526,6 +562,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
               defaultChecked={this.viewMode === ViewMode.Split}
               onInput={this.handleViewModeChange.bind(this, ViewMode.Split)} />
             <label htmlFor="split-mode">Split</label>
+          </div>
+          <div>
+            {rightButtons}
           </div>
         </div>
         <div className='patch-editor' ref={this.divEditor} />

@@ -208,6 +208,10 @@ div.hunk-widget button {
   font-weight: bold;
   border-radius: 5px;
 }
+.stage-line-button * {
+  font-family: var(--font-famliy);
+  font-weight: normal;
+}
 .stage-line-button:hover {
   background: green;
 }
@@ -222,6 +226,10 @@ div.hunk-widget button {
   font-family: 'Courier New', Courier, monospace;
   font-weight: bold;
   border-radius: 5px;
+}
+.unstage-line-button * {
+  font-family: var(--font-famliy);
+  font-weight: normal;
 }
 .unstage-line-button:hover {
   background: red;
@@ -413,6 +421,7 @@ div.welcome-dashboard div.actions div.action:active {
 .tooltip-bottom {
   position: relative;
   border-bottom: 1px dotted var(--font-color);
+  /* To move */
 }
 .tooltip-bottom .tooltip-text {
   visibility: hidden;
@@ -437,6 +446,35 @@ div.welcome-dashboard div.actions div.action:active {
   border-color: transparent transparent black transparent;
 }
 .tooltip-bottom:hover .tooltip-text {
+  visibility: visible;
+}
+.tooltip-right {
+  position: relative;
+}
+.tooltip-right .tooltip-text {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: calc(100% + 8px);
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+.tooltip-right .tooltip-text::after {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent black transparent transparent;
+}
+.tooltip-right:hover .tooltip-text {
   visibility: visible;
 }
 /* Buttons */

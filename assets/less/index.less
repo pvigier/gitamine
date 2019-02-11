@@ -272,6 +272,11 @@ div.hunk-widget {
   font-family: 'Courier New', Courier, monospace;
   font-weight: bold;
   border-radius: 5px;
+
+  * {
+    font-family: var(--font-famliy);
+    font-weight: normal;
+  }
 }
 
 .stage-line-button {
@@ -557,6 +562,39 @@ div.welcome-dashboard {
       border-width: 5px;
       border-style: solid;
       border-color: transparent transparent black transparent;
+    }
+  }
+
+  &:hover .tooltip-text {
+    visibility: visible;
+  }
+}
+
+.tooltip-right {
+  position: relative;
+
+  .tooltip-text {
+    visibility: hidden;
+    background-color: black;
+    color: #fff;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: calc(100% + 8px);
+    transform: translateY(-50%);
+    white-space: nowrap;
+
+    &::after {
+      content: "";
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent black transparent transparent;
     }
   }
 

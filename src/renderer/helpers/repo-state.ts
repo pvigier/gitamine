@@ -205,7 +205,7 @@ export class RepoState {
     this.shaToCommit.delete(commitSha);
     for (let parentSha of this.parents.get(commitSha)!) {
       const parentChildren = this.children.get(parentSha)!;
-      parentChildren.splice(parentChildren.findIndex((x) => x[0] === commitSha), 1);
+      parentChildren.splice(parentChildren.indexOf(commitSha), 1);
     }
     this.parents.delete(commitSha);
     for (let childSha of this.children.get(commitSha)!) {

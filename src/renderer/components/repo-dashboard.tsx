@@ -167,6 +167,11 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     if (this.graphViewer.current) {
       this.graphViewer.current.updateGraph();
     }
+    // If the selected commit is removed, switch to index
+    if (this.state.selectedCommit && 
+      !this.props.repo.shaToCommit.has(this.state.selectedCommit.sha())) {
+        this.handleIndexSelect();
+    }
   }
 
   render() {

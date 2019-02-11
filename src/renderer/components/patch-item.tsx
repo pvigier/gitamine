@@ -1,8 +1,8 @@
 import { remote, clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
-import * as openEditor from 'open-editor';
 import { RepoState, PatchType } from '../helpers/repo-state';
+import { openInEditor } from '../helpers/open-in-editor';
 
 export interface PatchItemProps { 
   repo?: RepoState;
@@ -85,7 +85,7 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
       },
       {
         label: 'Open in editor',
-        click: () => openEditor([path], {editor: 'code'})
+        click: () => openInEditor(path)
       }
     );
     const menu = remote.Menu.buildFromTemplate(template);

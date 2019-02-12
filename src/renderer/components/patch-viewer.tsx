@@ -97,12 +97,13 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   componentDidMount() {
-    window.addEventListener('keyup', this.handleKeyUp);
     this.setUpEditor();
+    window.addEventListener('keyup', this.handleKeyUp);
   }
 
   componentWillUnmount() {
     window.removeEventListener('keyup', this.handleKeyUp);
+    this.editor.dispose();
   }
 
   componentDidUpdate(prevProps: PatchViewerProps) {
@@ -223,7 +224,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
 
   async updateEditor() {
     // Hide the editor during update
-    this.divEditor.current!.classList.add('hidden');
+    if (this.divEditor.current) {
+      this.divEditor.current.classList.add('hidden');
+    }
     // Update editor options
     this.editor.updateOptions({
       renderSideBySide: this.viewMode === ViewMode.Split
@@ -236,7 +239,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       await this.customizeHunkView(); 
     }
     // Show the editor
-    this.divEditor.current!.classList.remove('hidden');
+    if (this.divEditor.current) {
+      this.divEditor.current.classList.remove('hidden');
+    }
   }
 
   resetEditor() {

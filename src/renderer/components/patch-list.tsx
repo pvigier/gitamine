@@ -12,38 +12,45 @@ export interface PatchListProps {
   patches: Git.ConvenientPatch[];
   type: PatchType;
   selectedPatch: Git.ConvenientPatch | null;
-  onPatchSelect: (patch: Git.ConvenientPatch) => void;
+  selectedPatches?: Set<Git.ConvenientPatch>;
+  onPatchSelect: (patch: Git.ConvenientPatch, ctrlKey: boolean, shiftKey: boolean) => void;
 }
 
 export class PatchList extends React.PureComponent<PatchListProps, {}> {
+  iAnchor: number;
+
   constructor(props: PatchListProps) {
     super(props);
     this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handlePatchSelect = this.handlePatchSelect.bind(this);
+  }
+
+  handlePatchSelect(patch: Git.ConvenientPatch, ctrlKey: boolean, shiftKey: boolean) {
+    this.iAnchor = this.props.patches.indexOf(patch);
+    this.props.onPatchSelect(patch, ctrlKey, shiftKey);
   }
 
   handleKeyDown(event: React.KeyboardEvent<HTMLUListElement>) {
-    if (this.props.selectedPatch) {
-      if (event.keyCode === 38) {
-        let i = this.props.patches.indexOf(this.props.selectedPatch);
-        i = (i - 1 + this.props.patches.length) % this.props.patches.length;
-        this.props.onPatchSelect(this.props.patches[i])
-      } else if (event.keyCode === 40) {
-        let i = this.props.patches.indexOf(this.props.selectedPatch);
-        i = (i + 1) % this.props.patches.length;
-        this.props.onPatchSelect(this.props.patches[i])
+    if (this.props.selectedPatch || (this.props.selectedPatches !== undefined && this.props.selectedPatches.size > 0)) {
+      if (event.keyCode === 38 && this.iAnchor > 0) {
+        --this.iAnchor;
+        this.props.onPatchSelect(this.props.patches[this.iAnchor], event.ctrlKey, event.shiftKey)
+      } else if (event.keyCode === 40 && this.iAnchor < this.props.patches.length - 1) {
+        ++this.iAnchor;
+        this.props.onPatchSelect(this.props.patches[this.iAnchor], event.ctrlKey, event.shiftKey)
       }
     }
   }
 
   render() {
     // Patch items
-    const patchItems = this.props.patches.map((patch) => {
-      const path = patch.newFile().path();
+    const patchItems = this.props.patches.map((patch, i) => {
+      const selected = patch === this.props.selectedPatch || (this.props.selectedPatches !== undefined && this.props.selectedPatches.has(patch));
       return <PatchItem repo={this.props.repo}
         patch={patch} 
         type={this.props.type}
-        selected={patch === this.props.selectedPatch} 
-        onPatchSelect={this.props.onPatchSelect} 
+        selected={selected} 
+        onPatchSelect={this.handlePatchSelect} 
         key={generatePatchKey(patch)} />;
     });
 

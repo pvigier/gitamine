@@ -9,7 +9,7 @@ export interface PatchItemProps {
   patch: Git.ConvenientPatch;
   type: PatchType;
   selected: boolean;
-  onPatchSelect: (patch: Git.ConvenientPatch) => void;
+  onPatchSelect: (patch: Git.ConvenientPatch, ctrlKey: boolean, shiftKey: boolean) => void;
 }
 
 function getPatchIcon(patch: Git.ConvenientPatch) {
@@ -35,8 +35,8 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
     this.handleContextMenu = this.handleContextMenu.bind(this);
   }
 
-  handleClick() {
-    this.props.onPatchSelect(this.props.patch);
+  handleClick(event: React.MouseEvent<HTMLLIElement>) {
+    this.props.onPatchSelect(this.props.patch, event.ctrlKey, event.shiftKey);
   }
 
   handleStageClick(event: React.MouseEvent<HTMLButtonElement>) {

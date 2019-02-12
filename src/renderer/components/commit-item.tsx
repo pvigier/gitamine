@@ -12,7 +12,7 @@ export interface CommitItemProps {
   references: string[];
   selected: boolean;
   color: string;
-  stash: Stash | undefined;
+  stash?: Stash;
   onCommitSelect: (commit: Git.Commit) => void;
 }
 
@@ -81,15 +81,6 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
     menu.popup({});
   }
 
-  formatStashMessage() {
-    const message = `WIP o${this.props.stash!.message.substr(1)}`
-    if (message.indexOf(':') === message.length - 1) {
-      return message.substr(0, message.length - 1);
-    } else {
-      return message;
-    }
-  }
-
   render() {
     const badges = this.props.references.map((name) => (
       <ReferenceBadge name={name} 
@@ -102,7 +93,7 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
       <li className={this.props.selected ? 'selected-commit' : ''} 
         onClick={this.handleClick}
         onContextMenu={this.handleContextMenu}>
-        {badges}{this.props.stash ? this.formatStashMessage() : this.props.commit.message()}
+        {badges}{this.props.commit.message()}
       </li>
     );
   }

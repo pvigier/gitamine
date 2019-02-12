@@ -2,11 +2,7 @@ import { clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
-import { PatchType, RepoState } from '../helpers/repo-state';
-
-function shortenSha(sha: string) {
-  return sha.substr(0, 6);
-}
+import { PatchType, RepoState, shortenSha } from '../helpers/repo-state';
 
 function formatDate(date: Date) {
   return `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
@@ -96,11 +92,11 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
     );
   }
 
-  createNavigationButtons(oids: Git.Oid[]) {
+  createNavigationButtons(shas: string[]) {
     const buttons = [];
-    for (let i = 0; i < oids.length; ++i) {
-      buttons.push(this.createNavigationButton(this.props.repo.shaToCommit.get(oids[i].tostrS())!));
-      if (i < oids.length - 1) {
+    for (let i = 0; i < shas.length; ++i) {
+      buttons.push(this.createNavigationButton(this.props.repo.shaToCommit.get(shas[i])!));
+      if (i < shas.length - 1) {
         buttons.push(', ');
       }
     }
@@ -118,7 +114,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
         <p>By {author.name()} &lt;<a href={`mailto:${author.email()}`}>{author.email()}</a>&gt;</p>
         <p>Authored {formatDate(authoredDate)}</p>
         <p>Last modified {formatDate(commit.date())}</p>
-        <p>Parents: {this.createNavigationButtons(commit.parents())}</p>
+        <p>Parents: {this.createNavigationButtons(this.props.repo.parents.get(commit.sha())!)}</p>
         <PatchList patches={this.state.patches}
           type={PatchType.Committed}
           selectedPatch={this.props.selectedPatch}

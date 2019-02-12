@@ -9,6 +9,10 @@ export function getRepoName(path: string) {
   return Path.parse(Path.dirname(path)).name;
 }
 
+export function shortenSha(sha: string) {
+  return sha.substr(0, 6);
+}
+
 const diffOptions = {
   flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 
   Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
@@ -26,12 +30,10 @@ export enum PatchType {
 
 export class Stash {
   index: number;
-  message: string;
   commit: Git.Commit;
 
-  constructor(index: number, message: string, commit: Git.Commit) {
+  constructor(index: number, commit: Git.Commit) {
     this.index = index;
-    this.message = message;
     this.commit = commit;
   }
 }
@@ -92,6 +94,7 @@ export class RepoState {
     const newCommits = await this.getNewCommits(referencesToUpdate, stashesToUpdate);
     await this.getParents(newCommits);
     this.removeUnreachableCommits();
+    await this.hideStashSecondParents(stashesToUpdate);
     this.sortCommits();
     console.log('end');
   }
@@ -199,9 +202,15 @@ export class RepoState {
     }
   }
 
+  async hideStashSecondParents(stashes: Stash[]) {
+    // Hide the second parent of stash commits
+    const parents = await Promise.all(Array.from(stashes.values(), (stash) => stash.commit.parent(1)));
+    parents.map((parent) => this.removeCommit(parent));
+  }
+
   removeCommit(commit: Git.Commit) {
-    this.commits.splice(this.commits.indexOf(commit), 1); // TODO: batch removal
     const commitSha = commit.sha();
+    this.commits.splice(this.commits.indexOf(this.shaToCommit.get(commitSha)!), 1); // TODO: batch removal
     this.shaToCommit.delete(commitSha);
     for (let parentSha of this.parents.get(commitSha)!) {
       const parentChildren = this.children.get(parentSha)!;
@@ -463,22 +472,19 @@ export class RepoState {
 
   async getStashes() {
     const oids: Git.Oid[] = [];
-    const messages: string[] = [];
     await Git.Stash.foreach(this.repo, (index: Git.Index, message: string, oid: Git.Oid) => {
       oids.push(oid);
-      messages.push(message);
     });
     let commits = await Promise.all(oids.map((oid) => this.repo.getCommit(oid)));
-    // Return the second parent of stash commits
-    commits = await Promise.all(commits.map((commit) => commit.parent(1)));
     return new Map<string, Stash>(commits.map((commit, index) => 
-      [commit.sha(), new Stash(index, messages[index], commit)] as [string, Stash]));
+      [commit.sha(), new Stash(index, commit)] as [string, Stash]));
   }
 
   async stash() {
     try {
       const stasher = this.getSignature();
-      await Git.Stash.save(this.repo, stasher, '', Git.Stash.FLAGS.DEFAULT);
+      const message = `${shortenSha(this.headCommit.sha())} ${this.headCommit.message()}`
+      await Git.Stash.save(this.repo, stasher, message, Git.Stash.FLAGS.DEFAULT);
     } catch(e) {
       this.onNotification(`Unable to stash: ${e.message}`);
     }

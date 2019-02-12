@@ -14,6 +14,10 @@ nameInput.addEventListener('input', () => {
   updateButton();
 });
 
+// Checkout input
+
+const checkoutInput = document.getElementById('checkout') as HTMLInputElement;
+
 // Create branch button
 
 const createButton = document.getElementById('create') as HTMLButtonElement;
@@ -29,7 +33,7 @@ createButton.addEventListener('click', () => {
   const window = remote.BrowserWindow.getFocusedWindow()!;
   const name = nameInput.value;
   if (sha && name) {
-    window.getParentWindow().webContents.send('create-branch', name, sha);
+    window.getParentWindow().webContents.send('create-branch', name, sha, checkoutInput.checked);
     window.close();
   }
 });

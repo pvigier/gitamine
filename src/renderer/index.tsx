@@ -44,9 +44,13 @@ ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
   }
 });
 
-ipcRenderer.on('create-branch', (event: Electron.Event, name: string, sha: string) => {
+ipcRenderer.on('create-branch', async (event: Electron.Event, name: string, sha: string, checkout: boolean) => {
   if (app) {
-    app.getCurrentRepo().createBranch(name, sha);
+    await app.getCurrentRepo().createBranch(name, sha);
+    if (checkout) {
+      // It is a bit hacky to use the name while we can get a reference object
+      app.getCurrentRepo().checkoutReference(`refs/heads/${name}`);
+    }
   }
 });
 

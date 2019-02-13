@@ -44,6 +44,7 @@ export class RepoState {
   name: string;
   commits: Git.Commit[];
   shaToCommit: Map<string, Git.Commit>;
+  shaToIndex: Map<string, number>;
   references: Map<string, Git.Commit>;
   shaToReferences: Map<string, string[]>;
   stashes: Map<string, Stash>; // Use a dictionary?
@@ -62,6 +63,7 @@ export class RepoState {
     this.name = getRepoName(this.path);
     this.commits = [];
     this.shaToCommit = new Map<string, Git.Commit>();
+    this.shaToIndex = new Map<string, number>();
     this.references = new Map<string, Git.Commit>();
     this.shaToReferences = new Map<string, string[]>();
     this.stashes = new Map<string, Stash>();
@@ -210,7 +212,7 @@ export class RepoState {
 
   removeCommit(commit: Git.Commit) {
     const commitSha = commit.sha();
-    this.commits.splice(this.commits.indexOf(this.shaToCommit.get(commitSha)!), 1); // TODO: batch removal
+    this.commits.splice(this.commits.indexOf(this.shaToCommit.get(commitSha)!), 1); // TODO: batch removal or update shaToIndex before removal
     this.shaToCommit.delete(commitSha);
     for (let parentSha of this.parents.get(commitSha)!) {
       const parentChildren = this.children.get(parentSha)!;
@@ -247,6 +249,8 @@ export class RepoState {
       dfs(commit);
     }
     this.commits = sortedCommits;
+    // Update shaToIndex
+    this.shaToIndex = new Map(this.commits.map((commit, i) => [commit.sha(), i] as [string, number]));
   }
 
   async updateHead() {

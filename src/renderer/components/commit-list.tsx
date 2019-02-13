@@ -70,7 +70,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
     event.preventDefault();
     if (event.keyCode === 38) {
       let i = this.props.selectedCommit ? 
-        this.props.repo.commits.indexOf(this.props.selectedCommit) : -1;
+        this.props.repo.shaToIndex.get(this.props.selectedCommit.sha())! : -1;
       i = Math.max(i - 1, -1);
       if (i >= 0) {
         this.props.onCommitSelect(this.props.repo.commits[i])
@@ -79,7 +79,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
       }
     } else if (event.keyCode === 40) {
       let i = this.props.selectedCommit ? 
-        this.props.repo.commits.indexOf(this.props.selectedCommit) : -1;
+        this.props.repo.shaToIndex.get(this.props.selectedCommit.sha())! : -1;
       i = Math.min(i + 1, this.props.repo.commits.length - 1);
       this.props.onCommitSelect(this.props.repo.commits[i])
     }
@@ -87,8 +87,8 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
 
   scrollToItem() {
     // Scroll so that the commit is visible
-    const i = this.props.selectedCommit ? 
-      this.props.repo.commits.indexOf(this.props.selectedCommit) : -1;
+    let i = this.props.selectedCommit ? 
+      this.props.repo.shaToIndex.get(this.props.selectedCommit.sha())! : -1;
     if (i <= this.state.start && this.div.current) {
       this.div.current.scrollTo(0, (i + 1) * ITEM_HEIGHT);
     }

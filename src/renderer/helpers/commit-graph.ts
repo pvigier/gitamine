@@ -89,7 +89,7 @@ export class CommitGraph {
       const commitSha = commit.sha();
       const children = repo.children.get(commit.sha())!;
       // Compute forbidden indices
-      const forbiddenIndices = mergeSets(children.filter((childSha) => repo.parents.get(childSha)!.length > 1).map((childSha) => activeNodes.get(childSha)!));
+      const forbiddenIndices = mergeSets(children.filter((childSha) => repo.parents.get(childSha)![0] !== commitSha).map((childSha) => activeNodes.get(childSha)!));
       console.log(commitSha, forbiddenIndices, children, children.map((childSha) => [...activeNodes.get(childSha)!]));
       // Find a commit to replace
       let commitToReplace: string | null = null;
@@ -124,7 +124,7 @@ export class CommitGraph {
         }
       }
       // Upddate the active nodes
-      const jToAdd = [j, ...children.filter((childSha) => repo.parents.get(childSha)!.length < 2).map((childSha) => this.positions.get(childSha)![1])];
+      const jToAdd = [j, ...children.filter((childSha) => repo.parents.get(childSha)![0] === commitSha).map((childSha) => this.positions.get(childSha)![1])];
       for (let activeNode of activeNodes.values()) {
         jToAdd.forEach((j) => activeNode.add(j));
       }
@@ -148,10 +148,9 @@ export class CommitGraph {
     this.edges = new IntervalTree<Edge>();
     for (let [commitSha, [i0, j0]] of this.positions) {
       const parents = repo.parents.get(commitSha)!;
-      const type = parents.length > 1 ? EdgeType.Merge : EdgeType.Normal;
-      for (let parentSha of parents) {
+      for (let [i, parentSha] of parents.entries()) {
         const [i1, j1] = this.positions.get(parentSha)!;
-        this.edges.insert(i0, i1, [[i0, j0], [i1, j1], type]);
+        this.edges.insert(i0, i1, [[i0, j0], [i1, j1], i > 0 ? EdgeType.Merge : EdgeType.Normal]);
       }
     }
   }

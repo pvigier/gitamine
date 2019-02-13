@@ -13,6 +13,10 @@ export function shortenSha(sha: string) {
   return sha.substr(0, 6);
 }
 
+export function removeReferencePrefix(name: string) {
+  return name.substr(name.indexOf('/', name.indexOf('/') + 1) + 1);
+}
+
 const diffOptions = {
   flags: Git.Diff.OPTION.INCLUDE_UNTRACKED | 
   Git.Diff.OPTION.RECURSE_UNTRACKED_DIRS
@@ -430,12 +434,24 @@ export class RepoState {
     }
   }
 
+  async merge(from: string, to: string) {
+    try {
+      await this.repo.mergeBranches(from, to);
+    } catch (e) {
+      this.onNotification(`Unable to merge ${from} into ${to}: ${e.message}`);
+    }
+  }
+
   async fetchAll() {
     try {
       await this.repo.fetchAll(this.getCredentialsCallback());
     } catch (e) {
       this.onNotification(`Unable to fetch all: ${e.message}`);
     }
+  }
+
+  async pull(name: string) {
+    await this.merge(name, `origin/${name}`);
   }
 
   async push() {

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { RepoState } from '../helpers/repo-state';
+import { RepoState, removeReferencePrefix } from '../helpers/repo-state';
 import { openCreateBranchWindow } from '../helpers/open-create-branch-window';
 
 export class ToolbarProps {
@@ -13,6 +13,7 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
   constructor(props: ToolbarProps) {
     super(props);
     this.handleFetchButtonClick = this.handleFetchButtonClick.bind(this);
+    this.handlePullButtonClick = this.handlePullButtonClick.bind(this);
     this.handlePushButtonClick = this.handlePushButtonClick.bind(this);
     this.handleBranchButtonClick = this.handleBranchButtonClick.bind(this);
     this.handleStashButtonClick = this.handleStashButtonClick.bind(this);
@@ -21,6 +22,10 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
 
   handleFetchButtonClick() {
     this.props.repo.fetchAll();
+  }
+
+  handlePullButtonClick() {
+    this.props.repo.pull(removeReferencePrefix(this.props.repo.head));
   }
 
   handlePushButtonClick() {
@@ -52,6 +57,7 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
         <div className='separator' />
         <div className='toolbar-buttons'>
           <button onClick={this.handleFetchButtonClick}>Fetch</button>
+          <button onClick={this.handlePullButtonClick}>Pull</button>
           <button onClick={this.handlePushButtonClick}>Push</button>
           <button onClick={this.handleBranchButtonClick}>Branch</button>
           <button onClick={this.handleStashButtonClick}>Stash</button>

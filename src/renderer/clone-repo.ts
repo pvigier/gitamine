@@ -54,7 +54,7 @@ function getData() {
   return [pathPrefix, folderName, url];
 }
 
-const cloneButton = document.getElementById('clone') as HTMLButtonElement;
+const cloneButton = document.getElementById('submit-button') as HTMLButtonElement;
 function updateButton() {
   let disabled = true;
   const [pathPrefix, folderName, url] = getData();
@@ -64,7 +64,7 @@ function updateButton() {
   cloneButton.disabled = disabled;
 }
 cloneButton.addEventListener('click', () => {
-  const window = remote.BrowserWindow.getFocusedWindow()!;
+  const window = remote.getCurrentWindow();
   const [pathPrefix, folderName, url] = getData();
   if (pathPrefix && folderName && url) {
     const path = Path.join(pathPrefix, folderName);

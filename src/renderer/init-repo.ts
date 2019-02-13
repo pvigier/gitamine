@@ -53,7 +53,7 @@ function getData() {
   return [pathPrefix, folderName];
 }
 
-const createButton = document.getElementById('create') as HTMLButtonElement;
+const createButton = document.getElementById('submit-button') as HTMLButtonElement;
 function updateButton() {
   let disabled = true;
   const [pathPrefix, folderName] = getData();
@@ -63,7 +63,7 @@ function updateButton() {
   createButton.disabled = disabled;
 }
 createButton.addEventListener('click', () => {
-  const window = remote.BrowserWindow.getFocusedWindow()!;
+  const window = remote.getCurrentWindow();
   const [pathPrefix, folderName] = getData();
   if (pathPrefix && folderName) {
     const path = Path.join(pathPrefix, folderName);

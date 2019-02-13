@@ -1,9 +1,10 @@
 import * as Path from 'path';
 import * as fs from 'fs'
 import * as Git from 'nodegit';
-import * as ignore from 'ignore'
+import ignore from 'ignore'
 import { CommitGraph } from './commit-graph';
 import { Field, Settings } from '../../shared/settings';
+import { NotificationType } from '../components/notification-item';
 
 export function getRepoName(path: string) {
   return Path.parse(Path.dirname(path)).name;
@@ -57,11 +58,11 @@ export class RepoState {
   head: string;
   headCommit: Git.Commit;
   graph: CommitGraph;
-  onNotification: (message: string) => void;
+  onNotification: (message: string, type: NotificationType) => void;
   updatePromise: Promise<void>; // Used to queue updates
   ig: any;
 
-  constructor(repo: Git.Repository, onNotification: (message: string) => void) {
+  constructor(repo: Git.Repository, onNotification: (message: string, type: NotificationType) => void) {
     this.repo = repo;
     this.path = this.repo.path(); 
     this.name = getRepoName(this.path);
@@ -272,8 +273,9 @@ export class RepoState {
     try {
       const reference = await this.repo.getReference(name);
       await this.repo.checkoutRef(reference);
+      this.onNotification(`Checkout successfully to ${name}`, NotificationType.Information);
     } catch(e) {
-      this.onNotification(`Unable to checkout to ${name}: ${e.message}`);
+      this.onNotification(`Unable to checkout to ${name}: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -384,7 +386,7 @@ export class RepoState {
       const oid = await index.writeTree();
       await this.repo.createCommit('HEAD', author, author, message, oid, [this.headCommit]);
     } catch (e) {
-      this.onNotification(`Unable to commit: ${e.message}`);
+      this.onNotification(`Unable to commit: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -394,7 +396,7 @@ export class RepoState {
       const oid = await index.writeTree();
       this.headCommit.amend('HEAD', this.headCommit.author(), this.getSignature(), this.headCommit.messageEncoding(), message, oid);
     } catch (e) {
-      this.onNotification(`Unable to amend: ${e.message}`);
+      this.onNotification(`Unable to amend: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -422,7 +424,7 @@ export class RepoState {
     try {
       await this.repo.createBranch(name, this.shaToCommit.get(sha)!, false);
     } catch (e) {
-      this.onNotification(`Unable to create branch ${name}: ${e.message}`);
+      this.onNotification(`Unable to create branch ${name}: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -430,15 +432,16 @@ export class RepoState {
     try {
       await Git.Reference.remove(this.repo, name);
     } catch (e) {
-      this.onNotification(`Unable to remove reference ${name}: ${e.message}`);
+      this.onNotification(`Unable to remove reference ${name}: ${e.message}`, NotificationType.Error);
     }
   }
 
   async merge(from: string, to: string) {
     try {
       await this.repo.mergeBranches(from, to);
+      this.onNotification('Merge successfully', NotificationType.Information);
     } catch (e) {
-      this.onNotification(`Unable to merge ${from} into ${to}: ${e.message}`);
+      this.onNotification(`Unable to merge ${from} into ${to}: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -446,7 +449,7 @@ export class RepoState {
     try {
       await this.repo.fetchAll(this.getCredentialsCallback());
     } catch (e) {
-      this.onNotification(`Unable to fetch all: ${e.message}`);
+      this.onNotification(`Unable to fetch all: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -456,12 +459,10 @@ export class RepoState {
 
   async push() {
     try {
-      console.log(this.head);
-      const remote = await this.repo.getRemote('origin');
-      console.log(await remote.getPushRefspecs());
       await remote.push([`${this.head}:${this.head}`], this.getCredentialsCallback())
+      this.onNotification('Pushed successfully', NotificationType.Information);
     } catch (e) {
-      this.onNotification(`Unable to push: ${e.message}`);
+      this.onNotification(`Unable to push: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -473,7 +474,7 @@ export class RepoState {
       const email = Settings.get(Field.Email);
       return Git.Signature.now(name, email);
     } catch (e) {
-      this.onNotification('Unable to set an author for this commit. Please check you configure correctly your account in "Preferences".');
+      this.onNotification('Unable to set an author for this commit. Please check you configure correctly your account in "Preferences".', NotificationType.Error);
       throw e;
     }
   }
@@ -506,7 +507,7 @@ export class RepoState {
       const message = `${shortenSha(this.headCommit.sha())} ${this.headCommit.message()}`
       await Git.Stash.save(this.repo, stasher, message, Git.Stash.FLAGS.DEFAULT);
     } catch(e) {
-      this.onNotification(`Unable to stash: ${e.message}`);
+      this.onNotification(`Unable to stash: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -514,7 +515,7 @@ export class RepoState {
     try {
       await Git.Stash.apply(this.repo, index);
     } catch(e) {
-      this.onNotification(`Unable to apply stash: ${e.message}`);
+      this.onNotification(`Unable to apply stash: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -522,7 +523,7 @@ export class RepoState {
     try {
       await Git.Stash.pop(this.repo, index);
     } catch(e) {
-      this.onNotification(`Unable to pop stash: ${e.message}`);
+      this.onNotification(`Unable to pop stash: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -530,7 +531,7 @@ export class RepoState {
     try {
       await Git.Stash.drop(this.repo, index);
     } catch(e) {
-      this.onNotification(`Unable to drop stash: ${e.message}`);
+      this.onNotification(`Unable to drop stash: ${e.message}`, NotificationType.Error);
     }
   }
 

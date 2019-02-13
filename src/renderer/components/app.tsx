@@ -6,6 +6,7 @@ import { NotificationQueue } from './notification-queue';
 import { WelcomeDashboard } from './welcome-dashboard';
 import { Field, Settings } from '../../shared/settings';
 import { ThemeManager } from '../../shared/theme-manager';
+import { NotificationType } from './notification-item';
 
 export interface AppState {
   repos: RepoState[]; 
@@ -45,7 +46,7 @@ export class App extends React.PureComponent<{}, AppState> {
       const repo = await Git.Clone.clone(url, path);
       this.addRepo(repo);
     } catch (e) {
-      this.showNotification(e.message);
+      this.showNotification(e.message, NotificationType.Error);
     }
   }
 
@@ -54,7 +55,7 @@ export class App extends React.PureComponent<{}, AppState> {
       const repo = await Git.Repository.init(path, 0);
       this.addRepo(repo);
     } catch (e) {
-      this.showNotification(e.message);
+      this.showNotification(e.message, NotificationType.Error);
     }
   }
 
@@ -63,7 +64,7 @@ export class App extends React.PureComponent<{}, AppState> {
       const repo = await Git.Repository.open(path);
       this.addRepo(repo);
     } catch (e) {
-      this.showNotification(e.message);
+      this.showNotification(e.message, NotificationType.Error);
     }
   }
 
@@ -96,9 +97,9 @@ export class App extends React.PureComponent<{}, AppState> {
     return this.state.repos[0];
   }
 
-  showNotification(message: string) {
+  showNotification(message: string, type: NotificationType) {
     if (this.notificationQueue.current) {
-      this.notificationQueue.current.addNotification(message);
+      this.notificationQueue.current.addNotification(message, type);
     }
   }
 

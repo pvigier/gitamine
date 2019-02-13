@@ -1,8 +1,14 @@
 import * as React from 'react';
 
+export enum NotificationType {
+  Information,
+  Error
+}
+
 export interface NotificationItemProps { 
   id: number;
   message: string;
+  type: NotificationType;
   onRemove: (key: number) => void;
 }
 
@@ -59,6 +65,7 @@ export class NotificationItem extends React.PureComponent<NotificationItemProps,
   render() {
     return (
       <li ref={this.li} 
+        className={this.props.type === NotificationType.Error ? 'error' : 'information'}
         onClick={this.disappear} 
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}>

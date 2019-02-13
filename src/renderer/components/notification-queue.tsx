@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { NotificationItem } from './notification-item';
+import { NotificationItem, NotificationType } from './notification-item';
 
 class Notification {
   id: number;
   message: string;
+  type: NotificationType;
 }
 
 export interface NotificationQueueState {
@@ -22,8 +23,8 @@ export class NotificationQueue extends React.PureComponent<{}, NotificationQueue
     this.removeNotification = this.removeNotification.bind(this);
   }
 
-  addNotification(message: string) {
-    const notification = {id: this.counter, message: message};
+  addNotification(message: string, type: NotificationType) {
+    const notification = {id: this.counter, message: message, type: type};
     ++this.counter;
     this.setState((prevState) => ({
       notifications: [...prevState.notifications, notification]
@@ -44,6 +45,7 @@ export class NotificationQueue extends React.PureComponent<{}, NotificationQueue
     // Notification items
     const notificationItems = this.state.notifications.map((notification) => 
       <NotificationItem message={notification.message}
+        type={notification.type}
         onRemove={this.removeNotification}
         id={notification.id}
         key={notification.id} />

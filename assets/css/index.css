@@ -402,6 +402,32 @@ ul.notification-queue li.shown {
 ul.notification-queue li:hover {
   background: var(--hover-color);
 }
+ul.notification-queue li.information {
+  color: var(--button-font-color);
+  background-color: var(--green-button-background-color);
+  border-color: var(--green-button-border-color);
+}
+ul.notification-queue li.information:hover {
+  background-color: var(--green-button-background-color);
+  border-color: var(--green-button-background-color);
+}
+ul.notification-queue li.information:active {
+  background-color: var(--green-button-border-color);
+  border-color: var(--green-button-background-color);
+}
+ul.notification-queue li.error {
+  color: var(--button-font-color);
+  background-color: var(--red-button-background-color);
+  border-color: var(--red-button-border-color);
+}
+ul.notification-queue li.error:hover {
+  background-color: var(--red-button-background-color);
+  border-color: var(--red-button-background-color);
+}
+ul.notification-queue li.error:active {
+  background-color: var(--red-button-border-color);
+  border-color: var(--red-button-background-color);
+}
 /* Welcome dashboard */
 div.welcome-dashboard {
   margin-top: 100px;

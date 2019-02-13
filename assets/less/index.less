@@ -511,6 +511,38 @@ ul.notification-queue {
     &:hover {
       background: var(--hover-color);
     }
+
+    &.information {
+      color: var(--button-font-color);
+      background-color: var(--green-button-background-color);
+      border-color: var(--green-button-border-color);
+
+      &:hover {
+        background-color: var(--green-button-background-color);
+        border-color: var(--green-button-background-color);
+      }
+
+      &:active {
+        background-color: var(--green-button-border-color);
+        border-color: var(--green-button-background-color)
+      }
+    }
+
+    &.error {
+      color: var(--button-font-color);
+      background-color: var(--red-button-background-color);
+      border-color: var(--red-button-border-color);
+
+      &:hover {
+        background-color: var(--red-button-background-color);
+        border-color: var(--red-button-background-color);
+      }
+
+      &:active {
+        background-color: var(--red-button-border-color);
+        border-color: var(--red-button-background-color)
+      }
+    }
   }
 }
 

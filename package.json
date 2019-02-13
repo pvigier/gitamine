@@ -60,6 +60,7 @@
     "electron-settings": "^3.2.0",
     "electron-squirrel-startup": "^1.0.0",
     "electron-unhandled": "^2.1.0",
+    "fastpriorityqueue": "^0.6.1",
     "ignore": "^5.0.5",
     "launch-editor": "^2.2.1",
     "monaco-loader": "^0.15.0",

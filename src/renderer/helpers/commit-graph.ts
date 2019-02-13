@@ -1,5 +1,6 @@
 import { RepoState } from './repo-state'
 import IntervalTree from 'node-interval-tree';
+import * as FastPriorityQueue from 'fastpriorityqueue';
 
 const BRANCH_COLORS = [
   'dodgerblue', 
@@ -59,22 +60,22 @@ export class CommitGraph {
       }());
     }
 
-    function insertCommit(commit: string, j: number, forbiddenIndices: Set<number>) {
+    function insertCommit(commitSha: string, j: number, forbiddenIndices: Set<number>) {
       // Try to insert as close as possible to i 
       // replace i by j
       let dj = 1;
       while (j - dj >= 0 || j + dj < branches.length) {
         if (j + dj < branches.length && branches[j + dj] === null && !forbiddenIndices.has(j + dj)) {
-          branches[j + dj] = commit;
+          branches[j + dj] = commitSha;
           return j + dj;
         } else if (j - dj >= 0 && branches[j - dj] === null && !forbiddenIndices.has(j - dj)) {
-          branches[j - dj] = commit;
+          branches[j - dj] = commitSha;
           return j - dj;
         }
         ++dj;
       }
       // If it is not possible to find an available position, insert at the end
-      branches.push(commit);
+      branches.push(commitSha);
       return branches.length - 1;
     }
 
@@ -83,14 +84,16 @@ export class CommitGraph {
     let i = 1;
     const branches: (string | null)[] = ['index'];
     const activeNodes = new Map<string, Set<number>>();
+    const activeNodesQueue = new FastPriorityQueue<[number, string]>((lhs, rhs) => lhs[0] < rhs[0]);
     activeNodes.set('index', new Set<number>());
+    activeNodesQueue.add([repo.shaToIndex.get(repo.headCommit.sha())!, 'index']);
     for (let commit of repo.commits) {
       let j = -1;
       const commitSha = commit.sha();
       const children = repo.children.get(commit.sha())!;
       // Compute forbidden indices
       const forbiddenIndices = mergeSets(children.filter((childSha) => repo.parents.get(childSha)![0] !== commitSha).map((childSha) => activeNodes.get(childSha)!));
-      console.log(commitSha, forbiddenIndices, children, children.map((childSha) => [...activeNodes.get(childSha)!]));
+      //console.log(i, activeNodes.size, commitSha, forbiddenIndices, children, children.map((childSha) => [...activeNodes.get(childSha)!]));
       // Find a commit to replace
       let commitToReplace: string | null = null;
       let jCommitToReplace = Infinity;
@@ -119,9 +122,14 @@ export class CommitGraph {
           // We could try to insert near any child instead of arbitrarily chosing the first one
           j = insertCommit(commitSha, jChild, forbiddenIndices);
         } else {
-          // TODO: Find a better value for i
+          // TODO: Find a better value for j
           j = insertCommit(commitSha, 0, new Set());
         }
+      }
+      // Remove useless active nodes
+      while (!activeNodesQueue.isEmpty() && activeNodesQueue.peek()[0] < i) {
+        const sha = activeNodesQueue.poll()[1];
+        activeNodes.delete(sha);
       }
       // Upddate the active nodes
       const jToAdd = [j, ...children.filter((childSha) => repo.parents.get(childSha)![0] === commitSha).map((childSha) => this.positions.get(childSha)![1])];
@@ -129,14 +137,15 @@ export class CommitGraph {
         jToAdd.forEach((j) => activeNode.add(j));
       }
       activeNodes.set(commitSha, new Set<number>());
+      const iRemove = Math.max(...repo.parents.get(commitSha)!.map((parentSha) => repo.shaToIndex.get(parentSha)!));
+      activeNodesQueue.add([iRemove, commitSha]);
       // Remove children from active branches
       for (let childSha of children) {
         if (childSha != commitToReplace && repo.parents.get(childSha)![0] === commitSha) {
           branches[branches.indexOf(childSha)] = null; // Use positions
         }
       }
-      // TODO: remove useless active nodes
-      // Finally set the positions
+      // Finally set the position
       this.positions.set(commitSha, [i, j, repo.stashes.has(commitSha) ? NodeType.Stash : NodeType.Commit]);
       ++i;
     }

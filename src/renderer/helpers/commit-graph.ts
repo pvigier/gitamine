@@ -51,18 +51,27 @@ export class CommitGraph {
   }
 
   computePositions(repo: RepoState) {
-    function insertCommit(commit: string, i: number) {
-      // Try to insert as close as possible to i
-      let di = 1;
-      while (i - di >= 0 || i + di < branches.length) {
-        if (i + di < branches.length && branches[i + di] === null) {
-          branches[i + di] = commit;
-          return i + di;
-        } else if (i - di >= 0 && branches[i - di] === null) {
-          branches[i - di] = commit;
-          return i - di;
+    function mergeSets(sets: Set<number>[]) {
+      return new Set<number>(function*() { 
+        for (let set of sets) {
+          yield* set;
         }
-        ++di;
+      }());
+    }
+
+    function insertCommit(commit: string, j: number, forbiddenIndices: Set<number>) {
+      // Try to insert as close as possible to i 
+      // replace i by j
+      let dj = 1;
+      while (j - dj >= 0 || j + dj < branches.length) {
+        if (j + dj < branches.length && branches[j + dj] === null && !forbiddenIndices.has(j + dj)) {
+          branches[j + dj] = commit;
+          return j + dj;
+        } else if (j - dj >= 0 && branches[j - dj] === null && !forbiddenIndices.has(j - dj)) {
+          branches[j - dj] = commit;
+          return j - dj;
+        }
+        ++dj;
       }
       // If it is not possible to find an available position, insert at the end
       branches.push(commit);
@@ -73,42 +82,61 @@ export class CommitGraph {
     const headSha = repo.headCommit.sha();
     let i = 1;
     const branches: (string | null)[] = ['index'];
+    const activeNodes = new Map<string, Set<number>>();
+    activeNodes.set('index', new Set<number>());
     for (let commit of repo.commits) {
       let j = -1;
       const commitSha = commit.sha();
       const children = repo.children.get(commit.sha())!;
+      // Compute forbidden indices
+      const forbiddenIndices = mergeSets(children.filter((childSha) => repo.parents.get(childSha)!.length > 1).map((childSha) => activeNodes.get(childSha)!));
+      console.log(commitSha, forbiddenIndices, children, children.map((childSha) => [...activeNodes.get(childSha)!]));
       // Find a commit to replace
       let commitToReplace: string | null = null;
+      let jCommitToReplace = Infinity;
       if (commitSha === headSha) {
         commitToReplace = 'index';
+        jCommitToReplace = 0;
       } else {
         for (let childSha of children) {
-          if (repo.parents.get(childSha)![0] === commitSha) {
+          const jChild = this.positions.get(childSha)![1]!;
+          // Do we want commit to be the first parent of child?
+          if (repo.parents.get(childSha)![0] === commitSha && !forbiddenIndices.has(jChild) && jChild < jCommitToReplace) {
             commitToReplace = childSha;
-            break;
+            jCommitToReplace = jChild;
           }
         }
       }
       // Insert the commit in the active branches
       if (commitToReplace) {
-        j = branches.indexOf(commitToReplace);
+        j = jCommitToReplace;
         branches[j] = commitSha;
       } else {
         if (children.length > 0) {
           const childSha = children[0];
           const jChild = this.positions.get(childSha)![1];
-          j = insertCommit(commitSha, jChild);
+          // Try to insert near a child
+          // We could try to insert near any child instead of arbitrarily chosing the first one
+          j = insertCommit(commitSha, jChild, forbiddenIndices);
         } else {
           // TODO: Find a better value for i
-          j = insertCommit(commitSha, 0);
+          j = insertCommit(commitSha, 0, new Set());
         }
       }
+      // Upddate the active nodes
+      const jToAdd = [j, ...children.filter((childSha) => repo.parents.get(childSha)!.length < 2).map((childSha) => this.positions.get(childSha)![1])];
+      for (let activeNode of activeNodes.values()) {
+        jToAdd.forEach((j) => activeNode.add(j));
+      }
+      activeNodes.set(commitSha, new Set<number>());
       // Remove children from active branches
       for (let childSha of children) {
         if (childSha != commitToReplace && repo.parents.get(childSha)![0] === commitSha) {
-          branches[branches.indexOf(childSha)] = null;
+          branches[branches.indexOf(childSha)] = null; // Use positions
         }
       }
+      // TODO: remove useless active nodes
+      // Finally set the positions
       this.positions.set(commitSha, [i, j, repo.stashes.has(commitSha) ? NodeType.Stash : NodeType.Commit]);
       ++i;
     }

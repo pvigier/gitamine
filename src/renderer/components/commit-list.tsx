@@ -12,6 +12,7 @@ export interface CommitListProps {
   selectedCommit: Git.Commit | null;
   onCommitSelect: (commit: Git.Commit) => void;
   onIndexSelect: () => void;
+  onCreateBranch: (commit: Git.Commit) => void;
   onScroll: (height: number, start: number, end: number) => void;
   onResize: (offset: number, start: number, end: number) => void;
   onStateUpdate: (start: number, end: number) => void;
@@ -138,6 +139,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
           references={this.props.repo.shaToReferences.get(commitSha) || []}
           selected={this.props.selectedCommit === commit} 
           onCommitSelect={this.props.onCommitSelect} 
+          onCreateBranch={this.props.onCreateBranch}
           color={color}
           stash={this.props.repo.stashes.get(commitSha)}
           key={commit.sha()} />

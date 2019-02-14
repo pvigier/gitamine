@@ -3,7 +3,6 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { ReferenceBadge } from './reference-badge';
 import { RepoState, Stash } from '../helpers/repo-state';
-import { openCreateBranchWindow } from '../helpers/open-create-branch-window';
 
 export interface CommitItemProps { 
   repo: RepoState;
@@ -14,6 +13,7 @@ export interface CommitItemProps {
   color: string;
   stash?: Stash;
   onCommitSelect: (commit: Git.Commit) => void;
+  onCreateBranch: (commit: Git.Commit) => void;
 }
 
 export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
@@ -33,7 +33,7 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
       template.push(
         {
           label: 'Create branch here',
-          click: () => openCreateBranchWindow(this.props.commit.sha())
+          click: () => this.props.onCreateBranch(this.props.commit)
         },
         {
           label: 'Reset to this commit',

@@ -489,7 +489,7 @@ ul.notification-queue {
   top: 0;
   left: calc(100% - @notification-item-width);
   width: 2 * @notification-item-width;
-  z-index: 4;
+  z-index: 5;
   list-style: none;
   margin: 16px 0px;
   padding: 0px;
@@ -703,5 +703,63 @@ button {
   &:active {
     background-color: var(--red-button-border-color);
     border-color: var(--red-button-background-color)
+  }
+}
+
+/* Modal windows */
+
+div.modal-container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+
+  div.modal-background {
+    background-color: var(--background-color);
+  }
+}
+
+/* Modal forms */
+
+form.modal-form {
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+
+  div.field-container {
+    display: flex;
+    margin: 4px 0px;
+
+    label {
+      min-width: 140px;
+      display: inline-block;
+      text-align: right;
+      margin-right: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+    }
+
+    span#prefix {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  div.button-container {
+    width: 100%;
+    margin: 4px 0px;
+
+    button {
+      width: 100%;
+      margin: 0px;
+    }
   }
 }

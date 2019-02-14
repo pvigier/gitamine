@@ -4,13 +4,15 @@ import { RepoDashboard } from './repo-dashboard';
 import { RepoState } from '../helpers/repo-state';
 import { NotificationQueue } from './notification-queue';
 import { WelcomeDashboard } from './welcome-dashboard';
+import { NotificationType } from './notification-item';
+import { CreateBranchDialog } from './create-branch-dialog';
 import { Field, Settings } from '../../shared/settings';
 import { ThemeManager } from '../../shared/theme-manager';
-import { NotificationType } from './notification-item';
 
 export interface AppState {
   repos: RepoState[]; 
   editorTheme: string;
+  modalWindow: JSX.Element | null;
 }
 
 export class App extends React.PureComponent<{}, AppState> {
@@ -23,10 +25,13 @@ export class App extends React.PureComponent<{}, AppState> {
     this.themeManager = new ThemeManager();
     this.state = {
       repos: [],
-      editorTheme: 'vs-light'
+      editorTheme: 'vs-light',
+      modalWindow: null
     };
     this.openRepo = this.openRepo.bind(this);
+    this.openCreateBranchWindow = this.openCreateBranchWindow.bind(this);
     this.showNotification = this.showNotification.bind(this);
+    this.closeModalWindow = this.closeModalWindow.bind(this);
   }
 
   componentDidMount() {
@@ -103,6 +108,21 @@ export class App extends React.PureComponent<{}, AppState> {
     }
   }
 
+  // Modal components
+
+  openCreateBranchWindow(commit: Git.Commit) {
+    const element = <CreateBranchDialog repo={this.getCurrentRepo()} commit={commit} onClose={this.closeModalWindow} />;
+    this.setState({
+      modalWindow: element
+    });
+  }
+
+  closeModalWindow() {
+    this.setState({
+      modalWindow: null
+    });
+  }
+
   render() {
     const repoDashboards = this.state.repos.length === 0 ?
       <WelcomeDashboard onRecentlyOpenedRepoClick={this.openRepo} /> :
@@ -110,10 +130,12 @@ export class App extends React.PureComponent<{}, AppState> {
         repo={repo} 
         editorTheme={this.state.editorTheme}
         onRepoClose={() => this.closeRepo(i)}
+        onCreateBranch={this.openCreateBranchWindow}
         key={repo.path} />);
     return (
       <div id='app'>
         {repoDashboards}
+        {this.state.modalWindow}
         <NotificationQueue ref={this.notificationQueue} />
       </div>
     );

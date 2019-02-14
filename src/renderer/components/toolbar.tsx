@@ -1,12 +1,12 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { RepoState, removeReferencePrefix } from '../helpers/repo-state';
-import { openCreateBranchWindow } from '../helpers/open-create-branch-window';
 
 export class ToolbarProps {
   repo: RepoState;
   selectedCommit: Git.Commit | null;
   onRepoClose: () => void;
+  onCreateBranch: (commit: Git.Commit) => void;
 }
 
 export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
@@ -33,10 +33,11 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
   }
 
   handleBranchButtonClick() {
+    // Replace sha by commit
     if (this.props.selectedCommit === null) {
-      openCreateBranchWindow(this.props.repo.headCommit.sha());
+      this.props.onCreateBranch(this.props.repo.headCommit);
     } else {
-      openCreateBranchWindow(this.props.selectedCommit.sha());
+      this.props.onCreateBranch(this.props.selectedCommit);
     }
   }
 

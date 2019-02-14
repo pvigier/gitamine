@@ -9,6 +9,7 @@ export interface GraphViewerProps {
   selectedCommit: Git.Commit | null;
   onCommitSelect: (commit: Git.Commit) => void;
   onIndexSelect: () => void;
+  onCreateBranch: (commit: Git.Commit) => void;
 }
 
 export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {

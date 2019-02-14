@@ -420,9 +420,9 @@ export class RepoState {
     return commits.filter(([name, commit]) => commit !== null) as [string, Git.Commit][];
   }
 
-  async createBranch(name: string, sha: string)  {
+  async createBranch(name: string, commit: Git.Commit)  {
     try {
-      await this.repo.createBranch(name, this.shaToCommit.get(sha)!, false);
+      await this.repo.createBranch(name, commit, false);
     } catch (e) {
       this.onNotification(`Unable to create branch ${name}: ${e.message}`, NotificationType.Error);
     }
@@ -459,6 +459,7 @@ export class RepoState {
 
   async push() {
     try {
+      const remote = await this.repo.getRemote('origin');
       await remote.push([`${this.head}:${this.head}`], this.getCredentialsCallback())
       this.onNotification('Pushed successfully', NotificationType.Information);
     } catch (e) {

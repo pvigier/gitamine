@@ -15,6 +15,7 @@ export interface RepoDashboardProps {
   repo: RepoState;
   editorTheme: string;
   onRepoClose: () => void;
+  onCreateBranch: (commit: Git.Commit) => void;
 }
 
 export interface RepoDashboardState { 
@@ -187,6 +188,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         selectedCommit={this.state.selectedCommit} 
         onCommitSelect={this.handleCommitSelect}
         onIndexSelect={this.handleIndexSelect} 
+        onCreateBranch={this.props.onCreateBranch}
         ref={this.graphViewer} />
     }
     let rightViewer;
@@ -207,7 +209,8 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       <div className='repo-dashboard'>
         <Toolbar repo={this.props.repo} 
           selectedCommit={this.state.selectedCommit} 
-          onRepoClose={this.props.onRepoClose} />
+          onRepoClose={this.props.onRepoClose} 
+          onCreateBranch={this.props.onCreateBranch} />
         <div className='repo-content'>
           {leftViewer}
           <Splitter onPanelResize={this.handlePanelResize} />

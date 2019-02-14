@@ -1,23 +1,14 @@
-import { ipcRenderer } from 'electron';
 import * as React from 'react';
 import { Field, Settings } from '../../shared/settings';
 import { getRepoName } from '../helpers/repo-state';
 
 export class WelcomeDashboardProps {
   onRecentlyOpenedRepoClick: (path: string) => void;
+  onOpenRepo: () => void;
   onInitRepo: () => void;
   onCloneRepo: () => void;
 }
 export class WelcomeDashboard extends React.PureComponent<WelcomeDashboardProps, {}> {
-  constructor(props: WelcomeDashboardProps) {
-    super(props);
-    this.sendOpenRepoMessage = this.sendOpenRepoMessage.bind(this);
-  }
-
-  sendOpenRepoMessage() {
-    ipcRenderer.send('open-open-repo-window');
-  }
-
   render() {
     const recentlyOpenedItems = Settings.get(Field.RecentlyOpened, [])
       .map((path: string) => (
@@ -37,7 +28,7 @@ export class WelcomeDashboard extends React.PureComponent<WelcomeDashboardProps,
         </div>
         <h2>Actions</h2>
         <div className='actions'>
-          <div className='action' onClick={this.sendOpenRepoMessage}>
+          <div className='action' onClick={this.props.onOpenRepo}>
             <h3>Open a repo</h3>
            </div>
           <div className='action' onClick={this.props.onInitRepo}>

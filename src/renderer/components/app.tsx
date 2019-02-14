@@ -10,6 +10,7 @@ import { CloneRepoDialog } from './clone-repo-dialog';
 import { InitRepoDialog } from './init-repo-dialog';
 import { Field, Settings } from '../../shared/settings';
 import { ThemeManager } from '../../shared/theme-manager';
+import { remote } from 'electron';
 
 export interface AppState {
   repos: RepoState[]; 
@@ -35,6 +36,7 @@ export class App extends React.PureComponent<{}, AppState> {
     this.openRepo = this.openRepo.bind(this);
     this.openCloneRepoDialog = this.openCloneRepoDialog.bind(this);
     this.openInitRepoDialog = this.openInitRepoDialog.bind(this);
+    this.openOpenRepoDialog = this.openOpenRepoDialog.bind(this);
     this.openCreateBranchDialog = this.openCreateBranchDialog.bind(this);
     this.showNotification = this.showNotification.bind(this);
     this.closeModalWindow = this.closeModalWindow.bind(this);
@@ -130,6 +132,17 @@ export class App extends React.PureComponent<{}, AppState> {
     });
   }
 
+  openOpenRepoDialog() {
+    remote.dialog.showOpenDialog(remote.getCurrentWindow(),
+      {properties: ['openDirectory']}, 
+      (paths) => {
+        if (paths) {
+          this.openRepo(paths[0]);
+        }
+      }
+    );
+  }
+
   openCreateBranchDialog(commit: Git.Commit) {
     const element = <CreateBranchDialog repo={this.getCurrentRepo()} commit={commit} onClose={this.closeModalWindow} />;
     this.setState({
@@ -146,6 +159,7 @@ export class App extends React.PureComponent<{}, AppState> {
   render() {
     const repoDashboards = this.state.repos.length === 0 ?
       <WelcomeDashboard onRecentlyOpenedRepoClick={this.openRepo} 
+        onOpenRepo={this.openOpenRepoDialog}
         onInitRepo={this.openInitRepoDialog}
         onCloneRepo={this.openCloneRepoDialog} /> :
       this.state.repos.map((repo, i) => <RepoDashboard 

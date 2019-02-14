@@ -38,15 +38,16 @@ ipcRenderer.on('init-repo', () => {
   }
 });
 
-ipcRenderer.on('open-repo', (event: Electron.Event, path: string) => {
+ipcRenderer.on('open-repo', () => {
   if (app) {
-    app.openRepo(path);
+    app.openOpenRepoDialog();
   }
 });
 
 // Unhandled exceptions
 
 function handleError(e: any) {
+  // This was necessary for node-watch, is it still necessary for chokidar?
   if (e.code === 'ENOTDIR' || e.code === 'ENOENT') {
     console.log(e);
   } else {

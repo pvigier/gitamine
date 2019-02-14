@@ -1,4 +1,4 @@
-import { BrowserWindow, Menu, dialog } from 'electron';
+import { BrowserWindow, Menu } from 'electron';
 
 function createModalWindow(parent: BrowserWindow, path: string) {
   let window: BrowserWindow | null = new BrowserWindow({
@@ -16,14 +16,6 @@ function createModalWindow(parent: BrowserWindow, path: string) {
   });
   window.on('close', () => { 
     window = null
-  });
-}
-
-export function openOpenRepoWindow(mainWindow: Electron.BrowserWindow) {
-  dialog.showOpenDialog(mainWindow, {properties: ['openDirectory']}, (paths) => {
-    if (paths) {
-      mainWindow.webContents.send('open-repo', paths[0]);
-    }
   });
 }
 
@@ -45,7 +37,7 @@ export function setMenu(mainWindow: Electron.BrowserWindow) {
         {
           label: 'Open repo',
           accelerator: 'CmdOrCtrl+O',
-          click: () => openOpenRepoWindow(mainWindow)
+          click: () => mainWindow.webContents.send('open-repo')
         },
         {
           type: 'separator'

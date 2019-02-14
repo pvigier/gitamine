@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { enableLiveReload } from 'electron-compile';
-import { setMenu, openCloneRepoWindow, openOpenRepoWindow } from './menu';
+import { setMenu, openOpenRepoWindow } from './menu';
 import { ThemeManager } from '../shared/theme-manager';
 
 // Live reloading
@@ -20,6 +20,8 @@ const createWindow = async () => {
   // Create the browser window
   mainWindow = new BrowserWindow({
     show: false,
+    minWidth: 800,
+    minHeight: 600,
     width: 800,
     height: 600,
     backgroundColor: themeManager.getBackgroundColor()
@@ -66,12 +68,6 @@ app.on('activate', () => {
 });
 
 // Events
-
-ipcMain.on('open-clone-repo-window', () => {
-  if (mainWindow) {
-    openCloneRepoWindow(mainWindow);
-  }
-});
 
 ipcMain.on('open-open-repo-window', () => {
   if (mainWindow) {

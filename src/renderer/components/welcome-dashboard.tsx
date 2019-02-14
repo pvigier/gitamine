@@ -6,20 +6,16 @@ import { getRepoName } from '../helpers/repo-state';
 export class WelcomeDashboardProps {
   onRecentlyOpenedRepoClick: (path: string) => void;
   onInitRepo: () => void;
+  onCloneRepo: () => void;
 }
 export class WelcomeDashboard extends React.PureComponent<WelcomeDashboardProps, {}> {
   constructor(props: WelcomeDashboardProps) {
     super(props);
     this.sendOpenRepoMessage = this.sendOpenRepoMessage.bind(this);
-    this.sendCloneRepoMessage = this.sendCloneRepoMessage.bind(this);
   }
 
   sendOpenRepoMessage() {
     ipcRenderer.send('open-open-repo-window');
-  }
-
-  sendCloneRepoMessage() {
-    ipcRenderer.send('open-clone-repo-window');
   }
 
   render() {
@@ -47,7 +43,7 @@ export class WelcomeDashboard extends React.PureComponent<WelcomeDashboardProps,
           <div className='action' onClick={this.props.onInitRepo}>
             <h3>Init a repo</h3>
            </div>
-          <div className='action' onClick={this.sendCloneRepoMessage}>
+          <div className='action' onClick={this.props.onCloneRepo}>
             <h3>Clone a repo</h3>
           </div>
         </div>

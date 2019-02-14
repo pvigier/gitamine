@@ -19,10 +19,6 @@ function createModalWindow(parent: BrowserWindow, path: string) {
   });
 }
 
-export function openCloneRepoWindow(mainWindow: Electron.BrowserWindow) {
-  createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/clone-repo.html`);
-}
-
 export function openOpenRepoWindow(mainWindow: Electron.BrowserWindow) {
   dialog.showOpenDialog(mainWindow, {properties: ['openDirectory']}, (paths) => {
     if (paths) {
@@ -39,7 +35,7 @@ export function setMenu(mainWindow: Electron.BrowserWindow) {
         {
           label: 'Clone repo',
           accelerator: 'CmdOrCtrl+N',
-          click: () => openCloneRepoWindow(mainWindow)
+          click: () => mainWindow.webContents.send('clone-repo')
         },
         {
           label: 'Init repo',

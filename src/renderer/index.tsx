@@ -26,9 +26,9 @@ ipcRenderer.on('update-theme', (event: Electron.Event, theme: string) => {
   }
 });
 
-ipcRenderer.on('clone-repo', (event: Electron.Event, [path, url]: [string, string]) => {
+ipcRenderer.on('clone-repo', () => {
   if (app) {
-    app.cloneRepo(path, url);
+    app.openCloneRepoDialog();
   }
 });
 

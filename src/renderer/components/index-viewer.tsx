@@ -37,8 +37,8 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       selectedUnstagedPatches: new Set(),
       selectedStagedPatches: new Set()
     }
-    this.handleUnstagedPatchSelect = this.generatePatchSelectHandler('unstagedPatches', 'selectedUnstagedPatches', 'selectedStagedPatches');
-    this.handleStagedPatchSelect = this.generatePatchSelectHandler('stagedPatches', 'selectedStagedPatches', 'selectedUnstagedPatches');
+    this.handleUnstagedPatchSelect = this.generatePatchSelectHandler('unstagedPatches', 'selectedUnstagedPatches', 'selectedStagedPatches', PatchType.Unstaged);
+    this.handleStagedPatchSelect = this.generatePatchSelectHandler('stagedPatches', 'selectedStagedPatches', 'selectedUnstagedPatches', PatchType.Staged);
     this.handlePatchesStage = this.handlePatchesStage.bind(this);
     this.handlePatchesUnstage = this.handlePatchesUnstage.bind(this);
     this.handleAmendChange = this.handleAmendChange.bind(this);
@@ -50,7 +50,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.getPatches();
   }
 
-  generatePatchSelectHandler(targetedPatchesKey: string, targetedSelectedPatchesKey: string, otherSelectedPatchesKey: string) {
+  generatePatchSelectHandler(targetedPatchesKey: string, targetedSelectedPatchesKey: string, otherSelectedPatchesKey: string, type: PatchType) {
     return (patch: Git.ConvenientPatch, ctrlKey: boolean, shiftKey: boolean) => {
         this.setState((prevState) => {
         const patches = (prevState as any)[targetedPatchesKey] as Git.ConvenientPatch[];
@@ -104,7 +104,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           this.iSelectedPatch = iPatch; 
           this.iAnchorPatch = this.iSelectedPatch;
           this.iShiftPatch = null;
-          this.props.onPatchSelect(patch, PatchType.Unstaged);
+          this.props.onPatchSelect(patch, type);
           return generateNewState(new Set([patch]));
         }
       });

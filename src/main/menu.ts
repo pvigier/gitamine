@@ -1,23 +1,4 @@
-import { BrowserWindow, Menu } from 'electron';
-
-function createModalWindow(parent: BrowserWindow, path: string) {
-  let window: BrowserWindow | null = new BrowserWindow({
-    show: false,
-    width: 400,
-    height: 320,
-    parent: parent,
-    modal: true
-  });
-
-  window.loadURL(path);
-
-  window.once('ready-to-show', () => {
-    window!.show();
-  });
-  window.on('close', () => { 
-    window = null
-  });
-}
+import {  Menu } from 'electron';
 
 export function setMenu(mainWindow: Electron.BrowserWindow) {
   const template = [
@@ -45,7 +26,7 @@ export function setMenu(mainWindow: Electron.BrowserWindow) {
         {
           label: 'Preferences',
           accelerator: 'CmdOrCtrl+,',
-          click: () => createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/preferences.html`)
+          click: () => mainWindow.webContents.send('preferences')
         },
         {
           type: 'separator'

@@ -607,3 +607,41 @@ form.modal-form div.button-container button {
   width: 100%;
   margin: 0px;
 }
+/* Preferences */
+div.preferences {
+  width: 600px;
+  height: 400px;
+  display: flex;
+}
+div.preferences nav {
+  width: 200px;
+}
+div.preferences nav ul {
+  list-style: none;
+  margin: 16px 0px;
+  padding: 0px;
+}
+div.preferences nav ul li {
+  padding: 5px 16px;
+}
+div.preferences nav ul li:hover {
+  background-color: var(--hover-color);
+}
+div.preferences nav ul li.selected {
+  background-color: var(--selected-color);
+}
+div.preferences main {
+  flex-grow: 1;
+}
+div.preferences section {
+  display: none;
+  padding: 16px;
+}
+div.preferences section.shown {
+  display: block;
+}
+div.preferences section h1 {
+  margin: 0px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 16px;
+}

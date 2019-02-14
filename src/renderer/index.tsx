@@ -20,12 +20,6 @@ if (module.hot) { module.hot.accept(render); }
 
 // Events
 
-ipcRenderer.on('update-theme', (event: Electron.Event, theme: string) => {
-  if (app) {
-    app.updateTheme(theme);
-  }
-});
-
 ipcRenderer.on('clone-repo', () => {
   if (app) {
     app.openCloneRepoDialog();
@@ -41,6 +35,12 @@ ipcRenderer.on('init-repo', () => {
 ipcRenderer.on('open-repo', () => {
   if (app) {
     app.openOpenRepoDialog();
+  }
+});
+
+ipcRenderer.on('preferences', () => {
+  if (app) {
+    app.openPreferencesDialog();
   }
 });
 

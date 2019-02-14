@@ -763,3 +763,52 @@ form.modal-form {
     }
   }
 }
+
+/* Preferences */
+
+div.preferences {
+  width: 600px;
+  height: 400px;
+  display: flex;
+
+  nav {
+    width: 200px;
+
+    ul {
+      list-style: none;
+      margin: 16px 0px;
+      padding: 0px;
+
+      li {
+        padding: 5px 16px;
+
+        &:hover {
+          background-color: var(--hover-color);
+        }
+
+        &.selected {
+          background-color: var(--selected-color);
+        }
+      }
+    }
+  }
+
+  main {
+    flex-grow: 1;
+  }
+
+  section {
+    display: none;
+    padding: 16px;
+
+    &.shown {
+      display: block;
+    }
+
+    h1 {
+      margin: 0px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 16px;
+    }
+  }
+}

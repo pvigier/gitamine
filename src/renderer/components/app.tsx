@@ -1,3 +1,4 @@
+import { remote } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { RepoDashboard } from './repo-dashboard';
@@ -8,9 +9,9 @@ import { NotificationType } from './notification-item';
 import { CreateBranchDialog } from './create-branch-dialog';
 import { CloneRepoDialog } from './clone-repo-dialog';
 import { InitRepoDialog } from './init-repo-dialog';
+import { PreferencesDialog } from './preferences-dialog';
 import { Field, Settings } from '../../shared/settings';
 import { ThemeManager } from '../../shared/theme-manager';
-import { remote } from 'electron';
 
 export interface AppState {
   repos: RepoState[]; 
@@ -31,6 +32,7 @@ export class App extends React.PureComponent<{}, AppState> {
       editorTheme: 'vs-light',
       modalWindow: null
     };
+    this.updateTheme = this.updateTheme.bind(this);
     this.cloneRepo = this.cloneRepo.bind(this);
     this.initRepo = this.initRepo.bind(this);
     this.openRepo = this.openRepo.bind(this);
@@ -141,6 +143,13 @@ export class App extends React.PureComponent<{}, AppState> {
         }
       }
     );
+  }
+
+  openPreferencesDialog() {
+    const element = <PreferencesDialog onClose={this.closeModalWindow} onThemeUpdate={this.updateTheme}/>
+    this.setState({
+      modalWindow: element
+    });
   }
 
   openCreateBranchDialog(commit: Git.Commit) {

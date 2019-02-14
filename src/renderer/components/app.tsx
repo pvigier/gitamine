@@ -6,6 +6,7 @@ import { NotificationQueue } from './notification-queue';
 import { WelcomeDashboard } from './welcome-dashboard';
 import { NotificationType } from './notification-item';
 import { CreateBranchDialog } from './create-branch-dialog';
+import { InitRepoDialog } from './init-repo-dialog';
 import { Field, Settings } from '../../shared/settings';
 import { ThemeManager } from '../../shared/theme-manager';
 
@@ -28,7 +29,9 @@ export class App extends React.PureComponent<{}, AppState> {
       editorTheme: 'vs-light',
       modalWindow: null
     };
+    this.initRepo = this.initRepo.bind(this);
     this.openRepo = this.openRepo.bind(this);
+    this.openInitRepoDialog = this.openInitRepoDialog.bind(this);
     this.openCreateBranchWindow = this.openCreateBranchWindow.bind(this);
     this.showNotification = this.showNotification.bind(this);
     this.closeModalWindow = this.closeModalWindow.bind(this);
@@ -60,7 +63,7 @@ export class App extends React.PureComponent<{}, AppState> {
       const repo = await Git.Repository.init(path, 0);
       this.addRepo(repo);
     } catch (e) {
-      this.showNotification(e.message, NotificationType.Error);
+      this.showNotification(`Unable to init repo: ${e.message}`, NotificationType.Error);
     }
   }
 
@@ -110,6 +113,13 @@ export class App extends React.PureComponent<{}, AppState> {
 
   // Modal components
 
+  openInitRepoDialog() {
+    const element = <InitRepoDialog onInitRepo={this.initRepo} onClose={this.closeModalWindow} />
+    this.setState({
+      modalWindow: element
+    });
+  }
+
   openCreateBranchWindow(commit: Git.Commit) {
     const element = <CreateBranchDialog repo={this.getCurrentRepo()} commit={commit} onClose={this.closeModalWindow} />;
     this.setState({
@@ -125,7 +135,8 @@ export class App extends React.PureComponent<{}, AppState> {
 
   render() {
     const repoDashboards = this.state.repos.length === 0 ?
-      <WelcomeDashboard onRecentlyOpenedRepoClick={this.openRepo} /> :
+      <WelcomeDashboard onRecentlyOpenedRepoClick={this.openRepo} 
+        onInitRepo={this.openInitRepoDialog} /> :
       this.state.repos.map((repo, i) => <RepoDashboard 
         repo={repo} 
         editorTheme={this.state.editorTheme}

@@ -32,9 +32,9 @@ ipcRenderer.on('clone-repo', (event: Electron.Event, [path, url]: [string, strin
   }
 });
 
-ipcRenderer.on('init-repo', (event: Electron.Event, path: string) => {
+ipcRenderer.on('init-repo', () => {
   if (app) {
-    app.initRepo(path);
+    app.openInitRepoDialog();
   }
 });
 

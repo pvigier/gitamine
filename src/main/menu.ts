@@ -23,10 +23,6 @@ export function openCloneRepoWindow(mainWindow: Electron.BrowserWindow) {
   createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/clone-repo.html`);
 }
 
-export function openInitRepoWindow(mainWindow: Electron.BrowserWindow) {
-  createModalWindow(mainWindow, `file://${__dirname}/../../assets/html/init-repo.html`);
-}
-
 export function openOpenRepoWindow(mainWindow: Electron.BrowserWindow) {
   dialog.showOpenDialog(mainWindow, {properties: ['openDirectory']}, (paths) => {
     if (paths) {
@@ -48,7 +44,7 @@ export function setMenu(mainWindow: Electron.BrowserWindow) {
         {
           label: 'Init repo',
           accelerator: 'CmdOrCtrl+I',
-          click: () => openInitRepoWindow(mainWindow)
+          click: () => mainWindow.webContents.send('init-repo')
         },
         {
           label: 'Open repo',

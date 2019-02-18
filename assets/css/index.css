@@ -358,6 +358,12 @@ span.patch-rename::before {
   content: '/';
   color: dodgerblue;
 }
+span.patch-conflict::before {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  content: '!';
+  color: orange;
+}
 /* Ellipsis middle */
 .ellipsis-middle {
   display: flex;

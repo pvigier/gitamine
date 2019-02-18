@@ -21,6 +21,8 @@ function getPatchIcon(patch: Git.ConvenientPatch) {
     return <span className='icon patch-modify' />;
   } else if (patch.isRenamed()) {
     return <span className='icon patch-rename' />;
+  } else if (patch.isConflicted()) {
+    return <span className='icon patch-conflict' />;
   } else {
     return null;
   }

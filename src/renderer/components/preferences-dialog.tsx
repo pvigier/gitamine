@@ -2,6 +2,7 @@ import * as Path from 'path';
 import * as fs from 'fs';
 import * as React from 'react';
 import { makeModal } from './make-modal';
+import { PatchViewerOptions } from './patch-viewer';
 import { Settings, Field } from '../../shared/settings';
 
 enum Section {
@@ -14,6 +15,7 @@ enum Section {
 export class PreferencesProps {
   onClose: () => void;
   onThemeUpdate: (theme: string) => void;
+  onEditorPreferencesUpdate: (options: PatchViewerOptions) => void;
 }
 
 export class PreferencesState {
@@ -32,6 +34,7 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
       themes: []
     }
     this.handleThemeChange = this.handleThemeChange.bind(this);
+    this.handleEditorPreferencesChange = this.handleEditorPreferencesChange.bind(this);
   }
 
   componentDidMount() {
@@ -53,6 +56,12 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
     this.props.onThemeUpdate(event.target.selectedOptions[0].text);
   }
 
+  handleEditorPreferencesChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.props.onEditorPreferencesUpdate({
+      fontSize: Number(event.target.value)
+    });
+  }
+
   loadSettings() {
     // This does not conform to React's style
     const setInputValuesFromStore = (ids: string[], keys: string[]) => {
@@ -64,7 +73,8 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
       }
     }
 
-    setInputValuesFromStore(['name', 'email'], [Field.Name, Field.Email]);
+    setInputValuesFromStore(['name', 'email', 'font-size'], 
+      [Field.Name, Field.Email, Field.FontSize]);
   }
 
   loadThemes() {
@@ -91,7 +101,8 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
       Settings.setAll(values);
     }
 
-    saveInputValuesInStore(['name', 'email'], [Field.Name, Field.Email]);
+    saveInputValuesInStore(['name', 'email', 'font-size'], 
+      [Field.Name, Field.Email, Field.FontSize]);
     
     const themeSelect = document.getElementById('theme') as HTMLSelectElement;
     Settings.set(Field.Theme, themeSelect.selectedOptions[0].text);
@@ -99,6 +110,7 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
 
   render() {
     const selectedTheme = this.settings[Field.Theme];
+    const fontSize = this.settings[Field.FontSize];
     const themeOptions = this.state.themes.map((theme) => (
       <option value={theme} key={theme}>
         {theme}
@@ -159,17 +171,8 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
             <h1>Editor Preferences</h1>
             <form>
               <div>
-                <label htmlFor="font">Font:</label>
-                <select id="font">
-                </select>
-              </div>
-              <div>
                 <label htmlFor="font-size">Font size:</label>
-                <input type="number" id="font-size" name="font-size" />
-              </div>
-              <div>
-                <label htmlFor="tab-size">Tab size:</label>
-                <input type="number" id="tab-size" name="tab-size" />
+                <input type="number" id="font-size" name="font-size" defaultValue={fontSize} onChange={this.handleEditorPreferencesChange}/>
               </div>
             </form>
           </section>

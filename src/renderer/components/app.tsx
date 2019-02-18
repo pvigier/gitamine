@@ -9,6 +9,7 @@ import { NotificationType } from './notification-item';
 import { CreateBranchDialog } from './create-branch-dialog';
 import { CloneRepoDialog } from './clone-repo-dialog';
 import { InitRepoDialog } from './init-repo-dialog';
+import { PatchViewerOptions, PatchViewer } from './patch-viewer';
 import { PreferencesDialog } from './preferences-dialog';
 import { Field, Settings } from '../../shared/settings';
 import { ThemeManager } from '../../shared/theme-manager';
@@ -16,6 +17,7 @@ import { ThemeManager } from '../../shared/theme-manager';
 export interface AppState {
   repos: RepoState[]; 
   editorTheme: string;
+  patchViewerOptions: PatchViewerOptions;
   modalWindow: JSX.Element | null;
 }
 
@@ -30,9 +32,13 @@ export class App extends React.PureComponent<{}, AppState> {
     this.state = {
       repos: [],
       editorTheme: 'vs-light',
+      patchViewerOptions: {
+        fontSize: 14
+      },
       modalWindow: null
     };
     this.updateTheme = this.updateTheme.bind(this);
+    this.updatePatchViewer = this.updatePatchViewer.bind(this);
     this.cloneRepo = this.cloneRepo.bind(this);
     this.initRepo = this.initRepo.bind(this);
     this.openRepo = this.openRepo.bind(this);
@@ -46,6 +52,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
   componentDidMount() {
     this.updateTheme();
+    this.updatePatchViewer();
   }
 
   async updateTheme(name?: string) {
@@ -53,6 +60,13 @@ export class App extends React.PureComponent<{}, AppState> {
     this.themeManager.updateCssVariables();
     this.setState({
       editorTheme: this.themeManager.getEditorTheme()
+    });
+  }
+
+  async updatePatchViewer(options?: PatchViewerOptions) {
+    options = options || {fontSize: Settings.get(Field.FontSize)};
+    this.setState({
+      patchViewerOptions: options!
     });
   }
 
@@ -146,7 +160,9 @@ export class App extends React.PureComponent<{}, AppState> {
   }
 
   openPreferencesDialog() {
-    const element = <PreferencesDialog onClose={this.closeModalWindow} onThemeUpdate={this.updateTheme}/>
+    const element = <PreferencesDialog onClose={this.closeModalWindow} 
+      onThemeUpdate={this.updateTheme}
+      onEditorPreferencesUpdate={this.updatePatchViewer} />
     this.setState({
       modalWindow: element
     });
@@ -174,6 +190,7 @@ export class App extends React.PureComponent<{}, AppState> {
       this.state.repos.map((repo, i) => <RepoDashboard 
         repo={repo} 
         editorTheme={this.state.editorTheme}
+        patchViewerOptions={this.state.patchViewerOptions}
         onRepoClose={() => this.closeRepo(i)}
         onCreateBranch={this.openCreateBranchDialog}
         key={repo.path} />);

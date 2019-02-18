@@ -656,3 +656,9 @@ div.preferences section h1 {
   border-bottom: 1px solid var(--border-color);
   margin-bottom: 16px;
 }
+div.preferences section div {
+  margin: 4px 0px;
+}
+div.preferences section div label {
+  margin-right: 4px;
+}

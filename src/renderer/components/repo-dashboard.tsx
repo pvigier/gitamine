@@ -6,7 +6,7 @@ import * as Git from 'nodegit';
 import { GraphViewer } from './graph-viewer';
 import { CommitViewer } from './commit-viewer';
 import { IndexViewer } from './index-viewer';
-import { PatchViewer } from './patch-viewer';
+import { PatchViewer, PatchViewerOptions } from './patch-viewer';
 import { Splitter } from './splitter';
 import { Toolbar } from './toolbar';
 import { RepoState, PatchType } from '../helpers/repo-state';
@@ -14,6 +14,7 @@ import { RepoState, PatchType } from '../helpers/repo-state';
 export interface RepoDashboardProps { 
   repo: RepoState;
   editorTheme: string;
+  patchViewerOptions: PatchViewerOptions;
   onRepoClose: () => void;
   onCreateBranch: (commit: Git.Commit) => void;
 }
@@ -182,6 +183,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         patch={this.state.selectedPatch!} 
         type={this.state.patchType}
         editorTheme={this.props.editorTheme}
+        options={this.props.patchViewerOptions}
         onClose={this.exitPatchViewer} /> 
     } else {
       leftViewer = <GraphViewer repo={this.props.repo} 

@@ -60,11 +60,16 @@ enum Editor {
   Count
 }
 
+export interface PatchViewerOptions {
+  fontSize: number;
+}
+
 export interface PatchViewerProps { 
   repo: RepoState;
   patch: Git.ConvenientPatch;
   type: PatchType;
   editorTheme: string;
+  options: PatchViewerOptions;
   onClose: () => void;
 }
 
@@ -119,6 +124,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     } 
     if (this.props.editorTheme !== prevProps.editorTheme) {
       monaco.editor.setTheme(this.props.editorTheme); 
+    }
+    if (this.props.options !== prevProps.options) {
+      this.editor.updateOptions(this.props.options);
     }
   }
 
@@ -187,7 +195,8 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
         theme: this.props.editorTheme,
         automaticLayout: true,
         renderSideBySide: false,
-        readOnly: true
+        readOnly: true,
+        ...this.props.options
       }
       this.editor = monaco.editor.createDiffEditor(this.divEditor.current, options)
       this.editor.onDidUpdateDiff(() => this.updateMarginButtons());

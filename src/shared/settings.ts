@@ -6,7 +6,8 @@ export enum Field {
   Name = 'name',
   Email = 'email',
   RecentlyOpened = 'recentlyOpened',
-  Theme = 'theme'
+  Theme = 'theme',
+  FontSize = 'fontSize'
 }
 
 function getKey(field: Field) {

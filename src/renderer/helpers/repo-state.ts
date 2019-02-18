@@ -367,7 +367,7 @@ export class RepoState {
   async discardPatch(patch: Git.ConvenientPatch) {
     if (patch.isUntracked()) {
       // Remove the file
-      fs.unlink(Path.join(this.repo.workdir(), patch.newFile().path()));
+      fs.unlink(Path.join(this.repo.workdir(), patch.newFile().path()), () => {});
     } else if (this.headCommit) {
       const path = patch.newFile().path();
       await Git.Checkout.head(this.repo, {

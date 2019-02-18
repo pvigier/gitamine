@@ -134,13 +134,15 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   handleAmendChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const newState = {
-      amend: event.target.checked
-    } as IndexViewerState
-    if (newState.amend && !this.state.summary) {
-      newState.summary = this.props.repo.headCommit.summary();
+    if (this.props.repo.headCommit) {
+      const newState = {
+        amend: event.target.checked
+      } as IndexViewerState
+      if (newState.amend && !this.state.summary) {
+        newState.summary = this.props.repo.headCommit.summary();
+      }
+      this.setState(newState);
     }
-    this.setState(newState);
   }
 
   handleSummaryChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -225,7 +227,6 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   render() {
-    const repo = this.props.repo;
     return (
       <div className='commit-viewer' ref={this.div}>
         <h2>Index</h2>
@@ -259,10 +260,11 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           onPatchSelect={this.handleStagedPatchSelect} />
         <div className='section-header'>
           <p>Commit message</p>
+          {this.props.repo.headCommit ?
           <div className='amend-container'>
             <input type='checkbox' id='amend' name='amend' checked={this.state.amend} onChange={this.handleAmendChange} />
             <label htmlFor='amend'>Amend</label> 
-          </div>
+          </div> : null}
         </div>
         <input placeholder={'Summary'} 
           value={this.state.summary} 

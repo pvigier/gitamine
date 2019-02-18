@@ -80,13 +80,15 @@ export class CommitGraph {
     }
 
     this.positions.clear();
-    const headSha = repo.headCommit.sha();
+    const headSha = repo.headCommit ? repo.headCommit.sha() : null;
     let i = 1;
     const branches: (string | null)[] = ['index'];
     const activeNodes = new Map<string, Set<number>>();
     const activeNodesQueue = new FastPriorityQueue<[number, string]>((lhs, rhs) => lhs[0] < rhs[0]);
     activeNodes.set('index', new Set<number>());
-    activeNodesQueue.add([repo.shaToIndex.get(repo.headCommit.sha())!, 'index']);
+    if (headSha) {
+      activeNodesQueue.add([repo.shaToIndex.get(headSha)!, 'index']);
+    }
     for (let commit of repo.commits) {
       let j = -1;
       const commitSha = commit.sha();

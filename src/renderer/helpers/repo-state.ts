@@ -55,8 +55,8 @@ export class RepoState {
   stashes: Map<string, Stash>; // Use a dictionary?
   parents: Map<string, string[]>;
   children: Map<string, string[]>;
-  head: string;
-  headCommit: Git.Commit;
+  head: string | null;
+  headCommit: Git.Commit | null;
   graph: CommitGraph;
   onNotification: (message: string, type: NotificationType) => void;
   updatePromise: Promise<void>; // Used to queue updates
@@ -259,7 +259,11 @@ export class RepoState {
   }
 
   async updateHead() {
-    this.head = (await this.repo.head()).name();
+    try  {
+      this.head = (await this.repo.head()).name();
+    } catch (e) {
+      this.head = null;
+    }
     this.headCommit = await this.repo.getHeadCommit();
   }
 
@@ -286,21 +290,16 @@ export class RepoState {
   // Index operations
 
   async getUnstagedPatches() {
-    if (this.headCommit) {
-      const unstagedDiff = await Git.Diff.indexToWorkdir(this.repo, null, diffOptions);
-      await unstagedDiff.findSimilar(findSimilarOptions);
-      return await unstagedDiff.patches();
-    }
-    return [];
+    const unstagedDiff = await Git.Diff.indexToWorkdir(this.repo, null, diffOptions);
+    await unstagedDiff.findSimilar(findSimilarOptions);
+    return await unstagedDiff.patches();
   }
 
   async getStagedPatches() {
-    if (this.headCommit) {
-      const stagedDiff = await Git.Diff.treeToIndex(this.repo, await this.headCommit.getTree(), null, diffOptions);
-      await stagedDiff.findSimilar(findSimilarOptions);
-      return await stagedDiff.patches();
-    }
-    return [];
+    const oldTree = this.headCommit ? await this.headCommit.getTree() : null;
+    const stagedDiff = await Git.Diff.treeToIndex(this.repo, oldTree, null, diffOptions);
+    await stagedDiff.findSimilar(findSimilarOptions);
+    return await stagedDiff.patches();
   }
 
   async stageLines(patch: Git.ConvenientPatch, lines: Git.DiffLine[]) {
@@ -384,7 +383,8 @@ export class RepoState {
       const author = this.getSignature();
       const index = await this.repo.index();
       const oid = await index.writeTree();
-      await this.repo.createCommit('HEAD', author, author, message, oid, [this.headCommit]);
+      const parent = this.headCommit ? [this.headCommit] : []; // The first commit has no parent
+      await this.repo.createCommit('HEAD', author, author, message, oid, parent);
     } catch (e) {
       this.onNotification(`Unable to commit: ${e.message}`, NotificationType.Error);
     }
@@ -392,9 +392,13 @@ export class RepoState {
 
   async amend(message: string) {
     try {
-      const index = await this.repo.index();
-      const oid = await index.writeTree();
-      this.headCommit.amend('HEAD', this.headCommit.author(), this.getSignature(), this.headCommit.messageEncoding(), message, oid);
+      if (this.headCommit) {
+        const index = await this.repo.index();
+        const oid = await index.writeTree();
+        this.headCommit.amend('HEAD', this.headCommit.author(), this.getSignature(), this.headCommit.messageEncoding(), message, oid);
+      } else {
+        throw Error('There is no commit to amend');
+      }
     } catch (e) {
       this.onNotification(`Unable to amend: ${e.message}`, NotificationType.Error);
     }
@@ -505,7 +509,7 @@ export class RepoState {
   async stash() {
     try {
       const stasher = this.getSignature();
-      const message = `${shortenSha(this.headCommit.sha())} ${this.headCommit.message()}`
+      const message = this.headCommit ? `${shortenSha(this.headCommit.sha())} ${this.headCommit.message()}` : '';
       await Git.Stash.save(this.repo, stasher, message, Git.Stash.FLAGS.DEFAULT);
     } catch(e) {
       this.onNotification(`Unable to stash: ${e.message}`, NotificationType.Error);

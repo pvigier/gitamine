@@ -25,7 +25,9 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
   }
 
   handlePullButtonClick() {
-    this.props.repo.pull(removeReferencePrefix(this.props.repo.head));
+    if (this.props.repo.head) {
+      this.props.repo.pull(removeReferencePrefix(this.props.repo.head));
+    }
   }
 
   handlePushButtonClick() {
@@ -34,9 +36,9 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
 
   handleBranchButtonClick() {
     // Replace sha by commit
-    if (this.props.selectedCommit === null) {
+    if (this.props.selectedCommit === null && this.props.repo.headCommit) {
       this.props.onCreateBranch(this.props.repo.headCommit);
-    } else {
+    } else if (this.props.selectedCommit) {
       this.props.onCreateBranch(this.props.selectedCommit);
     }
   }

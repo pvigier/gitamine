@@ -80,7 +80,7 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
     const repo = this.props.repo;
     const positions = repo.graph.positions;
     // Draw the edge between the index and the head commit
-    if (positions.size > 0) {
+    if (repo.headCommit) {
       let [x0, y0] = this.computeNodeCenterCoordinates(0, 0);
       y0 += RADIUS;
       const node = positions.get(repo.headCommit.sha())!;

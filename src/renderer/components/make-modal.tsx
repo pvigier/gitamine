@@ -15,23 +15,16 @@ export function makeModal<P extends ModalComponentProps, S>(Component: Component
       this.handleKeyUp = this.handleKeyUp.bind(this);
     }
 
-    componentDidMount() {
-      window.addEventListener('keyup', this.handleKeyUp);
-    }
-
-    componentWillUnmount() {
-      window.removeEventListener('keyup', this.handleKeyUp);
-    }
-
-    handleKeyUp(event: KeyboardEvent) {
+    handleKeyUp(event: React.KeyboardEvent<HTMLDivElement>) {
       if (event.keyCode === 27) {
         this.props.onClose();
       }
+      event.nativeEvent.stopPropagation();
     }
 
     render() {
       return (
-        <div className='modal-container'>
+        <div className='modal-container' onKeyUp={this.handleKeyUp} tabIndex={-1} ref={div => div && div.focus()}>
           <div className='modal-background'>
             <Component {...this.props} />
           </div>

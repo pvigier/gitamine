@@ -107,7 +107,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   componentDidUpdate(prevProps: PatchViewerProps) {
-    if (this.props.type !== prevProps.type || !comparePatches(this.props.patch, prevProps.patch)) {
+    if (this.props.type !== prevProps.type || this.props.patch.isUntracked() || !comparePatches(this.props.patch, prevProps.patch)) {
       this.loadAndUpdate();
     } 
     if (this.props.editorTheme !== prevProps.editorTheme) {

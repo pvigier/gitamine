@@ -31,11 +31,17 @@ async function getBlob(repo: Git.Repository, file: Git.DiffFile) {
   }
 }
 
-function comparePatches(lhs: Git.ConvenientPatch, rhs: Git.ConvenientPatch) {
+function arePatchesEqual(lhs: Git.ConvenientPatch, rhs: Git.ConvenientPatch) {
   return lhs.oldFile().id().equal(rhs.oldFile().id()) &&
     lhs.newFile().id().equal(rhs.newFile().id()) &&
     lhs.status() === rhs.status() &&
     lhs.size() === rhs.size();
+}
+
+function arePatchesSimilar(lhs: Git.ConvenientPatch, rhs: Git.ConvenientPatch) {
+  return lhs.oldFile().path() === rhs.oldFile().path() &&
+    lhs.newFile().path() === rhs.newFile().path() &&
+    lhs.status() === rhs.status()
 }
 
 // PatchViewer
@@ -107,8 +113,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
   }
 
   componentDidUpdate(prevProps: PatchViewerProps) {
-    if (this.props.type !== prevProps.type || this.props.patch.isUntracked() || !comparePatches(this.props.patch, prevProps.patch)) {
-      this.loadAndUpdate();
+    if (this.props.type !== prevProps.type || this.props.patch.isUntracked() || !arePatchesEqual(this.props.patch, prevProps.patch)) {
+      const scrollTop = arePatchesSimilar(prevProps.patch, this.props.patch) ? this.editor.getModifiedEditor().getScrollTop() : 0;
+      this.loadAndUpdate(scrollTop);
     } 
     if (this.props.editorTheme !== prevProps.editorTheme) {
       monaco.editor.setTheme(this.props.editorTheme); 
@@ -125,7 +132,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     if (viewMode !== this.viewMode) {
       this.viewMode = viewMode;
       if (this.editor) {
-        this.updateEditor();
+        this.updateEditor(0);
       }
     }
   }
@@ -184,14 +191,14 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       }
       this.editor = monaco.editor.createDiffEditor(this.divEditor.current, options)
       this.editor.onDidUpdateDiff(() => this.updateMarginButtons());
-      this.loadAndUpdate();
+      this.loadAndUpdate(0);
     }
   }
 
-  async loadAndUpdate() {
+  async loadAndUpdate(scrollTop: number) {
     await this.loadData();
     if (this.editor) {
-      this.updateEditor();
+      this.updateEditor(scrollTop);
     }
   }
 
@@ -222,7 +229,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
       .reduce((acc, value) => acc.concat(value), []);
   }
 
-  async updateEditor() {
+  async updateEditor(scrollTop: number) {
     // Hide the editor during update
     if (this.divEditor.current) {
       this.divEditor.current.classList.add('hidden');
@@ -238,6 +245,8 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, {}> {
     if (this.viewMode === ViewMode.Hunk && this.props.patch.isModified()) {
       await this.customizeHunkView(); 
     }
+    // Scroll
+    this.editor.getModifiedEditor().setScrollTop(scrollTop);
     // Show the editor
     if (this.divEditor.current) {
       this.divEditor.current.classList.remove('hidden');

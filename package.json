@@ -51,9 +51,6 @@
     }
   },
   "dependencies": {
-    "@types/electron-devtools-installer": "^2.2.0",
-    "@types/react": "^16.7.18",
-    "@types/react-dom": "^16.0.11",
     "chokidar": "^2.1.1",
     "electron-compile": "^6.4.3",
     "electron-devtools-installer": "^2.2.4",
@@ -73,7 +70,10 @@
   },
   "devDependencies": {
     "@types/chokidar": "^1.7.5",
+    "@types/electron-devtools-installer": "^2.2.0",
     "@types/nodegit": "^0.22.5",
+    "@types/react": "^16.7.18",
+    "@types/react-dom": "^16.0.11",
     "@types/react-hot-loader": "^4.1.0",
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-preset-env": "^1.7.0",

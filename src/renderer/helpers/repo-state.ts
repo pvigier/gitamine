@@ -369,13 +369,17 @@ export class RepoState {
   }
 
   async discardPatch(patch: Git.ConvenientPatch) {
-    // This a bit hacky
-    const path = patch.newFile().path();
-    await Git.Checkout.head(this.repo, {
-      baseline: await this.headCommit.getTree(),
-      checkoutStrategy: Git.Checkout.STRATEGY.FORCE,
-      paths: path
-    });
+    if (patch.isUntracked()) {
+      // Remove the file
+      fs.unlink(Path.join(this.repo.workdir(), patch.newFile().path()));
+    } else if (this.headCommit) {
+      const path = patch.newFile().path();
+      await Git.Checkout.head(this.repo, {
+        baseline: await this.headCommit.getTree(),
+        checkoutStrategy: Git.Checkout.STRATEGY.FORCE,
+        paths: path
+      });
+    }
   }
 
   async commit(message: string) {

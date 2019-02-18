@@ -95,7 +95,6 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     // Watch index and head 
     // fs.watch seems sufficient for that, I should try with chokidar
     fs.watch(path, async (error: string, filename: string) => {
-      console.log('repo', filename);
       if (filename === 'index') {
         this.refreshIndex();
       } else if (filename === 'HEAD') {
@@ -116,7 +115,6 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       binaryInterval: 500
     });
     workingDirectoryWatcher.on('all', async (event: string, path: string) => {
-      console.log('wd', event, path);
       if (path.endsWith('.gitignore')) {
         this.props.repo.updateIgnore();
       }
@@ -137,7 +135,6 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       followSymlinks: false
     });
     referencesWatcher.on('all', async (event: string, path: string) => {
-      console.log('refs', event, path);
       await this.refreshReferences();
       this.refreshIndex();
     });

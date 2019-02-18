@@ -95,7 +95,6 @@ export class CommitGraph {
       const children = repo.children.get(commit.sha())!;
       // Compute forbidden indices
       const forbiddenIndices = mergeSets(children.filter((childSha) => repo.parents.get(childSha)![0] !== commitSha).map((childSha) => activeNodes.get(childSha)!));
-      //console.log(i, activeNodes.size, commitSha, forbiddenIndices, children, children.map((childSha) => [...activeNodes.get(childSha)!]));
       // Find a commit to replace
       let commitToReplace: string | null = null;
       let jCommitToReplace = Infinity;

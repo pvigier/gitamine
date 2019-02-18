@@ -94,16 +94,13 @@ export class RepoState {
   }
 
   async updateCommits() {
-    console.log('start');
     const referencesToUpdate = await this.updateReferences();
     const stashesToUpdate = await this.updateStashes();
-    console.log('stashes to update:', stashesToUpdate.map((s) => s.commit.sha()));
     const newCommits = await this.getNewCommits(referencesToUpdate, stashesToUpdate);
     await this.getParents(newCommits);
     this.removeUnreachableCommits();
     await this.hideStashSecondParents(stashesToUpdate);
     this.sortCommits();
-    console.log('end');
   }
 
   async updateReferences() {
@@ -134,7 +131,6 @@ export class RepoState {
       }
     }
     this.stashes = stashes;
-    console.log('stashes:', this.stashes.keys());
     return stashesToUpdate;
   }
 
@@ -421,7 +417,6 @@ export class RepoState {
           return [name, await this.repo.getReferenceCommit(name)] as [string, Git.Commit];
         }
       } catch (e) {
-        console.log(e);
         return [name, null] as [string, null];
       }
     }));

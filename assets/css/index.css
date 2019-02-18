@@ -359,16 +359,16 @@ span.patch-rename::before {
   color: dodgerblue;
 }
 /* Ellipsis middle */
-div.ellipsis-middle {
+.ellipsis-middle {
   display: flex;
   overflow: hidden;
 }
-div.ellipsis-middle div.left {
+.ellipsis-middle .left {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
-div.ellipsis-middle div.right {
+.ellipsis-middle .right {
   max-width: 100%;
   flex-shrink: 0;
   text-overflow: ellipsis;

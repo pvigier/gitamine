@@ -2,7 +2,7 @@
   "name": "gitamine",
   "productName": "gitamine",
   "version": "0.0.1",
-  "description": "gitamine is a modern git client",
+  "description": "gitamine is a modern graphical user interface for git ",
   "main": "src/main/main.ts",
   "scripts": {
     "start": "electron-forge start",
@@ -22,12 +22,14 @@
     "forge": {
       "make_targets": {
         "win32": [
+          "zip",
           "squirrel"
         ],
         "darwin": [
           "zip"
         ],
         "linux": [
+          "zip",
           "deb",
           "rpm"
         ]

@@ -60,4 +60,8 @@ typings/
 # next.js build output
 .next
 
+# npm package-lock
 package-lock\.json
+
+# Electron-forge
+out/

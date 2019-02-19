@@ -24,6 +24,8 @@ gitamine is powered by awesome technologies including:
 
 You can download the latest version of gitamine [here](https://github.com/pvigier/gitamine/releases/latest).
 
+See this [page](https://github.com/pvigier/gitamine/wiki/How-to-install) for detailed instruction on how to install gitamine.
+
 ## Contributing
 
 Here are some ways, you can contribute to gitamine:

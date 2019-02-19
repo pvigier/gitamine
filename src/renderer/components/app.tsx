@@ -9,7 +9,7 @@ import { NotificationType } from './notification-item';
 import { CreateBranchDialog } from './create-branch-dialog';
 import { CloneRepoDialog } from './clone-repo-dialog';
 import { InitRepoDialog } from './init-repo-dialog';
-import { PatchViewerOptions, PatchViewer } from './patch-viewer';
+import { PatchViewerOptions } from './patch-viewer';
 import { PreferencesDialog } from './preferences-dialog';
 import { Field, Settings } from '../../shared/settings';
 import { ThemeManager } from '../../shared/theme-manager';
@@ -72,8 +72,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
   async cloneRepo(url: string, path: string) {
     try {
-      const repo = await Git.Clone.clone(url, path);
-      this.addRepo(repo);
+      this.addRepo(await RepoState.clone(url, path));
     } catch (e) {
       this.showNotification(`Unable to clone repo: ${e.message}`, NotificationType.Error);
     }
@@ -81,8 +80,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
   async initRepo(path: string) {
     try {
-      const repo = await Git.Repository.init(path, 0);
-      this.addRepo(repo);
+      this.addRepo(await RepoState.init(path));
     } catch (e) {
       this.showNotification(`Unable to init repo: ${e.message}`, NotificationType.Error);
     }
@@ -90,8 +88,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
   async openRepo(path: string) {
     try {
-      const repo = await Git.Repository.open(path);
-      this.addRepo(repo);
+      this.addRepo(await RepoState.open(path));
     } catch (e) {
       this.showNotification(`Unable to open repo: ${e.message}`, NotificationType.Error);
     }

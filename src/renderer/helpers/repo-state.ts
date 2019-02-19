@@ -267,6 +267,23 @@ export class RepoState {
     this.graph.computePositions(this);
   }
 
+  // Repo creation
+
+  static async clone(url: string, path: string) {
+    const options = { 
+      fetchOpts: RepoState.getCredentialsCallback()
+    };
+    return await Git.Clone.clone(url, path, options);
+  }
+
+  static async init(path: string) {
+    return await Git.Repository.init(path, 0);
+  }
+
+  static async open(path: string) {
+    return await Git.Repository.open(path);
+  }
+
   // Head operations
 
   async checkoutReference(name: string) {
@@ -450,7 +467,7 @@ export class RepoState {
 
   async fetchAll() {
     try {
-      await this.repo.fetchAll(this.getCredentialsCallback());
+      await this.repo.fetchAll(RepoState.getCredentialsCallback());
     } catch (e) {
       this.onNotification(`Unable to fetch all: ${e.message}`, NotificationType.Error);
     }
@@ -463,7 +480,7 @@ export class RepoState {
   async push() {
     try {
       const remote = await this.repo.getRemote('origin');
-      await remote.push([`${this.head}:${this.head}`], this.getCredentialsCallback())
+      await remote.push([`${this.head}:${this.head}`], RepoState.getCredentialsCallback())
       this.onNotification('Pushed successfully', NotificationType.Information);
     } catch (e) {
       this.onNotification(`Unable to push: ${e.message}`, NotificationType.Error);
@@ -483,7 +500,7 @@ export class RepoState {
     }
   }
 
-  getCredentialsCallback() {
+  static getCredentialsCallback() {
     return {
       callbacks: {
         credentials: (url: string, userName: string) => {

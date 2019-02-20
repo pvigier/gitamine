@@ -107,10 +107,14 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
     const commit = this.props.commit;
     const author = commit.author();
     const authoredDate = new Date(author.when().time() * 1000);
+    const body = commit.body();
     return (
       <div className='commit-viewer' ref={this.div}>
         <h3>Commit: {CommitViewer.createShaButton(commit.sha())}</h3>
-        <h2>{commit.message()}</h2>
+        <div className='commit-message'>
+          <h2>{commit.summary()}</h2>
+          {body ? <p>{body}</p> : null}
+        </div>
         <p>By {author.name()} &lt;<a href={`mailto:${author.email()}`}>{author.email()}</a>&gt;</p>
         <p>Authored {formatDate(authoredDate)}</p>
         <p>Last modified {formatDate(commit.date())}</p>

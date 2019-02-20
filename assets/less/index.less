@@ -349,8 +349,20 @@ div.commit-viewer {
     font-weight: normal;
   }
 
-  h2 {
-      margin: 8px;
+  div.commit-message {
+    max-height: 100px;
+    overflow-y: auto;
+    background: var(--list-background-color);
+    border: 1px solid var(--border-color);
+    margin: 8px;
+
+    h2 {
+        margin: 8px;
+    }
+
+    p {
+      font-size: 13px;
+    }
   }
 
   p {

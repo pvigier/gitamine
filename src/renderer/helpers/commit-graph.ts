@@ -52,6 +52,7 @@ export class CommitGraph {
   }
 
   computePositions(repo: RepoState) {
+    const startTime = Date.now();
     function insertCommit(commitSha: string, j: number, forbiddenIndices: Set<number>) {
       // Try to insert as close as possible to i 
       // replace i by j
@@ -136,6 +137,7 @@ export class CommitGraph {
     }
     this.width = branches.length;
     this.updateIntervalTree(repo);
+    console.log(Date.now() - startTime);
   }
 
   updateIntervalTree(repo: RepoState) {

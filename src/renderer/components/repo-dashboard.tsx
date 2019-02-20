@@ -28,13 +28,17 @@ export interface RepoDashboardState {
 export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
   graphViewer: React.RefObject<GraphViewer>;
   rightViewer: React.RefObject<CommitViewer | IndexViewer>;
-  dirtyWordingDirectory: boolean;
+  repositoryWatcher: fs.FSWatcher;
+  dirtyWorkingDirectory: boolean;
+  workingDirectoryWatcher: chokidar.FSWatcher;
+  workingDirectoryTimer: NodeJS.Timer;
+  referencesWatcher: chokidar.FSWatcher;
 
   constructor(props: RepoDashboardProps) {
     super(props);
     this.graphViewer = React.createRef();
     this.rightViewer = React.createRef();
-    this.dirtyWordingDirectory = false;
+    this.dirtyWorkingDirectory = false;
     this.handleCommitSelect = this.handleCommitSelect.bind(this);
     this.handleIndexSelect = this.handleIndexSelect.bind(this);
     this.handlePatchSelect = this.handlePatchSelect.bind(this);
@@ -57,6 +61,13 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       this.graphViewer.current.updateGraph();
     }
     this.setWatchers();
+  }
+
+  componentWillUnmount() {
+    this.repositoryWatcher.close();
+    this.workingDirectoryWatcher.close();
+    clearInterval(this.workingDirectoryTimer);
+    this.referencesWatcher.close();
   }
 
   handleCommitSelect(commit: Git.Commit) {
@@ -94,7 +105,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     const path = this.props.repo.path;
     // Watch index and head 
     // fs.watch seems sufficient for that, I should try with chokidar
-    fs.watch(path, async (error: string, filename: string) => {
+    this.repositoryWatcher = fs.watch(path, async (error: string, filename: string) => {
       if (filename === 'index') {
         this.refreshIndex();
       } else if (filename === 'HEAD') {
@@ -106,7 +117,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     // Watch working directory
     // It seems to work much better on big repo with polling
     const wdPath = this.props.repo.repo.workdir();
-    const workingDirectoryWatcher = chokidar.watch(wdPath, {
+    this.workingDirectoryWatcher = chokidar.watch(wdPath, {
       ignoreInitial: true,
       ignored: [/(.*\.git(\/.*|$))/, (path: string) => this.props.repo.isIgnored(Path.relative(wdPath, path))],
       followSymlinks: false,
@@ -114,27 +125,27 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       interval: 200,
       binaryInterval: 500
     });
-    workingDirectoryWatcher.on('all', async (event: string, path: string) => {
+    this.workingDirectoryWatcher.on('all', async (event: string, path: string) => {
       if (path.endsWith('.gitignore')) {
         this.props.repo.updateIgnore();
       }
-      this.dirtyWordingDirectory = true;
+      this.dirtyWorkingDirectory = true;
     });
     // To prevent from updating too often
-    setInterval(async () => {
-      if (this.dirtyWordingDirectory) {
+    this.workingDirectoryTimer = setInterval(async () => {
+      if (this.dirtyWorkingDirectory) {
         this.refreshIndex();
-        this.dirtyWordingDirectory = false;
+        this.dirtyWorkingDirectory = false;
       }
     }, 200);
 
     // Watch references
-    const referencesWatcher = chokidar.watch(Path.join(path, 'refs'), {
+    this.referencesWatcher = chokidar.watch(Path.join(path, 'refs'), {
       ignoreInitial: true,
       ignored: /.*\.lock$/,
       followSymlinks: false
     });
-    referencesWatcher.on('all', async (event: string, path: string) => {
+    this.referencesWatcher.on('all', async (event: string, path: string) => {
       await this.refreshReferences();
       this.refreshIndex();
     });

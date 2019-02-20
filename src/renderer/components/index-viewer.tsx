@@ -211,7 +211,9 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       }
       this.setState({
         amend: false,
-        summary: ''
+        summary: '',
+        selectedUnstagedPatches: new Set(),
+        selectedStagedPatches: new Set()
       });
     }
   }

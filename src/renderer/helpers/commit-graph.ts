@@ -52,6 +52,7 @@ export class CommitGraph {
   }
 
   computePositions(repo: RepoState) {
+    const startTime = Date.now();
     function mergeSets(sets: Set<number>[]) {
       return new Set<number>(function*() { 
         for (let set of sets) {
@@ -152,6 +153,7 @@ export class CommitGraph {
     }
     this.width = branches.length;
     this.updateIntervalTree(repo);
+    console.log(Date.now() - startTime);
   }
 
   updateIntervalTree(repo: RepoState) {

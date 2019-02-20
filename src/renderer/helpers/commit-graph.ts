@@ -52,14 +52,6 @@ export class CommitGraph {
   }
 
   computePositions(repo: RepoState) {
-    function mergeSets(sets: Set<number>[]) {
-      return new Set<number>(function*() { 
-        for (let set of sets) {
-          yield* set;
-        }
-      }());
-    }
-
     function insertCommit(commitSha: string, j: number, forbiddenIndices: Set<number>) {
       // Try to insert as close as possible to i 
       // replace i by j
@@ -83,18 +75,14 @@ export class CommitGraph {
     const headSha = repo.headCommit ? repo.headCommit.sha() : null;
     let i = 1;
     const branches: (string | null)[] = ['index'];
-    const activeNodes = new Map<string, Set<number>>();
-    const activeNodesQueue = new FastPriorityQueue<[number, string]>((lhs, rhs) => lhs[0] < rhs[0]);
-    activeNodes.set('index', new Set<number>());
-    if (headSha) {
-      activeNodesQueue.add([repo.shaToIndex.get(headSha)!, 'index']);
-    }
+    const edges = new IntervalTree<number>();
     for (let commit of repo.commits) {
       let j = -1;
       const commitSha = commit.sha();
       const children = repo.children.get(commit.sha())!;
       // Compute forbidden indices
-      const forbiddenIndices = mergeSets(children.filter((childSha) => repo.parents.get(childSha)![0] !== commitSha).map((childSha) => activeNodes.get(childSha)!));
+      const iMin = Math.min(...children.filter((childSha) => repo.parents.get(childSha)![0] !== commitSha).map((childSha) => this.positions.get(childSha)![0])!, i);
+      const forbiddenIndices = new Set<number>(edges.search(iMin, i));
       // Find a commit to replace
       let commitToReplace: string | null = null;
       let jCommitToReplace = Infinity;
@@ -127,23 +115,19 @@ export class CommitGraph {
           j = insertCommit(commitSha, 0, new Set());
         }
       }
-      // Remove useless active nodes
-      while (!activeNodesQueue.isEmpty() && activeNodesQueue.peek()[0] < i) {
-        const sha = activeNodesQueue.poll()[1];
-        activeNodes.delete(sha);
-      }
-      // Upddate the active nodes
-      const jToAdd = [j, ...children.filter((childSha) => repo.parents.get(childSha)![0] === commitSha).map((childSha) => this.positions.get(childSha)![1])];
-      for (let activeNode of activeNodes.values()) {
-        jToAdd.forEach((j) => activeNode.add(j));
-      }
-      activeNodes.set(commitSha, new Set<number>());
-      const iRemove = Math.max(...repo.parents.get(commitSha)!.map((parentSha) => repo.shaToIndex.get(parentSha)!));
-      activeNodesQueue.add([iRemove, commitSha]);
       // Remove children from active branches
       for (let childSha of children) {
         if (childSha != commitToReplace && repo.parents.get(childSha)![0] === commitSha) {
           branches[branches.indexOf(childSha)] = null; // Use positions
+        }
+      }
+      // Add edges
+      for (let childSha of children) {
+        const [iChild, jChild] = this.positions.get(childSha)!;
+        if (repo.parents.get(childSha)![0] === commitSha) {
+          edges.insert(iChild, i - 1, jChild);
+        } else {
+          edges.insert(iChild, i - 1, j);
         }
       }
       // Finally set the position

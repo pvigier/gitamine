@@ -26,7 +26,7 @@ class InitRepoForm extends React.PureComponent<InitRepoFormProps, InitRepoFormSt
     this.handleRepoPathChange = this.handleRepoPathChange.bind(this);
     this.handleBrowseClick = this.handleBrowseClick.bind(this);
     this.handleRepoFolderChange = this.handleRepoFolderChange.bind(this);
-    this.handleInitRepo = this.handleInitRepo.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleRepoNameChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -52,7 +52,8 @@ class InitRepoForm extends React.PureComponent<InitRepoFormProps, InitRepoFormSt
     this.setState({repoFolder: event.target.value});
   }
 
-  handleInitRepo() {
+  handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     if (this.isPathValid()) {
       const folderName = this.state.repoFolder || this.state.repoName;
       const fullPath = Path.join(this.state.repoPath, folderName);
@@ -68,7 +69,7 @@ class InitRepoForm extends React.PureComponent<InitRepoFormProps, InitRepoFormSt
 
   render() {
     return (
-      <form className='modal-form'>
+      <form className='modal-form' onSubmit={this.handleSubmit}>
         <div className='field-container'>
           <label htmlFor='name'>Name:</label>
           <input type='text' 
@@ -101,9 +102,8 @@ class InitRepoForm extends React.PureComponent<InitRepoFormProps, InitRepoFormSt
         </div>
         <div className='button-container'>
           <button className='green-button'
-            type='button' 
-            disabled={!this.isPathValid()}
-            onClick={this.handleInitRepo}>
+            type='submit' 
+            disabled={!this.isPathValid()}>
             Create repository
           </button>
         </div>

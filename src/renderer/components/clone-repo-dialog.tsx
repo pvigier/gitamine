@@ -26,7 +26,7 @@ class CloneRepoForm extends React.PureComponent<CloneRepoFormProps, CloneRepoFor
     this.handleBrowseClick = this.handleBrowseClick.bind(this);
     this.handleRepoUrlChange = this.handleRepoUrlChange.bind(this);
     this.handleRepoFolderChange = this.handleRepoFolderChange.bind(this);
-    this.handleCloneRepo = this.handleCloneRepo.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleRepoPathChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -52,7 +52,8 @@ class CloneRepoForm extends React.PureComponent<CloneRepoFormProps, CloneRepoFor
     this.setState({repoFolder: event.target.value});
   }
 
-  handleCloneRepo() {
+  handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault(); 
     if (this.isPathValid()) {
       const folderName = this.state.repoFolder || Path.parse(this.state.repoUrl).name;
       const fullPath = Path.join(this.state.repoPath, folderName);
@@ -68,7 +69,7 @@ class CloneRepoForm extends React.PureComponent<CloneRepoFormProps, CloneRepoFor
 
   render() {
     return (
-      <form className='modal-form'>
+      <form className='modal-form' onSubmit={this.handleSubmit}>
         <div className='field-container'>
           <label htmlFor='path'>Where to clone to:</label>
           <input type='text' 
@@ -101,9 +102,8 @@ class CloneRepoForm extends React.PureComponent<CloneRepoFormProps, CloneRepoFor
         </div>
         <div className='button-container'>
           <button className='green-button'
-            type='button' 
-            disabled={!this.isPathValid()}
-            onClick={this.handleCloneRepo}>
+            type='submit' 
+            disabled={!this.isPathValid()}>
             Clone the repository
           </button>
         </div>

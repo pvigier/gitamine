@@ -35,6 +35,7 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
     }
     this.handleThemeChange = this.handleThemeChange.bind(this);
     this.handleEditorPreferencesChange = this.handleEditorPreferencesChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -60,6 +61,10 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
     this.props.onEditorPreferencesUpdate({
       fontSize: Number(event.target.value)
     });
+  }
+
+  handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
   }
 
   loadSettings() {
@@ -141,7 +146,7 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
         <main>
           <section className={this.state.section === Section.Profile ? 'shown' : undefined}>
             <h1>Profile</h1>
-            <form>
+            <form onSubmit={this.handleSubmit}>
               <div>
                 <label htmlFor="name">Name:</label>
                 <input type="text" id="name" name="profile-name" />
@@ -158,7 +163,7 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
           </section>
           <section className={this.state.section === Section.UIPreferences ? 'shown' : undefined}>
             <h1>UI Preferences</h1>
-            <form>
+            <form onSubmit={this.handleSubmit}>
               <div>
                 <label htmlFor="theme">Theme:</label>
                 <select id="theme" defaultValue={selectedTheme} onChange={this.handleThemeChange}>
@@ -169,7 +174,7 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
           </section>
           <section className={this.state.section === Section.EditorPreferences ? 'shown' : undefined}>
             <h1>Editor Preferences</h1>
-            <form>
+            <form onSubmit={this.handleSubmit}>
               <div>
                 <label htmlFor="font-size">Font size:</label>
                 <input type="number" id="font-size" name="font-size" defaultValue={fontSize} onChange={this.handleEditorPreferencesChange}/>

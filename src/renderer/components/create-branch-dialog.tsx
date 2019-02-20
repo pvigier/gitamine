@@ -23,7 +23,7 @@ class CreateBranchForm extends React.PureComponent<CreateBranchFormProps, Create
     }
     this.handleBranchNameChange = this.handleBranchNameChange.bind(this);
     this.handleCheckoutChange = this.handleCheckoutChange.bind(this);
-    this.handleCreateBranch = this.handleCreateBranch.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleBranchNameChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -34,7 +34,8 @@ class CreateBranchForm extends React.PureComponent<CreateBranchFormProps, Create
     this.setState({checkout: event.target.checked});
   }
 
-  async handleCreateBranch() {
+  async handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     if (this.state.branchName) {
       await this.props.repo.createBranch(this.state.branchName, this.props.commit);
       if (this.state.checkout) {
@@ -47,7 +48,7 @@ class CreateBranchForm extends React.PureComponent<CreateBranchFormProps, Create
 
   render() {
     return (
-      <form className='modal-form'>
+      <form className='modal-form' onSubmit={this.handleSubmit}>
         <div className='field-container'>
           <label htmlFor='name'>Name:</label>
           <input type='text' 
@@ -66,9 +67,8 @@ class CreateBranchForm extends React.PureComponent<CreateBranchFormProps, Create
         </div>
         <div className='button-container'>
           <button className='green-button' 
-            type='button' 
-            disabled={!this.state.branchName} 
-            onClick={this.handleCreateBranch}>
+            type='submit' 
+            disabled={!this.state.branchName}>
             Create branch
           </button>
         </div>

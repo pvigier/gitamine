@@ -146,6 +146,10 @@ export class CommitGraph {
           branches[branches.indexOf(childSha)] = null; // Use positions
         }
       }
+      // If the commit has no parent, remove it from active branches
+      if (repo.parents.get(commitSha)!.length === 0) {
+        branches[j] = null;
+      }
       // Finally set the position
       this.positions.set(commitSha, [i, j, repo.stashes.has(commitSha) ? NodeType.Stash : NodeType.Commit]);
       ++i;

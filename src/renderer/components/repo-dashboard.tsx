@@ -64,10 +64,18 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   }
 
   componentWillUnmount() {
-    this.repositoryWatcher.close();
-    this.workingDirectoryWatcher.close();
-    clearInterval(this.workingDirectoryTimer);
-    this.referencesWatcher.close();
+    if (this.repositoryWatcher) {
+      this.repositoryWatcher.close();
+    }
+    if (this.workingDirectoryWatcher) {
+      this.workingDirectoryWatcher.close();
+    }
+    if (this.workingDirectoryTimer) {
+      clearInterval(this.workingDirectoryTimer);
+    }
+    if (this.referencesWatcher) {
+      this.referencesWatcher.close();
+    }
   }
 
   handleCommitSelect(commit: Git.Commit) {

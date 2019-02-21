@@ -525,7 +525,7 @@ export class RepoState {
   async stash() {
     try {
       const stasher = this.getSignature();
-      const message = this.headCommit ? `${shortenSha(this.headCommit.sha())} ${this.headCommit.message()}` : '';
+      const message = this.headCommit ? `${shortenSha(this.headCommit.sha())} ${this.headCommit.summary()}` : '';
       await Git.Stash.save(this.repo, stasher, message, Git.Stash.FLAGS.DEFAULT);
     } catch(e) {
       this.onNotification(`Unable to stash: ${e.message}`, NotificationType.Error);

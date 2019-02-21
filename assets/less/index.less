@@ -11,11 +11,17 @@
   --font-color: #000000;
   --font-famliy: Arial, Helvetica, sans-serif;
   --font-size: 14px;
+  --link-color: #0000ee;
   --button-font-color: #ffffff;
   --green-button-border-color: #006400;
   --green-button-background-color: #008000;
   --red-button-border-color: #8b0000;
   --red-button-background-color: #a70000;
+  --notification-font-color: #ffffff;
+  --info-notification-border-color: #006400;
+  --info-notification-background-color: #008000;
+  --error-notification-border-color: #8b0000;
+  --error-notification-background-color: #a70000;
 }
 
 /* Body */
@@ -58,6 +64,10 @@ h3 {
 
 button {
   margin: 4px 8px;
+}
+
+a {
+  color: var(--link-color);
 }
 
 /* Repo dashboard */
@@ -541,34 +551,34 @@ ul.notification-queue {
     }
 
     &.information {
-      color: var(--button-font-color);
-      background-color: var(--green-button-background-color);
-      border-color: var(--green-button-border-color);
+      color: var(--notification-font-color);
+      background-color: var(--info-notification-background-color);
+      border-color: var(--info-notification-border-color);
 
       &:hover {
-        background-color: var(--green-button-background-color);
-        border-color: var(--green-button-background-color);
+        background-color: var(--info-notification-background-color);
+        border-color: var(--info-notification-background-color);
       }
 
       &:active {
-        background-color: var(--green-button-border-color);
-        border-color: var(--green-button-background-color)
+        background-color: var(--info-notification-border-color);
+        border-color: var(--info-notification-background-color);
       }
     }
 
     &.error {
-      color: var(--button-font-color);
-      background-color: var(--red-button-background-color);
-      border-color: var(--red-button-border-color);
+      color: var(--notification-font-color);
+      background-color: var(--error-notification-background-color);
+      border-color: var(--error-notification-border-color);
 
       &:hover {
-        background-color: var(--red-button-background-color);
-        border-color: var(--red-button-background-color);
+        background-color: var(--error-notification-background-color);
+        border-color: var(--error-notification-background-color);
       }
 
       &:active {
-        background-color: var(--red-button-border-color);
-        border-color: var(--red-button-background-color)
+        background-color: var(--error-notification-border-color);
+        border-color: var(--error-notification-background-color);
       }
     }
   }

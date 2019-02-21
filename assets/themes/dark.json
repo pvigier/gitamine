@@ -10,11 +10,17 @@
     "font-color": "#dcdcdc",
     "font-famliy": "Arial, Helvetica, sans-serif",
     "font-size": "14px",
+    "link-color": "#3399ff",
     "button-font-color": "#dcdcdc",
     "green-button-border-color": "#008000",
     "green-button-background-color": "#006400",
     "red-button-border-color": "#a70000",
-    "red-button-background-color": "#8b0000"
+    "red-button-background-color": "#8b0000",
+    "notification-font-color": "#dcdcdc",
+    "info-notification-border-color": "#008000",
+    "info-notification-background-color": "#006400",
+    "error-notification-border-color": "#a70000",
+    "error-notification-background-color": "#8b0000"
   },
   "monaco": {
     "theme": "vs-dark"

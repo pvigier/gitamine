@@ -601,6 +601,12 @@ div.modal-container {
 div.modal-container div.modal-background {
   background-color: var(--background-color);
 }
+div.modal-container button.modal-close-button {
+  position: absolute;
+  top: 0px;
+  right: 0;
+  height: 42px;
+}
 /* Modal forms */
 form.modal-form {
   display: flex;

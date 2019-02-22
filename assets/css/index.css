@@ -143,13 +143,14 @@ div.commit-list {
   z-index: 1;
   overflow-y: scroll;
   text-align: left;
-  background-color: var(--list-background-color);
 }
 div.commit-list ul {
   margin: 0px;
   padding-left: 0px;
   list-style: none;
   line-height: 22px;
+  background-color: var(--list-background-color);
+  min-height: 100%;
 }
 div.commit-list ul li {
   white-space: nowrap;

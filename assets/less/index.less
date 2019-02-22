@@ -188,13 +188,14 @@ div.commit-list {
   z-index: 1;
   overflow-y: scroll;
   text-align: left;
-  background-color: var(--list-background-color);
 
   ul {
     margin: 0px;
     padding-left: 0px;
     list-style: none;
     line-height: @commit-list-item-height;
+    background-color: var(--list-background-color);
+    min-height: 100%;
 
     li {
       white-space: nowrap;

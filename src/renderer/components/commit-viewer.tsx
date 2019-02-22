@@ -48,7 +48,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
 
   resize(offset: number) {
     if (this.div.current) {
-      this.div.current.style.width = `${this.div.current.clientWidth + offset}px`;
+      this.div.current.style.width = `${this.div.current.clientWidth - offset}px`;
     }
   }
 

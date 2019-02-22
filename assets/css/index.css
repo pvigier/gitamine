@@ -1,11 +1,13 @@
-/* Theme's variables (default value should correspond to the default theme) */
+/* Variables */
 :root {
+  --canvas-width: 300px;
+  /* Theme's variables (default value should correspond to the default theme) */
   --background-color: #ffffff;
   --toolbar-color: #f5f5f5;
   --list-background-color: #ebebeb;
   --hover-color: #e1e1e1;
   --selected-color: #d7d7d7;
-  --splitter-color: #d7d7d7;
+  --splitter-color: #b9b9b9;
   --border-color: #e6e6e6;
   --font-color: #000000;
   --font-famliy: Arial, Helvetica, sans-serif;
@@ -110,7 +112,8 @@ div.graph-viewer {
 }
 /* Commit graph */
 div.commit-graph {
-  width: 50%;
+  min-width: 100px;
+  width: var(--canvas-width);
   height: 100%;
   overflow-x: scroll;
   overflow-y: hidden;
@@ -118,9 +121,18 @@ div.commit-graph {
 div.commit-graph canvas {
   position: sticky;
   margin-left: auto;
+  padding-right: 10px;
   display: block;
   z-index: 2;
   pointer-events: none;
+}
+div.commit-graph .splitter {
+  position: absolute;
+  top: 0px;
+  left: calc(var(--canvas-width));
+  height: 100%;
+  z-index: 3;
+  border: 1px dashed var(--splitter-color);
 }
 /* Commit list */
 div.commit-list {
@@ -144,7 +156,7 @@ div.commit-list ul li {
   overflow: hidden;
   text-overflow: ellipsis;
   height: 22px;
-  padding-left: calc(50% + 20px);
+  padding-left: calc(var(--canvas-width) + 16px);
   padding-top: 3px;
   padding-bottom: 3px;
   font-size: 13px;
@@ -263,8 +275,7 @@ div.hunk-widget button {
 }
 /* Splitter */
 div.splitter {
-  width: 4px;
-  background: var(--splitter-color);
+  border: 1.5px solid var(--splitter-color);
   cursor: col-resize;
 }
 /* Commit viewer */
@@ -274,7 +285,7 @@ div.splitter {
   display: flex;
   flex-direction: column;
   background: var(--background-color);
-  z-index: 2;
+  z-index: 4;
 }
 .commit-viewer h3 {
   margin: 4px 0;

@@ -194,7 +194,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
 
   resize(offset: number) {
     if (this.form.current) {
-      this.form.current.style.width = `${this.form.current.clientWidth + offset}px`;
+      this.form.current.style.width = `${this.form.current.clientWidth - offset}px`;
     }
   }
 

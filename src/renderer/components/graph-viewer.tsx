@@ -3,6 +3,7 @@ import * as Git from 'nodegit';
 import { GraphCanvas } from './graph-canvas';
 import { RepoState } from "../helpers/repo-state";
 import { CommitList } from './commit-list';
+import { Splitter } from './splitter';
 
 export interface GraphViewerProps { 
   repo: RepoState;
@@ -13,16 +14,19 @@ export interface GraphViewerProps {
 }
 
 export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
+  div: React.RefObject<HTMLDivElement>;
   canvas: React.RefObject<GraphCanvas>;
   commitList: React.RefObject<CommitList>;
 
   constructor(props: GraphViewerProps) {
     super(props);
+    this.div = React.createRef();
     this.canvas = React.createRef();
     this.commitList = React.createRef();
     this.handleListScroll = this.handleListScroll.bind(this);
     this.handleListResize = this.handleListResize.bind(this);
     this.handleListStateUpdate = this.handleListStateUpdate.bind(this);
+    this.handleCanvasResize = this.handleCanvasResize.bind(this);
   }
 
   handleListScroll(offset: number, start: number, end: number) {
@@ -43,6 +47,15 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
     }
   }
 
+  handleCanvasResize(offset: number) {
+    if (this.div.current) {
+      const parentWidth = this.div.current.parentElement!.clientWidth;
+      // 100px is the min width of the graph canvas
+      const newWidth = Math.max(100, Math.min(this.div.current.clientWidth + offset, parentWidth - 100));
+      document.body.style.setProperty('--canvas-width', `${newWidth}px`);
+    }
+  }
+
   updateGraph() {
     if (this.commitList.current) {
       this.commitList.current.updateState();
@@ -53,8 +66,9 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
   render() {
     return (
       <div className='graph-viewer'>
-        <div className='commit-graph'>
+        <div className='commit-graph' ref={this.div}>
           <GraphCanvas repo={this.props.repo} ref={this.canvas} />
+          <Splitter onDrag={this.handleCanvasResize} />
           <CommitList {...this.props} 
             onScroll={this.handleListScroll} 
             onResize={this.handleListResize}

@@ -231,7 +231,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
           onCreateBranch={this.props.onCreateBranch} />
         <div className='repo-content'>
           {leftViewer}
-          <Splitter onPanelResize={this.handlePanelResize} />
+          <Splitter onDrag={this.handlePanelResize} />
           {rightViewer}
         </div>
       </div>

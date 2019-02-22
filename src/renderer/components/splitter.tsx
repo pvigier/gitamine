@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 export interface SplitterProps { 
-  onPanelResize: (offset: number) => void;
+  onDrag: (offset: number) => void;
 }
 
 export class Splitter extends React.PureComponent<SplitterProps, {}> {
@@ -36,7 +36,7 @@ export class Splitter extends React.PureComponent<SplitterProps, {}> {
   handleMouseMove(event: MouseEvent) {
     if (this.dragging) {
       const mouseX = event.clientX;
-      this.props.onPanelResize(this.anchorX - mouseX);
+      this.props.onDrag(mouseX - this.anchorX);
       this.anchorX = mouseX;
     }
   }

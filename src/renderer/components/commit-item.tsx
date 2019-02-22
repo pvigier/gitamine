@@ -93,7 +93,7 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
       <li className={this.props.selected ? 'selected-commit' : ''} 
         onClick={this.handleClick}
         onContextMenu={this.handleContextMenu}>
-        {badges}{this.props.commit.message()}
+        {badges}{this.props.commit.summary()}
       </li>
     );
   }

@@ -318,6 +318,11 @@ div.commit-viewer div.section-header .amend-container {
 div.commit-viewer > input {
   margin: 4px 8px;
 }
+div.commit-viewer > textarea {
+  margin: 4px 8px;
+  resize: none;
+  font-family: var(--font-famliy);
+}
 /* Patch list */
 ul.patch-list {
   flex: 1;

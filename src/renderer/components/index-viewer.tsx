@@ -14,6 +14,7 @@ export interface IndexViewerState {
   stagedPatches: Git.ConvenientPatch[];
   amend: boolean;
   summary: string;
+  description: string;
   selectedUnstagedPatches: Set<Git.ConvenientPatch>;
   selectedStagedPatches: Set<Git.ConvenientPatch>;
 }
@@ -34,6 +35,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       stagedPatches: [],
       amend: false,
       summary: '',
+      description: '',
       selectedUnstagedPatches: new Set(),
       selectedStagedPatches: new Set()
     }
@@ -43,6 +45,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.handlePatchesUnstage = this.handlePatchesUnstage.bind(this);
     this.handleAmendChange = this.handleAmendChange.bind(this);
     this.handleSummaryChange = this.handleSummaryChange.bind(this);
+    this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
     this.commit = this.commit.bind(this);
   }
 
@@ -149,6 +152,10 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.setState({summary: event.target.value});
   }
 
+  handleDescriptionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    this.setState({description: event.target.value});
+  }
+
   async refresh() {
     await this.getPatches();
   }
@@ -203,15 +210,20 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   async commit() {
-    if (this.state.summary.length > 0) {
+    if (this.state.summary) {
+      const message = this.state.description ? 
+        `${this.state.summary}\n\n${this.state.description}` :
+        this.state.summary;
       if (this.state.amend) {
-        await this.props.repo.amend(this.state.summary);
+        await this.props.repo.amend(message);
       } else {
-        await this.props.repo.commit(this.state.summary);
+        await this.props.repo.commit(message);
       }
+      // Reset the state
       this.setState({
         amend: false,
         summary: '',
+        description: '',
         selectedUnstagedPatches: new Set(),
         selectedStagedPatches: new Set()
       });
@@ -231,7 +243,9 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   render() {
     return (
       <div className='commit-viewer' ref={this.div}>
-        <h2>Index</h2>
+        <div className='commit-message'>
+          <h2>Index</h2>
+        </div>
         <div className='section-header'>
           <p>Unstaged files ({this.state.unstagedPatches.length})</p>
           <button className='green-button'
@@ -271,6 +285,10 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
         <input placeholder={'Summary'} 
           value={this.state.summary} 
           onChange={this.handleSummaryChange} />
+        <textarea rows={3} 
+          placeholder='Description'
+          value={this.state.description}
+          onChange={this.handleDescriptionChange} />
         <button className='green-button'
           onClick={this.commit} 
           disabled={this.state.summary.length === 0}>

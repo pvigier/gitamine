@@ -268,7 +268,7 @@ div.splitter {
   cursor: col-resize;
 }
 /* Commit viewer */
-div.commit-viewer {
+.commit-viewer {
   width: 300px;
   min-width: 300px;
   display: flex;
@@ -276,49 +276,49 @@ div.commit-viewer {
   background: var(--background-color);
   z-index: 2;
 }
-div.commit-viewer h3 {
+.commit-viewer h3 {
   margin: 4px 0;
   text-align: center;
   font-size: var(--font-size);
   font-weight: normal;
 }
-div.commit-viewer div.commit-message {
+.commit-viewer div.commit-message {
   max-height: 100px;
   overflow-y: auto;
   background: var(--list-background-color);
   border: 1px solid var(--border-color);
   margin: 8px;
 }
-div.commit-viewer div.commit-message h2 {
+.commit-viewer div.commit-message h2 {
   margin: 8px;
 }
-div.commit-viewer div.commit-message p {
+.commit-viewer div.commit-message p {
   font-size: 13px;
 }
-div.commit-viewer p {
+.commit-viewer p {
   margin: 4px 8px;
 }
-div.commit-viewer .sha-button {
+.commit-viewer .sha-button {
   border-bottom: 1px dotted var(--font-color);
 }
-div.commit-viewer div.section-header {
+.commit-viewer div.section-header {
   display: flex;
   position: relative;
 }
-div.commit-viewer div.section-header button {
+.commit-viewer div.section-header button {
   position: absolute;
   right: 0px;
 }
-div.commit-viewer div.section-header .amend-container {
+.commit-viewer div.section-header .amend-container {
   display: flex;
   position: absolute;
   right: 0px;
   margin: 4px 8px;
 }
-div.commit-viewer > input {
+.commit-viewer > input {
   margin: 4px 8px;
 }
-div.commit-viewer > textarea {
+.commit-viewer > textarea {
   margin: 4px 8px;
   resize: none;
   font-family: var(--font-famliy);

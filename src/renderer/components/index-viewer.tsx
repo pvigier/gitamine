@@ -20,7 +20,7 @@ export interface IndexViewerState {
 }
 
 export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexViewerState> {
-  div: React.RefObject<HTMLDivElement>;
+  form: React.RefObject<HTMLFormElement>;
   iSelectedPatch: number;
   iAnchorPatch: number;
   iShiftPatch: number | null;
@@ -29,7 +29,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
 
   constructor(props: IndexViewerProps) {
     super(props);
-    this.div = React.createRef<HTMLDivElement>();
+    this.form = React.createRef<HTMLFormElement>();
     this.state = {
       unstagedPatches: [],
       stagedPatches: [],
@@ -46,7 +46,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.handleAmendChange = this.handleAmendChange.bind(this);
     this.handleSummaryChange = this.handleSummaryChange.bind(this);
     this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
-    this.commit = this.commit.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -193,8 +193,8 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   resize(offset: number) {
-    if (this.div.current) {
-      this.div.current.style.width = `${this.div.current.clientWidth + offset}px`;
+    if (this.form.current) {
+      this.form.current.style.width = `${this.form.current.clientWidth + offset}px`;
     }
   }
 
@@ -209,7 +209,8 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     });
   }
 
-  async commit() {
+  async handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     if (this.state.summary) {
       const message = this.state.description ? 
         `${this.state.summary}\n\n${this.state.description}` :
@@ -242,13 +243,14 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
 
   render() {
     return (
-      <div className='commit-viewer' ref={this.div}>
+      <form className='commit-viewer' ref={this.form} onSubmit={this.handleSubmit}>
         <div className='commit-message'>
           <h2>Index</h2>
         </div>
         <div className='section-header'>
           <p>Unstaged files ({this.state.unstagedPatches.length})</p>
           <button className='green-button'
+            type='button'
             disabled={this.state.unstagedPatches.length === 0}
             onClick={this.handlePatchesStage}>
             {this.formatButtonString('Stage', this.state.selectedUnstagedPatches)}
@@ -263,6 +265,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
         <div className='section-header'>
           <p>Staged files ({this.state.stagedPatches.length})</p>
           <button className='red-button'
+            type='button'
             disabled={this.state.stagedPatches.length === 0}
             onClick={this.handlePatchesUnstage}>
             {this.formatButtonString('Unstage', this.state.selectedStagedPatches)}
@@ -290,11 +293,11 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           value={this.state.description}
           onChange={this.handleDescriptionChange} />
         <button className='green-button'
-          onClick={this.commit} 
+          type='submit'
           disabled={this.state.summary.length === 0}>
           {this.state.amend ? 'Amend' : 'Commit'}
         </button>
-      </div>
+      </form>
     );
   }
 }

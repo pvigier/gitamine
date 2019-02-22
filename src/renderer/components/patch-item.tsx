@@ -100,11 +100,13 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
     const buttons: JSX.Element[] = [];
     if (this.props.type === PatchType.Unstaged) {
       buttons.push(<button className='green-button' 
+        type='button'
         onClick={this.handleStageClick} 
         key='stage'>Stage</button>);
     }
     if (this.props.type === PatchType.Staged) {
       buttons.push(<button className='red-button'
+        type='button'
         onClick={this.handleUnstageClick} 
         key='unstage'>Unstage</button>);
     }

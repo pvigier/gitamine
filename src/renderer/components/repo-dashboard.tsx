@@ -10,6 +10,7 @@ import { PatchViewer, PatchViewerOptions } from './patch-viewer';
 import { Splitter } from './splitter';
 import { Toolbar } from './toolbar';
 import { RepoState, PatchType } from '../helpers/repo-state';
+import { ReferenceExplorer } from './reference-explorer';
 
 export interface RepoDashboardProps { 
   repo: RepoState;
@@ -27,6 +28,7 @@ export interface RepoDashboardState {
 
 export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
   graphViewer: React.RefObject<GraphViewer>;
+  leftViewer: React.RefObject<ReferenceExplorer>;
   rightViewer: React.RefObject<CommitViewer | IndexViewer>;
   repositoryWatcher: fs.FSWatcher;
   dirtyWorkingDirectory: boolean;
@@ -37,13 +39,15 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   constructor(props: RepoDashboardProps) {
     super(props);
     this.graphViewer = React.createRef();
+    this.leftViewer = React.createRef();
     this.rightViewer = React.createRef();
     this.dirtyWorkingDirectory = false;
     this.handleCommitSelect = this.handleCommitSelect.bind(this);
     this.handleIndexSelect = this.handleIndexSelect.bind(this);
     this.handlePatchSelect = this.handlePatchSelect.bind(this);
     this.exitPatchViewer = this.exitPatchViewer.bind(this);
-    this.handlePanelResize = this.handlePanelResize.bind(this);
+    this.handleLeftPanelResize = this.handleLeftPanelResize.bind(this);
+    this.handleRightPanelResize = this.handleRightPanelResize.bind(this);
     this.state = {
       selectedCommit: null,
       selectedPatch: null,
@@ -103,7 +107,13 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     });
   }
 
-  handlePanelResize(offset: number) {
+  handleLeftPanelResize(offset: number) {
+    if (this.leftViewer.current) {
+      this.leftViewer.current.resize(offset);
+    }
+  }
+
+  handleRightPanelResize(offset: number) {
     if (this.rightViewer.current) {
       this.rightViewer.current.resize(offset);
     }
@@ -193,16 +203,16 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   }
 
   render() {
-    let leftViewer; 
+    let middleViewer; 
     if (this.state.selectedPatch) {
-      leftViewer = <PatchViewer repo={this.props.repo} 
+      middleViewer = <PatchViewer repo={this.props.repo} 
         patch={this.state.selectedPatch!} 
         type={this.state.patchType}
         editorTheme={this.props.editorTheme}
         options={this.props.patchViewerOptions}
         onClose={this.exitPatchViewer} /> 
     } else {
-      leftViewer = <GraphViewer repo={this.props.repo} 
+      middleViewer = <GraphViewer repo={this.props.repo} 
         selectedCommit={this.state.selectedCommit} 
         onCommitSelect={this.handleCommitSelect}
         onIndexSelect={this.handleIndexSelect} 
@@ -230,8 +240,10 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
           onRepoClose={this.props.onRepoClose} 
           onCreateBranch={this.props.onCreateBranch} />
         <div className='repo-content'>
-          {leftViewer}
-          <Splitter onDrag={this.handlePanelResize} />
+          <ReferenceExplorer repo={this.props.repo} ref={this.leftViewer} />
+          <Splitter onDrag={this.handleLeftPanelResize} />
+          {middleViewer}
+          <Splitter onDrag={this.handleRightPanelResize} />
           {rightViewer}
         </div>
       </div>

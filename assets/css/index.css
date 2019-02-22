@@ -104,6 +104,11 @@ div.repo-content {
   flex: 1;
   display: flex;
 }
+/* Reference explorer */
+div.reference-explorer {
+  width: 200px;
+  min-width: 200px;
+}
 /* Graph viewer */
 div.graph-viewer {
   flex: 1;

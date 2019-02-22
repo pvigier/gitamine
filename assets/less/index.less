@@ -128,22 +128,31 @@ div.repo-toolbar {
 
 /* Repo content */
 
-@left-viewer-min-width: 300px;
+@middle-viewer-min-width: 300px;
 
 div.repo-content {
   flex: 1;
   display: flex;
 }
 
-.left-viewer() {
+.middle-viewer() {
   flex: 1;
-  min-width: @left-viewer-min-width;
+  min-width: @middle-viewer-min-width;
+}
+
+/* Reference explorer */
+
+@reference-explorer-min-width: 200px;
+
+div.reference-explorer {
+  width: @reference-explorer-min-width;
+  min-width: @reference-explorer-min-width;
 }
 
 /* Graph viewer */
 
 div.graph-viewer {
-  .left-viewer();
+  .middle-viewer();
   position: relative;
 }
 
@@ -244,7 +253,7 @@ div.commit-list li span.reference {
 @patch-toolbar-height: 30px;
 
 div.patch-viewer {
-  .left-viewer();
+  .middle-viewer();
   z-index: 1;
 
   div.patch-header {

@@ -1,6 +1,6 @@
 /* Variables */
 :root {
-  --canvas-width: 300px;
+  --canvas-width: 100px;
   /* Theme's variables (default value should correspond to the default theme) */
   --background-color: #ffffff;
   --toolbar-color: #f5f5f5;
@@ -108,7 +108,6 @@ div.repo-content {
 /* Reference explorer */
 div.reference-explorer {
   width: 200px;
-  min-width: 200px;
   padding-top: 8px;
 }
 div.reference-explorer li {
@@ -139,7 +138,12 @@ div.reference-explorer h3 {
 div.graph-viewer {
   flex: 1;
   min-width: 300px;
+  display: flex;
+}
+div.graph-viewer div.graph-container {
   position: relative;
+  flex: 1;
+  min-width: calc(var(--canvas-width) + 100px);
 }
 /* Commit graph */
 div.commit-graph {
@@ -310,6 +314,7 @@ div.hunk-widget button {
 div.splitter {
   border: 1.5px solid var(--splitter-color);
   cursor: col-resize;
+  z-index: 1;
 }
 /* Commit viewer */
 .commit-viewer {

@@ -10,7 +10,6 @@ import { PatchViewer, PatchViewerOptions } from './patch-viewer';
 import { Splitter } from './splitter';
 import { Toolbar } from './toolbar';
 import { RepoState, PatchType } from '../helpers/repo-state';
-import { ReferenceExplorer } from './reference-explorer';
 
 export interface RepoDashboardProps { 
   repo: RepoState;
@@ -27,7 +26,6 @@ export interface RepoDashboardState {
 }
 
 export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
-  leftViewer: React.RefObject<ReferenceExplorer>;
   graphViewer: React.RefObject<GraphViewer>;
   rightViewer: React.RefObject<CommitViewer | IndexViewer>;
   repositoryWatcher: fs.FSWatcher;
@@ -39,14 +37,12 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   constructor(props: RepoDashboardProps) {
     super(props);
     this.graphViewer = React.createRef();
-    this.leftViewer = React.createRef();
     this.rightViewer = React.createRef();
     this.dirtyWorkingDirectory = false;
     this.handleCommitSelect = this.handleCommitSelect.bind(this);
     this.handleIndexSelect = this.handleIndexSelect.bind(this);
     this.handlePatchSelect = this.handlePatchSelect.bind(this);
     this.exitPatchViewer = this.exitPatchViewer.bind(this);
-    this.handleLeftPanelResize = this.handleLeftPanelResize.bind(this);
     this.handleRightPanelResize = this.handleRightPanelResize.bind(this);
     this.state = {
       selectedCommit: null,
@@ -63,9 +59,6 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
     if (this.graphViewer.current) {
       this.graphViewer.current.updateGraph();
-    }
-    if (this.leftViewer.current) {
-      this.leftViewer.current.forceUpdate();
     }
     this.setWatchers();
   }
@@ -108,12 +101,6 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     this.setState({
       selectedPatch: null
     });
-  }
-
-  handleLeftPanelResize(offset: number) {
-    if (this.leftViewer.current) {
-      this.leftViewer.current.resize(offset);
-    }
   }
 
   handleRightPanelResize(offset: number) {
@@ -188,9 +175,6 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     if (this.graphViewer.current) {
       this.graphViewer.current.updateGraph();
     }
-    if (this.leftViewer.current) {
-      this.leftViewer.current.forceUpdate();
-    }
   }
 
   async refreshReferences() {
@@ -206,22 +190,19 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       !this.props.repo.shaToCommit.has(this.state.selectedCommit.sha())) {
         this.handleIndexSelect();
     }
-    if (this.leftViewer.current) {
-      this.leftViewer.current.forceUpdate();
-    }
   }
 
   render() {
-    let middleViewer; 
+    let leftViewer; 
     if (this.state.selectedPatch) {
-      middleViewer = <PatchViewer repo={this.props.repo} 
+      leftViewer = <PatchViewer repo={this.props.repo} 
         patch={this.state.selectedPatch!} 
         type={this.state.patchType}
         editorTheme={this.props.editorTheme}
         options={this.props.patchViewerOptions}
         onClose={this.exitPatchViewer} /> 
     } else {
-      middleViewer = <GraphViewer repo={this.props.repo} 
+      leftViewer = <GraphViewer repo={this.props.repo} 
         selectedCommit={this.state.selectedCommit} 
         onCommitSelect={this.handleCommitSelect}
         onIndexSelect={this.handleIndexSelect} 
@@ -249,12 +230,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
           onRepoClose={this.props.onRepoClose} 
           onCreateBranch={this.props.onCreateBranch} />
         <div className='repo-content'>
-          <ReferenceExplorer repo={this.props.repo} 
-            onCommitSelect={this.handleCommitSelect}
-            onIndexSelect={this.handleIndexSelect}
-            ref={this.leftViewer} />
-          <Splitter onDrag={this.handleLeftPanelResize} />
-          {middleViewer}
+          {leftViewer}
           <Splitter onDrag={this.handleRightPanelResize} />
           {rightViewer}
         </div>

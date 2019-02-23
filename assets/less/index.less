@@ -1,7 +1,7 @@
 /* Variables */
 
 :root {
-  --canvas-width: 300px;
+  --canvas-width: 100px;
 
   /* Theme's variables (default value should correspond to the default theme) */
   --background-color: #ffffff;
@@ -143,11 +143,10 @@ div.repo-content {
 
 /* Reference explorer */
 
-@reference-explorer-min-width: 200px;
+@reference-explorer-initial-width: 200px;
 
 div.reference-explorer {
-  width: @reference-explorer-min-width;
-  min-width: @reference-explorer-min-width;
+  width: @reference-explorer-initial-width;
   padding-top: 8px;
 
   li {
@@ -182,15 +181,24 @@ div.reference-explorer {
 
 /* Graph viewer */
 
+@canvas-min-width: 100px;
+
+
 div.graph-viewer {
   .middle-viewer();
-  position: relative;
+  display: flex;
+
+  div.graph-container {
+    position: relative;
+    flex: 1;
+    min-width: calc(var(--canvas-width) + 100px);
+  }
 }
 
 /* Commit graph */
 
 div.commit-graph {
-  min-width: 100px;
+  min-width: @canvas-min-width;
   width: var(--canvas-width);
   height: 100%;
   overflow-x: scroll;
@@ -391,6 +399,7 @@ div.hunk-widget {
 div.splitter {
   border: 1.5px solid var(--splitter-color);
   cursor: col-resize;
+  z-index: 1;
 }
 
 /* Commit viewer */

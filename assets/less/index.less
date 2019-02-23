@@ -25,6 +25,7 @@
   --info-notification-background-color: #008000;
   --error-notification-border-color: #8b0000;
   --error-notification-background-color: #a70000;
+  --reference-section-background-color: #c8c8c8;
 }
 
 /* Body */
@@ -147,6 +148,36 @@ div.repo-content {
 div.reference-explorer {
   width: @reference-explorer-min-width;
   min-width: @reference-explorer-min-width;
+  padding-top: 8px;
+
+  li {
+    list-style: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;    
+    background: var(--list-background-color);
+    padding: 2px 4px 2px 16px;
+    font-size: 13px;
+
+    &:hover {
+      background: var(--hover-color);
+    }
+
+    &.selected {
+      background: var(--selected-color);
+    }
+  }
+
+  ul {
+    margin: 0px;
+    padding: 0px;
+  }
+  
+  h3 {
+    margin: 0px;
+    padding: 4px;
+    background: var(--reference-section-background-color);
+  }
 }
 
 /* Graph viewer */
@@ -255,6 +286,7 @@ div.commit-list li span.reference {
 div.patch-viewer {
   .middle-viewer();
   z-index: 1;
+  background: var(--background-color);
 
   div.patch-header {
     height: @patch-header-height;

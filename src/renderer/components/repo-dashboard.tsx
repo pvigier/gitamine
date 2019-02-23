@@ -27,8 +27,8 @@ export interface RepoDashboardState {
 }
 
 export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
-  graphViewer: React.RefObject<GraphViewer>;
   leftViewer: React.RefObject<ReferenceExplorer>;
+  graphViewer: React.RefObject<GraphViewer>;
   rightViewer: React.RefObject<CommitViewer | IndexViewer>;
   repositoryWatcher: fs.FSWatcher;
   dirtyWorkingDirectory: boolean;
@@ -63,6 +63,9 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
     if (this.graphViewer.current) {
       this.graphViewer.current.updateGraph();
+    }
+    if (this.leftViewer.current) {
+      this.leftViewer.current.forceUpdate();
     }
     this.setWatchers();
   }
@@ -185,6 +188,9 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     if (this.graphViewer.current) {
       this.graphViewer.current.updateGraph();
     }
+    if (this.leftViewer.current) {
+      this.leftViewer.current.forceUpdate();
+    }
   }
 
   async refreshReferences() {
@@ -199,6 +205,9 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     if (this.state.selectedCommit && 
       !this.props.repo.shaToCommit.has(this.state.selectedCommit.sha())) {
         this.handleIndexSelect();
+    }
+    if (this.leftViewer.current) {
+      this.leftViewer.current.forceUpdate();
     }
   }
 
@@ -240,7 +249,10 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
           onRepoClose={this.props.onRepoClose} 
           onCreateBranch={this.props.onCreateBranch} />
         <div className='repo-content'>
-          <ReferenceExplorer repo={this.props.repo} ref={this.leftViewer} />
+          <ReferenceExplorer repo={this.props.repo} 
+            onCommitSelect={this.handleCommitSelect}
+            onIndexSelect={this.handleIndexSelect}
+            ref={this.leftViewer} />
           <Splitter onDrag={this.handleLeftPanelResize} />
           {middleViewer}
           <Splitter onDrag={this.handleRightPanelResize} />

@@ -20,7 +20,8 @@
     "info-notification-border-color": "#006400",
     "info-notification-background-color": "#008000",
     "error-notification-border-color": "#8b0000",
-    "error-notification-background-color": "#a70000"
+    "error-notification-background-color": "#a70000",
+    "reference-section-background-color": "#c8c8c8"
   },
   "monaco": {
     "theme": "vs-light"

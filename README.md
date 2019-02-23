@@ -30,7 +30,7 @@ See this [page](https://github.com/pvigier/gitamine/wiki/How-to-install) for det
 
 Here are some ways, you can contribute to gitamine:
 
-* Found a bug, please create an issue, I will try fix it as quickly as possible.
+* Found a bug, please create an issue, I will try to fix it as quickly as possible.
 * Want to fix an issue or add a feature yourself, do a pull request.
 * If you are a designer, gitamine needs an application icon and some icons for the user interface, you are more than welcome.
 * If you want to become an active maintainer, please contact me.

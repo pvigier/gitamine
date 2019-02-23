@@ -3,6 +3,7 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { ReferenceBadge } from './reference-badge';
 import { RepoState, Stash } from '../helpers/repo-state';
+import { createStashContextMenu } from '../helpers/stash-context-menu';
 
 export interface CommitItemProps { 
   repo: RepoState;
@@ -28,9 +29,10 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
   }
 
   handleContextMenu(event: React.MouseEvent<HTMLLIElement>) {
-    const template: Electron.MenuItemConstructorOptions[] = [];
+    event.preventDefault();
+    let menu: Electron.Menu;
     if (!this.props.stash) {
-      template.push(
+      const template: Electron.MenuItemConstructorOptions[] = [
         {
           label: 'Create branch here',
           click: () => this.props.onCreateBranch(this.props.commit)
@@ -59,25 +61,11 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
           label: 'Copy commit sha to clipboard',
           click: () => clipboard.writeText(this.props.commit.sha())
         },
-      );
+      ];
+      menu = remote.Menu.buildFromTemplate(template);
     } else {
-      template.push(
-        {
-          label: 'Apply stash',
-          click: () => this.props.repo.applyStash(this.props.stash!.index)
-        },
-        {
-          label: 'Pop stash',
-          click: () => this.props.repo.popStash(this.props.stash!.index)
-        },
-        {
-          label: 'Drop stash',
-          click: () => this.props.repo.dropStash(this.props.stash!.index)
-        },
-      )
+      menu = createStashContextMenu(this.props.repo, this.props.stash.index);
     }
-    const menu = remote.Menu.buildFromTemplate(template);
-    event.preventDefault();
     menu.popup({});
   }
 

@@ -52,6 +52,7 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
   }
 
   handleContextMenu(event: React.MouseEvent<HTMLLIElement>) {
+    event.preventDefault();
     const path = this.props.patch.newFile().path();
     const template: Electron.MenuItemConstructorOptions[] = [];
     if (this.props.type === PatchType.Unstaged) {
@@ -91,7 +92,6 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
       }
     );
     const menu = remote.Menu.buildFromTemplate(template);
-    event.preventDefault();
     menu.popup({});
   }
 

@@ -1,6 +1,6 @@
-import { remote } from 'electron';
 import * as React from 'react';
 import { RepoState, removeReferencePrefix } from "../helpers/repo-state";
+import { createReferenceContextMenu } from '../helpers/reference-context-menu';
 
 export class ReferenceBadgeProps {
   name: string;
@@ -17,31 +17,14 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
   }
 
   handleContextMenu(event: React.MouseEvent<HTMLSpanElement>) {
-    const template = [];
-    if (!this.props.selected) {
-      template.push(
-        {
-          label: `Checkout to ${this.getShortName()}`,
-          click: () => this.props.repo.checkoutReference(this.props.name)
-        },
-        {
-          label: `Remove ${this.getShortName()}`,
-          click: () => this.props.repo.removeReference(this.props.name)
-        }
-      );
-    }
-    const menu = remote.Menu.buildFromTemplate(template);
     event.preventDefault();
     event.stopPropagation();
+    const menu = createReferenceContextMenu(this.props.repo, this.props.name, this.props.selected);
     menu.popup({});
   }
 
   handleDoubleClick() {
     this.props.repo.checkoutReference(this.props.name)
-  }
-
-  getShortName() {
-    return removeReferencePrefix(this.props.name);
   }
 
   render() {
@@ -53,7 +36,7 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
     }
     return (
       <span className={classNames.join(' ')} style={style} onContextMenu={this.handleContextMenu} onDoubleClick={this.handleDoubleClick}>
-        {this.getShortName()}
+        {removeReferencePrefix(this.props.name)}
       </span>
     );
   }

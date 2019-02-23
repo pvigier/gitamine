@@ -1,14 +1,16 @@
 import { app, BrowserWindow } from 'electron';
-import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
-import { enableLiveReload } from 'electron-compile';
 import { setMenu } from './menu';
 import { ThemeManager } from '../shared/theme-manager';
 
-// Live reloading
+// Dev mode
 const isDevMode = process.execPath.match(/[\\/]electron/);
 
-if (isDevMode) {
+async function initDevTools() {
+  const { enableLiveReload } = await import('electron-compile');
   enableLiveReload({strategy: 'react-hmr'});
+  const installExtension = await import('electron-devtools-installer');
+  mainWindow!.webContents.openDevTools();
+  await installExtension.default(installExtension.REACT_DEVELOPER_TOOLS);
 }
 
 let mainWindow: BrowserWindow | null = null;
@@ -35,8 +37,7 @@ const createWindow = async () => {
 
   // Open the DevTools
   if (isDevMode) {
-    await installExtension(REACT_DEVELOPER_TOOLS);
-    mainWindow.webContents.openDevTools();
+    await initDevTools();
   }
 
   // Only show when the DOM is ready

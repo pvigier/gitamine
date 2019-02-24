@@ -149,7 +149,7 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
             <form onSubmit={this.handleSubmit}>
               <div>
                 <label htmlFor="name">Name:</label>
-                <input type="text" id="name" name="profile-name" />
+                <input type="text" id="name" name="profile-name" autoFocus={true} />
               </div>
               <div>
                 <label htmlFor="path">Email:</label>

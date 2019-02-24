@@ -24,7 +24,7 @@ export function makeModal<P extends ModalComponentProps, S>(Component: Component
 
     render() {
       return (
-        <div className='modal-container' onKeyUp={this.handleKeyUp} tabIndex={-1} ref={div => div && div.focus()}>
+        <div className='modal-container' onKeyUp={this.handleKeyUp} tabIndex={-1}>
           <button className='modal-close-button' onClick={this.props.onClose}>
             Close
           </button>

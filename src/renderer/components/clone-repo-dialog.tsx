@@ -76,6 +76,7 @@ class CloneRepoForm extends React.PureComponent<CloneRepoFormProps, CloneRepoFor
             id='path' 
             name='repo-path' 
             value={this.state.repoPath}
+            autoFocus={true}
             onChange={this.handleRepoPathChange} />
           <button type='button'
             onClick={this.handleBrowseClick}>

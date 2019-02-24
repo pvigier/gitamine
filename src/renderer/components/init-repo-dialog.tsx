@@ -76,6 +76,7 @@ class InitRepoForm extends React.PureComponent<InitRepoFormProps, InitRepoFormSt
             id='name' 
             name='repo-name' 
             value={this.state.repoName}
+            autoFocus={true}
             onChange={this.handleRepoNameChange} />
         </div>
         <div className='field-container'>

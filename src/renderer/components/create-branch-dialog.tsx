@@ -55,6 +55,7 @@ class CreateBranchForm extends React.PureComponent<CreateBranchFormProps, Create
             id='name' 
             name='repo-name' 
             value={this.state.branchName} 
+            autoFocus={true}
             onChange={this.handleBranchNameChange} />
         </div>
         <div className='field-container'>

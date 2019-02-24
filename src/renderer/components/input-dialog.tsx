@@ -4,7 +4,7 @@ import { makeModal } from './make-modal';
 export type InputDialogHandler = (label: string, button: string, onSubmit: (value: string) => void, defaultValue?: string) => void;
 
 export class InputFormProps {
-  defaultValue?: string;
+  defaultValue = '';
   label: string;
   button: string;
   onSubmit: (value: string) => void;
@@ -19,7 +19,7 @@ class InputForm extends React.PureComponent<InputFormProps, InputFormState> {
   constructor(props: InputFormProps) {
     super(props);
     this.state = {
-      value: this.props.defaultValue || '',
+      value: this.props.defaultValue,
     }
     this.handleValueChange = this.handleValueChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);

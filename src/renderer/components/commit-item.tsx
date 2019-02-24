@@ -1,15 +1,15 @@
-import { remote, clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { ReferenceBadge } from './reference-badge';
 import { InputDialogHandler } from './input-dialog';
 import { RepoState, Stash } from '../helpers/repo-state';
 import { createStashContextMenu } from '../helpers/stash-context-menu';
+import { createCommitContextMenu } from '../helpers/commit-context-menu';
 
 export interface CommitItemProps { 
   repo: RepoState;
   commit: Git.Commit;
-  head: string;
+  head: string | null;
   references: string[];
   selected: boolean;
   color: string;
@@ -34,37 +34,10 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
     event.preventDefault();
     let menu: Electron.Menu;
     if (!this.props.stash) {
-      const template: Electron.MenuItemConstructorOptions[] = [
-        {
-          label: 'Create branch here',
-          click: () => this.props.onCreateBranch(this.props.commit)
-        },
-        {
-          label: 'Reset to this commit',
-          submenu: [
-            {
-              label: 'Soft',
-              click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.SOFT)
-            },
-            {
-              label: 'Mixed',
-              click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.MIXED)
-            },
-            {
-              label: 'Hard',
-              click: () => this.props.repo.reset(this.props.commit, Git.Reset.TYPE.HARD)
-            }
-          ]
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Copy commit sha to clipboard',
-          click: () => clipboard.writeText(this.props.commit.sha())
-        },
-      ];
-      menu = remote.Menu.buildFromTemplate(template);
+      menu = createCommitContextMenu(this.props.repo, 
+        this.props.commit, 
+        this.props.onCreateBranch, 
+        this.props.onOpenInputDialog);
     } else {
       menu = createStashContextMenu(this.props.repo, this.props.stash.index);
     }

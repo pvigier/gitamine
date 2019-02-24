@@ -137,7 +137,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
         <CommitItem 
           repo={this.props.repo} 
           commit={commit} 
-          head={this.props.repo.head!}
+          head={this.props.repo.head}
           references={this.props.repo.shaToReferences.get(commitSha) || []}
           selected={this.props.selectedCommit !== null && this.props.selectedCommit.sha() === commit.sha()} 
           onCommitSelect={this.props.onCommitSelect} 

@@ -178,7 +178,7 @@ export class App extends React.PureComponent<{}, AppState> {
     });
   }
 
-  openInputDialog(label: string, button: string, onSubmit: (value: string) => void, defaultValue?: string) {
+  openInputDialog(label: string, button: string, onSubmit: (value: string) => void, defaultValue = '') {
     const element = <InputDialog label={label} 
       button={button} 
       defaultValue={defaultValue} 

@@ -421,6 +421,24 @@ export class RepoState {
     }
   }
 
+  async cherrypick(commit: Git.Commit) {
+    try {
+      await Git.Cherrypick.cherrypick(this.repo, commit, new Git.CheckoutOptions());
+      await this.commit(commit.message());
+    } catch (e) {
+      this.onNotification(`Unable to cherrypick: ${e.message}`, NotificationType.Error);
+    }
+  }
+
+  async revert(commit: Git.Commit) {
+    try {
+      await Git.Revert.revert(this.repo, commit, null);
+      await this.commit(`Revert "${commit.message()}"`);
+    } catch (e) {
+      this.onNotification(`Unable to cherrypick: ${e.message}`, NotificationType.Error);
+    }
+  }
+
   // Reference operations
 
   async getReferenceCommits() {
@@ -445,6 +463,15 @@ export class RepoState {
       await this.repo.createBranch(name, commit, false);
     } catch (e) {
       this.onNotification(`Unable to create branch ${name}: ${e.message}`, NotificationType.Error);
+    }
+  }
+
+  async createTag(name: string, commit: Git.Commit, message = '') {
+    try {
+      const object = await Git.Object.lookup(this.repo, commit.id(), Git.Object.TYPE.COMMIT);
+      await Git.Tag.createLightweight(this.repo, name, object, 0);
+    } catch (e) {
+      this.onNotification(`Unable to create tag ${name}: ${e.message}`, NotificationType.Error);
     }
   }
 

@@ -9,6 +9,7 @@ import { IndexViewer } from './index-viewer';
 import { PatchViewer, PatchViewerOptions } from './patch-viewer';
 import { Splitter } from './splitter';
 import { Toolbar } from './toolbar';
+import { InputDialogHandler } from './input-dialog';
 import { RepoState, PatchType } from '../helpers/repo-state';
 
 export interface RepoDashboardProps { 
@@ -17,6 +18,7 @@ export interface RepoDashboardProps {
   patchViewerOptions: PatchViewerOptions;
   onRepoClose: () => void;
   onCreateBranch: (commit: Git.Commit) => void;
+  onOpenInputDialog: InputDialogHandler;
 }
 
 export interface RepoDashboardState { 
@@ -207,6 +209,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         onCommitSelect={this.handleCommitSelect}
         onIndexSelect={this.handleIndexSelect} 
         onCreateBranch={this.props.onCreateBranch}
+        onOpenInputDialog={this.props.onOpenInputDialog}
         ref={this.graphViewer} />
     }
     let rightViewer;

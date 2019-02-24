@@ -13,6 +13,7 @@ import { PatchViewerOptions } from './patch-viewer';
 import { PreferencesDialog } from './preferences-dialog';
 import { Field, Settings } from '../../shared/settings';
 import { ThemeManager } from '../../shared/theme-manager';
+import { InputDialog } from './input-dialog';
 
 export interface AppState {
   repos: RepoState[]; 
@@ -46,6 +47,7 @@ export class App extends React.PureComponent<{}, AppState> {
     this.openInitRepoDialog = this.openInitRepoDialog.bind(this);
     this.openOpenRepoDialog = this.openOpenRepoDialog.bind(this);
     this.openCreateBranchDialog = this.openCreateBranchDialog.bind(this);
+    this.openInputDialog = this.openInputDialog.bind(this);
     this.showNotification = this.showNotification.bind(this);
     this.closeModalWindow = this.closeModalWindow.bind(this);
   }
@@ -132,14 +134,16 @@ export class App extends React.PureComponent<{}, AppState> {
   // Modal components
 
   openCloneRepoDialog() {
-    const element = <CloneRepoDialog onCloneRepo={this.cloneRepo} onClose={this.closeModalWindow} />
+    const element = <CloneRepoDialog onCloneRepo={this.cloneRepo} 
+      onClose={this.closeModalWindow} />
     this.setState({
       modalWindow: element
     });
   }
 
   openInitRepoDialog() {
-    const element = <InitRepoDialog onInitRepo={this.initRepo} onClose={this.closeModalWindow} />
+    const element = <InitRepoDialog onInitRepo={this.initRepo} 
+      onClose={this.closeModalWindow} />
     this.setState({
       modalWindow: element
     });
@@ -166,7 +170,20 @@ export class App extends React.PureComponent<{}, AppState> {
   }
 
   openCreateBranchDialog(commit: Git.Commit) {
-    const element = <CreateBranchDialog repo={this.getCurrentRepo()} commit={commit} onClose={this.closeModalWindow} />;
+    const element = <CreateBranchDialog repo={this.getCurrentRepo()}
+      commit={commit}
+      onClose={this.closeModalWindow} />;
+    this.setState({
+      modalWindow: element
+    });
+  }
+
+  openInputDialog(label: string, button: string, onSubmit: (value: string) => void, defaultValue?: string) {
+    const element = <InputDialog label={label} 
+      button={button} 
+      defaultValue={defaultValue} 
+      onSubmit={onSubmit}
+      onClose={this.closeModalWindow} />
     this.setState({
       modalWindow: element
     });
@@ -190,6 +207,7 @@ export class App extends React.PureComponent<{}, AppState> {
         patchViewerOptions={this.state.patchViewerOptions}
         onRepoClose={() => this.closeRepo(i)}
         onCreateBranch={this.openCreateBranchDialog}
+        onOpenInputDialog={this.openInputDialog}
         key={repo.path} />);
     return (
       <div id='app'>

@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { CommitItem } from './commit-item';
 import { IndexItem } from './index-item';
+import { InputDialogHandler } from './input-dialog';
 import { RepoState } from '../helpers/repo-state';
 import { getBranchColor } from '../helpers/commit-graph';
 
@@ -13,6 +14,7 @@ export interface CommitListProps {
   onCommitSelect: (commit: Git.Commit) => void;
   onIndexSelect: () => void;
   onCreateBranch: (commit: Git.Commit) => void;
+  onOpenInputDialog: InputDialogHandler;
   onScroll: (height: number, start: number, end: number) => void;
   onResize: (offset: number, start: number, end: number) => void;
   onStateUpdate: (start: number, end: number) => void;
@@ -140,6 +142,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
           selected={this.props.selectedCommit !== null && this.props.selectedCommit.sha() === commit.sha()} 
           onCommitSelect={this.props.onCommitSelect} 
           onCreateBranch={this.props.onCreateBranch}
+          onOpenInputDialog={this.props.onOpenInputDialog}
           color={color}
           stash={this.props.repo.stashes.get(commitSha)}
           key={commit.sha()} />

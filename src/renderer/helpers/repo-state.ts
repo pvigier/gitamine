@@ -456,6 +456,15 @@ export class RepoState {
     }
   }
 
+  async renameReference(oldName: string, newName: string) {
+    try {
+      const reference = await this.repo.getReference(oldName);
+      await reference.rename(newName, 0, `Rename ${oldName} to ${newName}`);
+    } catch (e) {
+      this.onNotification(`Unable to rename reference ${oldName} to ${newName}: ${e.message}`, NotificationType.Error);
+    }
+  }
+
   async merge(from: string, to: string) {
     try {
       await this.repo.mergeBranches(from, to);

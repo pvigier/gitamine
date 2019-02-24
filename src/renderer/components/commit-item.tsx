@@ -2,6 +2,7 @@ import { remote, clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { ReferenceBadge } from './reference-badge';
+import { InputDialogHandler } from './input-dialog';
 import { RepoState, Stash } from '../helpers/repo-state';
 import { createStashContextMenu } from '../helpers/stash-context-menu';
 
@@ -15,6 +16,7 @@ export interface CommitItemProps {
   stash?: Stash;
   onCommitSelect: (commit: Git.Commit) => void;
   onCreateBranch: (commit: Git.Commit) => void;
+  onOpenInputDialog: InputDialogHandler;
 }
 
 export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
@@ -75,6 +77,7 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
         color={this.props.color} 
         selected={name === this.props.head} 
         repo={this.props.repo}
+        onOpenInputDialog={this.props.onOpenInputDialog}
         key={name} />
     ));
     return (

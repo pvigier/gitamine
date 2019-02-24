@@ -4,6 +4,7 @@ import { GraphCanvas } from './graph-canvas';
 import { CommitList } from './commit-list';
 import { Splitter } from './splitter';
 import { ReferenceExplorer } from './reference-explorer'
+import { InputDialogHandler } from './input-dialog';
 import { RepoState } from "../helpers/repo-state";
 
 export interface GraphViewerProps { 
@@ -12,6 +13,7 @@ export interface GraphViewerProps {
   onCommitSelect: (commit: Git.Commit) => void;
   onIndexSelect: () => void;
   onCreateBranch: (commit: Git.Commit) => void;
+  onOpenInputDialog: InputDialogHandler;
 }
 
 export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
@@ -82,6 +84,7 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
         <ReferenceExplorer repo={this.props.repo} 
           onCommitSelect={this.props.onCommitSelect}
           onIndexSelect={this.props.onIndexSelect}
+          onOpenInputDialog={this.props.onOpenInputDialog}
           ref={this.referenceExplorer} />
         <Splitter onDrag={this.handleLeftPanelResize} />
         <div className='graph-container'>

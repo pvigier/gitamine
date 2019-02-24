@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { RepoState, removeReferencePrefix } from "../helpers/repo-state";
 import { createReferenceContextMenu } from '../helpers/reference-context-menu';
+import { InputDialogHandler } from './input-dialog';
 
 export class ReferenceBadgeProps {
   name: string;
   color: string;
   selected: boolean;
   repo: RepoState;
+  onOpenInputDialog: InputDialogHandler;
 }
 
 export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}> {
@@ -19,7 +21,7 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
   handleContextMenu(event: React.MouseEvent<HTMLSpanElement>) {
     event.preventDefault();
     event.stopPropagation();
-    const menu = createReferenceContextMenu(this.props.repo, this.props.name, this.props.selected);
+    const menu = createReferenceContextMenu(this.props.repo, this.props.name, this.props.selected, this.props.onOpenInputDialog);
     menu.popup({});
   }
 
@@ -35,7 +37,9 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
       classNames.push('selected');
     }
     return (
-      <span className={classNames.join(' ')} style={style} onContextMenu={this.handleContextMenu} onDoubleClick={this.handleDoubleClick}>
+      <span className={classNames.join(' ')} style={style} 
+        onContextMenu={this.handleContextMenu} 
+        onDoubleClick={this.handleDoubleClick}>
         {removeReferencePrefix(this.props.name)}
       </span>
     );

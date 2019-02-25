@@ -144,16 +144,15 @@ export class RepoState {
     for (let stash of stashes) {
       walker.push(stash.commit.id());
     }
-    // TODO: find a way to stop earlier the exploration
-    const commits = await walker.getCommitsUntil(() => true);
-    const newCommits: Git.Commit[] = [];
-    for (let commit of commits) {
-      const sha = commit.sha();
-      if (!this.shaToCommit.has(sha)) {
-        this.commits.push(commit);
-        this.shaToCommit.set(sha, commit);
-        newCommits.push(commit);
-      }
+    // Prevent from retrieving a commit already loaded
+    for (let commit of this.commits) {
+      walker.hide(commit.id());
+    }
+    // Retrieve new commits
+    const newCommits = await walker.getCommitsUntil(() => true);
+    for (let commit of newCommits) {
+      this.commits.push(commit);
+      this.shaToCommit.set(commit.sha(), commit);
     }
     return newCommits;
   }

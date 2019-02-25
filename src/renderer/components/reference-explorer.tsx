@@ -41,7 +41,7 @@ export class ReferenceExplorer extends React.PureComponent<ReferenceExplorerProp
         <h3>Branches</h3>
         <ReferenceList repo={this.props.repo}
           names={[...this.props.repo.references.keys()]}
-          commits={[...this.props.repo.references.values()]} 
+          commits={this.props.repo.getReferenceCommits()} 
           head={this.props.repo.head}
           onOpenInputDialog={this.props.onOpenInputDialog}
           onClick={this.props.onCommitSelect} />

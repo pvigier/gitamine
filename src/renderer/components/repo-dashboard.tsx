@@ -61,6 +61,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
     if (this.graphViewer.current) {
       this.graphViewer.current.updateGraph();
+      this.graphViewer.current.shrinkCanvas();
     }
     this.setWatchers();
   }

@@ -56,10 +56,10 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
   handleCanvasResize(offset: number) {
     if (this.div.current) {
       const parentWidth = this.div.current.parentElement!.clientWidth;
-      // 98px is the min width of the graph canvas
+      // 32px is the min width of the graph canvas
       // 100px is the min width of the commit list
-      const newWidth = Math.max(98, Math.min(this.div.current.clientWidth + offset, parentWidth - 100));
-      document.body.style.setProperty('--canvas-width', `${newWidth}px`);
+      const newWidth = Math.max(32, Math.min(this.div.current.clientWidth + offset, parentWidth - 100));
+      this.setCanvasWidth(newWidth);
     }
   }
 
@@ -77,6 +77,20 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
     if (this.referenceExplorer.current) {
       this.referenceExplorer.current.forceUpdate();
     }
+  }
+
+  shrinkCanvas() {
+    if (this.canvas.current) {
+      const canvasWidth = this.canvas.current.getWidth();
+      // 32px is the min width of the graph canvas
+      // 20px is the padding around the canvas
+      // 98px is the width to display 4 branches
+      this.setCanvasWidth(Math.max(32, Math.min(canvasWidth + 20, 98)));
+    }
+  }
+
+  setCanvasWidth(width: number) {
+    document.body.style.setProperty('--canvas-width', `${width}px`);
   }
 
   render() {

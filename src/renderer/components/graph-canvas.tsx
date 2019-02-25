@@ -46,6 +46,10 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
     this.drawGraph();
   }
 
+  getWidth() {
+    return this.canvas.current ? this.canvas.current.width : 0;
+  }
+
   drawGraph() {
     if (this.canvas.current) {
       this.canvas.current.width = this.props.repo.graph.width * OFFSET_X;

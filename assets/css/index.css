@@ -1,6 +1,6 @@
 /* Variables */
 :root {
-  --canvas-width: 98px;
+  --canvas-width: 32px;
   /* Theme's variables (default value should correspond to the default theme) */
   --background-color: #ffffff;
   --toolbar-color: #f5f5f5;
@@ -148,7 +148,7 @@ div.graph-viewer div.graph-container {
 }
 /* Commit graph */
 div.commit-graph {
-  min-width: 98px;
+  min-width: 32px;
   width: var(--canvas-width);
   height: 100%;
   overflow-x: scroll;

@@ -109,14 +109,15 @@ export class RepoState {
     const newReferences = new Map<string, Git.Commit>();
     this.shaToReferences.clear();
     for (let [name, commit] of referenceCommits) {
-      if (!this.references.has(name) || this.references.get(name)!.sha() !== commit.sha()) {
+      const commitSha = commit.sha();
+      if (!this.references.has(name) || this.references.get(name)!.sha() !== commitSha) {
         referencesToUpdate.push(name);
       }
       newReferences.set(name, commit);
-      if (!this.shaToReferences.has(commit.sha())) {
-        this.shaToReferences.set(commit.sha(), []);
+      if (!this.shaToReferences.has(commitSha)) {
+        this.shaToReferences.set(commitSha, []);
       }
-      this.shaToReferences.get(commit.sha())!.push(name);
+      this.shaToReferences.get(commitSha)!.push(name);
     }
     this.references = newReferences;
     return referencesToUpdate;
@@ -182,7 +183,7 @@ export class RepoState {
     for (let commit of frontier) {
       alreadyAdded.set(commit.sha(), true);
     }
-    while (frontier.length !== 0) {
+    while (frontier.length > 0) {
       const commit = frontier.pop()!;
       const commitSha = commit.sha();
       for (let parentSha of this.parents.get(commitSha)!) {
@@ -227,7 +228,6 @@ export class RepoState {
   }
 
   sortCommits() {
-    // TODO: code the dfs with a stack
     const dfs = (commit: Git.Commit) => {
       const commitSha = commit.sha();
       if (alreadySeen.get(commitSha)) {

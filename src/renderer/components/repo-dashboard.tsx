@@ -82,14 +82,18 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   }
 
   handleCommitSelect(commit: Git.Commit) {
-    this.setState({
-      selectedCommit: commit
+    return new Promise((resolve) => {
+      this.setState({
+        selectedCommit: commit
+      }, () => resolve());
     });
   }
 
   handleIndexSelect() {
-    this.setState({
-      selectedCommit: null
+    return new Promise((resolve) => {
+      this.setState({
+        selectedCommit: null
+      }, () => resolve());
     });
   }
 

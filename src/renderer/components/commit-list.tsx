@@ -72,8 +72,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
   handleKeyUp(event: React.KeyboardEvent<HTMLUListElement>) {
     event.preventDefault();
     if (event.keyCode === 38) {
-      let i = this.props.selectedCommit ? 
-        this.props.repo.shaToIndex.get(this.props.selectedCommit.sha())! : -1;
+      let i = this.getIndexOfSelectedCommit();
       i = Math.max(i - 1, -1);
       if (i >= 0) {
         this.props.onCommitSelect(this.props.repo.commits[i])
@@ -90,13 +89,18 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
 
   scrollToItem() {
     // Scroll so that the commit is visible
-    let i = this.props.selectedCommit ? 
-      this.props.repo.shaToIndex.get(this.props.selectedCommit.sha())! : -1;
+    const i = this.getIndexOfSelectedCommit();
     if (i <= this.state.start && this.div.current) {
       this.div.current.scrollTo(0, (i + 1) * ITEM_HEIGHT);
     }
     if (i >= this.state.end - 1 && this.div.current) {
       this.div.current.scrollTo(0, (i + 2) * ITEM_HEIGHT - this.div.current.clientHeight);
+    }
+  }
+
+  centerOnItem(i: number) {
+    if (this.div.current) {
+      this.div.current.scrollTo(0, (i + 1.5) * ITEM_HEIGHT - this.div.current.clientHeight / 2);
     }
   }
 
@@ -119,6 +123,12 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
       start: start,
       end: end
     };
+  }
+
+  getIndexOfSelectedCommit() {
+    return this.props.selectedCommit ? 
+      this.props.repo.shaToIndex.get(this.props.selectedCommit.sha())! : 
+      -1;
   }
 
   render() {

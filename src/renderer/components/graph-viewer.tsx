@@ -97,8 +97,18 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
     return (
       <div className='graph-viewer'>
         <ReferenceExplorer repo={this.props.repo} 
-          onCommitSelect={this.props.onCommitSelect}
-          onIndexSelect={this.props.onIndexSelect}
+          onCommitSelect={async (commit) => { 
+            await this.props.onCommitSelect(commit); 
+            if (this.commitList.current) {
+              this.commitList.current.centerOnItem(this.props.repo.shaToIndex.get(commit.sha())!);
+            }
+          }}
+          onIndexSelect={async () => { 
+            await this.props.onIndexSelect(); 
+            if (this.commitList.current) {
+              this.commitList.current.centerOnItem(-1);
+            }
+          }}
           onOpenInputDialog={this.props.onOpenInputDialog}
           ref={this.referenceExplorer} />
         <Splitter onDrag={this.handleLeftPanelResize} />

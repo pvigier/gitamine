@@ -241,7 +241,9 @@ export class RepoState {
     }
 
     // Sort the commits by date (from newer to older)
-    this.commits.sort((lhs, rhs) => rhs.date().valueOf() - lhs.date().valueOf());
+    const commitsWithTime = this.commits.map((commit) => [commit.date().valueOf(), commit] as [number, Git.Commit]);
+    commitsWithTime.sort((lhs, rhs) => rhs[0] - lhs[0]);
+    this.commits = commitsWithTime.map(([time, commit]) => commit);
     // Topological sort (from parent to children)
     const sortedCommits: Git.Commit[] = [];
     const alreadySeen = new Map<string, boolean>();

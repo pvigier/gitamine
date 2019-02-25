@@ -56,8 +56,9 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
   handleCanvasResize(offset: number) {
     if (this.div.current) {
       const parentWidth = this.div.current.parentElement!.clientWidth;
-      // 100px is the min width of the graph canvas
-      const newWidth = Math.max(100, Math.min(this.div.current.clientWidth + offset, parentWidth - 100));
+      // 98px is the min width of the graph canvas
+      // 100px is the min width of the commit list
+      const newWidth = Math.max(98, Math.min(this.div.current.clientWidth + offset, parentWidth - 100));
       document.body.style.setProperty('--canvas-width', `${newWidth}px`);
     }
   }

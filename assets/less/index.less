@@ -1,7 +1,7 @@
 /* Variables */
 
 :root {
-  --canvas-width: 100px;
+  --canvas-width: @canvas-min-width;
 
   /* Theme's variables (default value should correspond to the default theme) */
   --background-color: #ffffff;
@@ -148,6 +148,7 @@ div.repo-content {
 div.reference-explorer {
   width: @reference-explorer-initial-width;
   padding-top: 8px;
+  overflow-y: auto;
 
   li {
     list-style: none;
@@ -181,7 +182,8 @@ div.reference-explorer {
 
 /* Graph viewer */
 
-@canvas-min-width: 100px;
+@canvas-min-width: 98px; // Fixed so that the canvas is 4 nodes wide
+@commit-list-min-width: 100px;
 
 div.graph-viewer {
   .middle-viewer();
@@ -190,7 +192,7 @@ div.graph-viewer {
   div.graph-container {
     position: relative;
     flex: 1;
-    min-width: calc(var(--canvas-width) + 100px);
+    min-width: calc(var(--canvas-width) + @commit-list-min-width);
   }
 }
 

@@ -97,7 +97,7 @@ export class RepoState {
     const referencesToUpdate = await this.updateReferences();
     const stashesToUpdate = await this.updateStashes();
     const newCommits = await this.getNewCommits(referencesToUpdate, stashesToUpdate);
-    await this.getParents(newCommits);
+    this.getParents(newCommits);
     this.removeUnreachableCommits();
     await this.hideStashSecondParents(stashesToUpdate);
     this.sortCommits();
@@ -161,15 +161,15 @@ export class RepoState {
     for (let commit of commits) {
       this.children.set(commit.sha(), []);
     }
-    return Promise.all(commits.map(async (commit) => {
+    for (let commit of commits) {
       const commitSha = commit.sha();
-      const parentShas = (await commit.getParents(Infinity)).map(commit => commit.sha());
+      const parentShas = commit.parents().map(oid => oid.tostrS());
       this.parents.set(commitSha, parentShas);
       // Update children
       for (let parentSha of parentShas) {
         this.children.get(parentSha)!.push(commitSha);
       }
-    }));
+    }
   }
 
   removeUnreachableCommits() {

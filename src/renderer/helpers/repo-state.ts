@@ -50,7 +50,7 @@ export class RepoState {
   commits: Git.Commit[];
   shaToCommit: Map<string, Git.Commit>;
   shaToIndex: Map<string, number>;
-  references: Map<string, Git.Commit>;
+  references: Map<string, Git.Reference>;
   shaToReferences: Map<string, string[]>;
   stashes: Map<string, Stash>; // Use a dictionary?
   parents: Map<string, string[]>;
@@ -69,7 +69,7 @@ export class RepoState {
     this.commits = [];
     this.shaToCommit = new Map<string, Git.Commit>();
     this.shaToIndex = new Map<string, number>();
-    this.references = new Map<string, Git.Commit>();
+    this.references = new Map<string, Git.Reference>();
     this.shaToReferences = new Map<string, string[]>();
     this.stashes = new Map<string, Stash>();
     this.parents = new Map<string, string[]>();
@@ -104,16 +104,17 @@ export class RepoState {
   }
 
   async updateReferences() {
-    const referenceCommits = await this.getReferenceCommits();
+    const references = await this.getReferences();
     const referencesToUpdate: string[] = [];
-    const newReferences = new Map<string, Git.Commit>();
+    const newReferences = new Map<string, Git.Reference>();
     this.shaToReferences.clear();
-    for (let [name, commit] of referenceCommits) {
-      const commitSha = commit.sha();
-      if (!this.references.has(name) || this.references.get(name)!.sha() !== commitSha) {
+    for (let reference of references) {
+      const name = reference.name();
+      const commitSha = reference.target().tostrS();
+      if (!this.references.has(name) || this.references.get(name)!.target().tostrS() !== commitSha) {
         referencesToUpdate.push(name);
       }
-      newReferences.set(name, commit);
+      newReferences.set(name, reference);
       if (!this.shaToReferences.has(commitSha)) {
         this.shaToReferences.set(commitSha, []);
       }
@@ -177,7 +178,7 @@ export class RepoState {
     // Find unreachable commits by doing a DFS
     const alreadyAdded = new Map<string, boolean>();
     const frontier: Git.Commit[] = [
-      ...this.references.values(), 
+      ...this.getReferenceCommits(), 
       ...Array.from(this.stashes.values(), (stash: Stash) => stash.commit)
     ];
     for (let commit of frontier) {
@@ -442,21 +443,15 @@ export class RepoState {
 
   // Reference operations
 
-  async getReferenceCommits() {
-    const names = await this.repo.getReferenceNames(Git.Reference.TYPE.OID);
-    const commits = await Promise.all(names.map(async (name) => {
-      try {
-        // Filter stash
-        if (name === 'refs/stash') {
-          return [name, null] as [string, null];
-        } else {
-          return [name, await this.repo.getReferenceCommit(name)] as [string, Git.Commit];
-        }
-      } catch (e) {
-        return [name, null] as [string, null];
-      }
-    }));
-    return commits.filter(([name, commit]) => commit !== null) as [string, Git.Commit][];
+  async getReferences() {
+    const references = await this.repo.getReferences(Git.Reference.TYPE.OID);
+    // Filter stash
+    return references.filter((reference) => reference.name() !== 'refs/stash');
+  }
+
+  getReferenceCommits() {
+    return Array.from(this.references.values(), (reference) => 
+      this.shaToCommit.get(reference.target().tostrS())!);
   }
 
   async createBranch(name: string, commit: Git.Commit)  {

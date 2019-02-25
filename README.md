@@ -37,8 +37,8 @@ Here are some ways, you can contribute to gitamine:
 
 ## Screenshots
 
-![Screenshot of graph viewer](https://user-images.githubusercontent.com/934316/52978316-09605380-33d1-11e9-97ed-38289f976815.png)
-![Screenshot of patch viewer](https://user-images.githubusercontent.com/934316/52978324-111ff800-33d1-11e9-998a-4ac968711a85.png)
+![Screenshot of graph viewer](https://user-images.githubusercontent.com/934316/53325641-10f98e00-38e4-11e9-972f-3c77cf86d364.png)
+![Screenshot of patch viewer](https://user-images.githubusercontent.com/934316/53325644-135be800-38e4-11e9-99ba-7a193c5254c2.png)
 
 ## License
 

@@ -156,7 +156,7 @@ div.commit-graph {
 div.commit-graph canvas {
   position: sticky;
   margin-left: auto;
-  padding-right: 10px;
+  padding: 0px 10px;
   display: block;
   z-index: 2;
   pointer-events: none;

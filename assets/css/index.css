@@ -337,12 +337,15 @@ div.splitter {
   background: var(--list-background-color);
   border: 1px solid var(--border-color);
   margin: 8px;
+  padding: 8px;
 }
 .commit-viewer div.commit-message h2 {
-  margin: 8px;
+  margin: 0px;
 }
-.commit-viewer div.commit-message p {
+.commit-viewer div.commit-message pre {
   font-size: 13px;
+  font-family: var(--font-famliy);
+  margin: 8px 0px 0px 0px;
 }
 .commit-viewer p {
   margin: 4px 8px;

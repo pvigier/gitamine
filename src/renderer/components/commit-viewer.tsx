@@ -113,7 +113,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
         <h3>Commit: {CommitViewer.createShaButton(commit.sha())}</h3>
         <div className='commit-message'>
           <h2>{commit.summary()}</h2>
-          {body ? <p>{body}</p> : null}
+          {body ? <pre>{body}</pre> : null}
         </div>
         <p>By {author.name()} &lt;<a href={`mailto:${author.email()}`}>{author.email()}</a>&gt;</p>
         <p>Authored {formatDate(authoredDate)}</p>

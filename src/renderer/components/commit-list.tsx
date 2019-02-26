@@ -169,7 +169,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
 
     return (
       <div className='commit-list' onScroll={this.handleScroll} ref={this.div}>
-        <ul style={style} tabIndex={1} onKeyDown={this.handleKeyUp}>{items}</ul>
+        <ul style={style} tabIndex={1} onKeyUp={this.handleKeyUp} onKeyDown={(event) => {event.preventDefault(); event.stopPropagation();}}>{items}</ul>
       </div>
     );
   }

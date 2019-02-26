@@ -3,6 +3,7 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
 import { PatchType, RepoState, shortenSha } from '../helpers/repo-state';
+import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
 
 function formatDate(date: Date) {
   return `${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
@@ -22,6 +23,7 @@ export interface CommitViewerState {
 
 export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitViewerState> {
   div: React.RefObject<HTMLDivElement>;
+  patchesPromise: CancellablePromise<Git.ConvenientPatch[]>;
 
   constructor(props: CommitViewerProps) {
     super(props);
@@ -36,8 +38,17 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
     this.updatePatches();
   }
 
+  componentWillUnmount() {
+    if (this.patchesPromise) {
+      this.patchesPromise.cancel();
+    }
+  }
+
   componentDidUpdate(prevProps: CommitViewerProps) {
     if (this.props.commit !== prevProps.commit) {
+      if (this.patchesPromise) {
+        this.patchesPromise.cancel();
+      }
       this.updatePatches();
     }
   }
@@ -53,13 +64,21 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
   }
 
   async updatePatches() {
-    const diffs = await this.props.commit.getDiff();
-    if (diffs.length > 0) {
-      const diff = diffs[0];
-      diff.findSimilar({})
+    this.patchesPromise = makeCancellable((async () => {
+      const diffs = await this.props.commit.getDiff();
+      if (diffs.length > 0) {
+        const diff = diffs[0];
+        await diff.findSimilar({});
+        return await diff.patches();
+      } else {
+        return [];
+      }
+    })());
+    try {
       this.setState({
-        patches: await diff.patches()
-      })
+        patches: await this.patchesPromise.promise
+      });
+    } catch (e) {
     }
   }
 

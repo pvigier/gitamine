@@ -67,18 +67,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   }
 
   componentWillUnmount() {
-    if (this.repositoryWatcher) {
-      this.repositoryWatcher.close();
-    }
-    if (this.workingDirectoryWatcher) {
-      this.workingDirectoryWatcher.close();
-    }
-    if (this.workingDirectoryTimer) {
-      clearInterval(this.workingDirectoryTimer);
-    }
-    if (this.referencesWatcher) {
-      this.referencesWatcher.close();
-    }
+    this.removeWatchers();
   }
 
   handleCommitSelect(commit: Git.Commit) {
@@ -130,15 +119,11 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     });
 
     // Watch working directory
-    // It seems to work much better on big repo with polling
     const wdPath = this.props.repo.repo.workdir();
     this.workingDirectoryWatcher = chokidar.watch(wdPath, {
       ignoreInitial: true,
       ignored: [/(.*\.git(\/.*|$))/, (path: string) => this.props.repo.isIgnored(Path.relative(wdPath, path))],
       followSymlinks: false,
-      usePolling: true,
-      interval: 200,
-      binaryInterval: 500
     });
     this.workingDirectoryWatcher.on('all', async (event: string, path: string) => {
       if (path.endsWith('.gitignore')) {
@@ -164,6 +149,21 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       await this.refreshReferences();
       this.refreshIndex();
     });
+  }
+
+  removeWatchers() {
+    if (this.repositoryWatcher) {
+      this.repositoryWatcher.close();
+    }
+    if (this.workingDirectoryWatcher) {
+      this.workingDirectoryWatcher.close();
+    }
+    if (this.workingDirectoryTimer) {
+      clearInterval(this.workingDirectoryTimer);
+    }
+    if (this.referencesWatcher) {
+      this.referencesWatcher.close();
+    }
   }
 
   async refreshIndex() {

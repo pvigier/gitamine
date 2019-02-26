@@ -43,7 +43,8 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
 
   componentDidMount() {
     if (this.div.current) {
-      this.resizeObserver = new ResizeObserver(this.handleResize).observe(this.div.current);
+      this.resizeObserver = new ResizeObserver(this.handleResize);
+      this.resizeObserver.observe(this.div.current);
     }
   }
 
@@ -51,6 +52,10 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
     if (this.props.selectedCommit !== prevProps.selectedCommit) {
       this.scrollToItem();
     }
+  }
+
+  componentWillUnmount() {
+    this.resizeObserver.disconnect();
   }
 
   handleScroll() {

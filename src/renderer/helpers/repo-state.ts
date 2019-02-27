@@ -52,7 +52,8 @@ export class RepoState {
   shaToIndex: Map<string, number>;
   references: Map<string, Git.Reference>;
   shaToReferences: Map<string, string[]>;
-  stashes: Map<string, Stash>; // Use a dictionary?
+  stashes: Map<string, Stash>;
+  tags: Map<string, Git.Tag>; // Annotated tags
   parents: Map<string, string[]>;
   children: Map<string, string[]>;
   head: string | null;
@@ -72,6 +73,7 @@ export class RepoState {
     this.references = new Map<string, Git.Reference>();
     this.shaToReferences = new Map<string, string[]>();
     this.stashes = new Map<string, Stash>();
+    this.tags = new Map<string, Git.Tag>();
     this.parents = new Map<string, string[]>();
     this.children = new Map<string, string[]>();
     this.graph = new CommitGraph();
@@ -97,6 +99,8 @@ export class RepoState {
     const referencesToUpdate = await this.updateReferences();
     const stashesToUpdate = await this.updateStashes();
     const newCommits = await this.getNewCommits(referencesToUpdate, stashesToUpdate);
+    await this.updateTags();
+    this.updateShaToReferences();
     this.getParents(newCommits);
     this.removeUnreachableCommits();
     await this.hideStashSecondParents(stashesToUpdate);
@@ -107,7 +111,6 @@ export class RepoState {
     const references = await this.getReferences();
     const referencesToUpdate: string[] = [];
     const newReferences = new Map<string, Git.Reference>();
-    this.shaToReferences.clear();
     for (let reference of references) {
       const name = reference.name();
       const commitSha = reference.target().tostrS();
@@ -115,10 +118,6 @@ export class RepoState {
         referencesToUpdate.push(name);
       }
       newReferences.set(name, reference);
-      if (!this.shaToReferences.has(commitSha)) {
-        this.shaToReferences.set(commitSha, []);
-      }
-      this.shaToReferences.get(commitSha)!.push(name);
     }
     this.references = newReferences;
     return referencesToUpdate;
@@ -134,6 +133,26 @@ export class RepoState {
     }
     this.stashes = stashes;
     return stashesToUpdate;
+  }
+
+  async updateTags() {
+    this.tags = new Map(await Promise.all([...this.references.values()]
+      .filter((reference) => reference.isTag() && !this.shaToCommit.has(reference.target().tostrS()))
+      .map(async (reference) =>  
+        [reference.name(), await this.repo.getTag(reference.target())] as [string, Git.Tag])));
+  }
+
+  updateShaToReferences() {
+    this.shaToReferences.clear();
+    for (let [name, reference] of this.references) {
+      const commitSha = this.tags.has(name) ?
+        this.tags.get(name)!.targetId().tostrS() :
+        reference.target().tostrS();
+      if (!this.shaToReferences.has(commitSha)) {
+        this.shaToReferences.set(commitSha, []);
+      }
+      this.shaToReferences.get(commitSha)!.push(name);
+    }
   }
 
   async getNewCommits(references: string[], stashes: Stash[]) {
@@ -451,8 +470,13 @@ export class RepoState {
   }
 
   getReferenceCommits() {
-    return Array.from(this.references.values(), (reference) => 
-      this.shaToCommit.get(reference.target().tostrS())!);
+    return Array.from(this.references.entries(), ([name, reference]) => {
+      if (this.tags.has(name)) {
+        return this.shaToCommit.get(this.tags.get(name)!.targetId().tostrS())!;
+      } else {
+        return this.shaToCommit.get(reference.target().tostrS())!;
+      }
+    });
   }
 
   async createBranch(name: string, commit: Git.Commit)  {

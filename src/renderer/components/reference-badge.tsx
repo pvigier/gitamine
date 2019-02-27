@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { RepoState, removeReferencePrefix } from "../helpers/repo-state";
+import * as Git from 'nodegit';
+import { RepoState } from "../helpers/repo-state";
 import { createReferenceContextMenu } from '../helpers/reference-context-menu';
 import { InputDialogHandler } from './input-dialog';
 
 export class ReferenceBadgeProps {
-  name: string;
+  reference: Git.Reference;
   color: string;
   selected: boolean;
   repo: RepoState;
@@ -21,12 +22,12 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
   handleContextMenu(event: React.MouseEvent<HTMLSpanElement>) {
     event.preventDefault();
     event.stopPropagation();
-    const menu = createReferenceContextMenu(this.props.repo, this.props.name, this.props.selected, this.props.onOpenInputDialog);
+    const menu = createReferenceContextMenu(this.props.repo, this.props.reference, this.props.selected, this.props.onOpenInputDialog);
     menu.popup({});
   }
 
   handleDoubleClick() {
-    this.props.repo.checkoutReference(this.props.name)
+    this.props.repo.checkoutReference(this.props.reference)
   }
 
   render() {
@@ -40,7 +41,7 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
       <span className={classNames.join(' ')} style={style} 
         onContextMenu={this.handleContextMenu} 
         onDoubleClick={this.handleDoubleClick}>
-        {removeReferencePrefix(this.props.name)}
+        {this.props.reference.shorthand()}
       </span>
     );
   }

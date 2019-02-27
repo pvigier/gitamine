@@ -307,9 +307,8 @@ export class RepoState {
 
   // Head operations
 
-  async checkoutReference(name: string) {
+  async checkoutReference(reference: Git.Reference) {
     try {
-      const reference = await this.repo.getReference(name);
       await this.repo.checkoutRef(reference);
       this.onNotification(`Checkout successfully to ${name}`, NotificationType.Information);
     } catch(e) {
@@ -470,20 +469,24 @@ export class RepoState {
   }
 
   getReferenceCommits() {
-    return Array.from(this.references.entries(), ([name, reference]) => {
-      if (this.tags.has(name)) {
-        return this.shaToCommit.get(this.tags.get(name)!.targetId().tostrS())!;
-      } else {
-        return this.shaToCommit.get(reference.target().tostrS())!;
-      }
-    });
+    return Array.from(this.references.entries(), ([name, reference]) => 
+      this.getReferenceCommit(name, reference));
+  }
+
+  getReferenceCommit(name: string, reference: Git.Reference) {
+    if (this.tags.has(name)) {
+      return this.shaToCommit.get(this.tags.get(name)!.targetId().tostrS())!;
+    } else {
+      return this.shaToCommit.get(reference.target().tostrS())!;
+    }
   }
 
   async createBranch(name: string, commit: Git.Commit)  {
     try {
-      await this.repo.createBranch(name, commit, false);
+      return await this.repo.createBranch(name, commit, false);
     } catch (e) {
       this.onNotification(`Unable to create branch ${name}: ${e.message}`, NotificationType.Error);
+      return null;
     }
   }
 
@@ -496,17 +499,18 @@ export class RepoState {
     }
   }
 
-  async removeReference(name: string) {
+  async removeReference(reference: Git.Reference) {
     try {
-      await Git.Reference.remove(this.repo, name);
+      reference.delete()
     } catch (e) {
       this.onNotification(`Unable to remove reference ${name}: ${e.message}`, NotificationType.Error);
     }
   }
 
-  async renameReference(oldName: string, newName: string) {
+  async renameReference(reference: Git.Reference, newShorthand: string) {
+    const oldName = reference.name();
+    const newName = oldName.substr(0, oldName.lastIndexOf(reference.shorthand())) + newShorthand;
     try {
-      const reference = await this.repo.getReference(oldName);
       await reference.rename(newName, 0, `Rename ${oldName} to ${newName}`);
     } catch (e) {
       this.onNotification(`Unable to rename reference ${oldName} to ${newName}: ${e.message}`, NotificationType.Error);

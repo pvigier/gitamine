@@ -1,23 +1,24 @@
 import { remote, clipboard } from 'electron';
-import { RepoState, removeReferencePrefix } from './repo-state';
+import * as Git from 'nodegit';
+import { RepoState } from './repo-state';
 import { InputDialogHandler } from '../components/input-dialog';
 
 export function createReferenceContextMenu(repo: RepoState, 
-  name: string, 
+  reference: Git.Reference, 
   currentBranch: boolean, 
   onOpenInputDialog: InputDialogHandler) {
   const template: Electron.MenuItemConstructorOptions[] = [];
-  const shortName = removeReferencePrefix(name);
+  const shortName = reference.shorthand();
 
   function openRenameBranchDialog() {
-    onOpenInputDialog('Name', 'Rename', (value) => repo.renameReference(name, `refs/heads/${value}`), shortName);
+    onOpenInputDialog('Name', 'Rename', (value) => repo.renameReference(reference, value), shortName);
   }
 
   if (!currentBranch) {
     template.push(
       {
         label: `Checkout to ${shortName}`,
-        click: () => repo.checkoutReference(name)
+        click: () => repo.checkoutReference(reference)
       },
       {
         label: `Rename ${shortName}`,
@@ -25,7 +26,7 @@ export function createReferenceContextMenu(repo: RepoState,
       },
       {
         label: `Remove ${shortName}`,
-        click: () => repo.removeReference(name)
+        click: () => repo.removeReference(reference)
       },
     );
   } else {
@@ -42,7 +43,7 @@ export function createReferenceContextMenu(repo: RepoState,
     },
     {
       label: 'Copy branch name to clipboard',
-      click: () => clipboard.writeText(name)
+      click: () => clipboard.writeText(reference.name())
     }
   );
   return remote.Menu.buildFromTemplate(template);

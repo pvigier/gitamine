@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { removeReferencePrefix, RepoState } from '../helpers/repo-state';
+import * as Git from 'nodegit';
+import { RepoState } from '../helpers/repo-state';
 import { createReferenceContextMenu } from '../helpers/reference-context-menu';
 import { InputDialogHandler } from './input-dialog';
 
 export interface ReferenceItemProps { 
   repo: RepoState;
-  name: string;
+  reference: Git.Reference;
   selected: boolean;
   onOpenInputDialog: InputDialogHandler;
   onClick: () => void;
@@ -20,12 +21,12 @@ export class ReferenceItem extends React.PureComponent<ReferenceItemProps, {}> {
 
   handleContextMenu(event: React.MouseEvent<HTMLSpanElement>) {
     event.preventDefault();
-    const menu = createReferenceContextMenu(this.props.repo, this.props.name, this.props.selected, this.props.onOpenInputDialog);
+    const menu = createReferenceContextMenu(this.props.repo, this.props.reference, this.props.selected, this.props.onOpenInputDialog);
     menu.popup({});
   }
 
   handleDoubleClick() {
-    this.props.repo.checkoutReference(this.props.name);
+    this.props.repo.checkoutReference(this.props.reference);
   }
 
   render() {
@@ -34,7 +35,7 @@ export class ReferenceItem extends React.PureComponent<ReferenceItemProps, {}> {
         onClick={this.props.onClick}
         onContextMenu={this.handleContextMenu}
         onDoubleClick={this.handleDoubleClick}>
-        {removeReferencePrefix(this.props.name)}
+        {this.props.reference.shorthand()}
       </li>
     );
   }

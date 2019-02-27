@@ -37,10 +37,9 @@ class CreateBranchForm extends React.PureComponent<CreateBranchFormProps, Create
   async handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (this.state.branchName) {
-      await this.props.repo.createBranch(this.state.branchName, this.props.commit);
-      if (this.state.checkout) {
-        // It is a bit hacky to use the name while we can get a reference object
-        this.props.repo.checkoutReference(`refs/heads/${this.state.branchName}`);
+      const reference = await this.props.repo.createBranch(this.state.branchName, this.props.commit);
+      if (reference && this.state.checkout) {
+        this.props.repo.checkoutReference(reference);
       }
       this.props.onClose(); 
     }

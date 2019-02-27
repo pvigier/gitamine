@@ -49,9 +49,13 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  componentDidMount() {
+    this.getPatches();
+  }
+
   generatePatchSelectHandler(targetedPatchesKey: string, targetedSelectedPatchesKey: string, otherSelectedPatchesKey: string, type: PatchType) {
     return (patch: Git.ConvenientPatch, ctrlKey: boolean, shiftKey: boolean) => {
-        this.setState((prevState) => {
+      this.setState((prevState) => {
         const patches = (prevState as any)[targetedPatchesKey] as Git.ConvenientPatch[];
         const selectedPatches = new Set((prevState as any)[targetedSelectedPatchesKey] as Set<Git.ConvenientPatch>);
 

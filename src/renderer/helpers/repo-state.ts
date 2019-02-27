@@ -310,7 +310,8 @@ export class RepoState {
   }
 
   async getStagedPatches() {
-    const oldTree = this.headCommit ? await this.headCommit.getTree() : null;
+    const headCommit = await this.repo.getHeadCommit(); // Retrieve the head
+    const oldTree = headCommit ? await headCommit.getTree() : null;
     const stagedDiff = await Git.Diff.treeToIndex(this.repo, oldTree, null, diffOptions);
     await stagedDiff.findSimilar(findSimilarOptions);
     return await stagedDiff.patches();

@@ -55,10 +55,6 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
 
   async componentDidMount() {
     await this.props.repo.init();
-    if (!this.state.selectedCommit && this.rightViewer.current) {
-      const indexViewer = this.rightViewer.current as IndexViewer;
-      await indexViewer.refresh();
-    }
     if (this.graphViewer.current) {
       this.graphViewer.current.updateGraph();
       this.graphViewer.current.shrinkCanvas();

@@ -220,6 +220,8 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       } else {
         await this.props.repo.commit(message);
       }
+      // Close path viewer if it is open
+      this.props.onPatchSelect(null, PatchType.Committed);
       // Reset the state
       this.setState({
         amend: false,

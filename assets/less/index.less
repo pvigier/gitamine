@@ -171,12 +171,22 @@ div.reference-explorer {
   ul {
     margin: 0px;
     padding: 0px;
+
+    &.hidden {
+      display: none;
+    }
   }
   
   h3 {
     margin: 0px;
     padding: 4px;
     background: var(--reference-section-background-color);
+    position: relative;
+
+    span {
+      position: absolute;
+      right: 8px;
+    }
   }
 }
 

@@ -130,10 +130,18 @@ div.reference-explorer ul {
   margin: 0px;
   padding: 0px;
 }
+div.reference-explorer ul.hidden {
+  display: none;
+}
 div.reference-explorer h3 {
   margin: 0px;
   padding: 4px;
   background: var(--reference-section-background-color);
+  position: relative;
+}
+div.reference-explorer h3 span {
+  position: absolute;
+  right: 8px;
 }
 /* Graph viewer */
 div.graph-viewer {

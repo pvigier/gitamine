@@ -5,6 +5,7 @@ import { InputDialogHandler } from './input-dialog';
 import { RepoState } from '../helpers/repo-state';
 
 export interface ReferenceListProps { 
+  title: string;
   repo: RepoState;
   head: string | null;
   references: Git.Reference[];
@@ -12,7 +13,25 @@ export interface ReferenceListProps {
   onClick: (commit: Git.Commit) => void;
 }
 
-export class ReferenceList extends React.PureComponent<ReferenceListProps, {}> {
+export interface ReferenceListState {
+  hide: boolean;
+}
+
+export class ReferenceList extends React.PureComponent<ReferenceListProps, ReferenceListState> {
+  constructor(props: ReferenceListProps) {
+    super(props);
+    this.state = {
+      hide: false
+    }
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick() {
+    this.setState((prevState) => ({
+      hide: !prevState.hide
+    }));
+  }
+
   render() {
     const referenceItems = this.props.references
       .sort((lhs, rhs) => lhs.name() <= rhs.name() ? -1 : 1)
@@ -26,9 +45,15 @@ export class ReferenceList extends React.PureComponent<ReferenceListProps, {}> {
           key={name} />;
       });
     return (
-      <ul>
-        {referenceItems}
-      </ul>
+      <>
+        <h3 onClick={this.handleClick}>
+          {this.props.title}
+          <span>{this.state.hide ? '+' : '\u2212'}</span>
+        </h3>
+        <ul className={this.state.hide ? 'hidden' : ''}>
+          {referenceItems}
+        </ul>
+      </>
     );
   }
 }

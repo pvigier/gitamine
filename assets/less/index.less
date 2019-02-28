@@ -37,6 +37,7 @@ html, body {
   color: var(--font-color);
   font-family: var(--font-famliy);
   font-size: var(--font-size);
+  user-select: none;
 }
 
 div#container {
@@ -320,6 +321,7 @@ div.patch-viewer {
     h2 {
       margin: 0px;
       padding: 6px 8px;
+      user-select: text;
     }
   }
 
@@ -428,6 +430,7 @@ div.splitter {
   flex-direction: column;
   background: var(--background-color);
   z-index: 4;
+  user-select: text;
 
   h3 {
     margin: 4px 0;
@@ -463,6 +466,10 @@ div.splitter {
     border-bottom: 1px dotted var(--font-color);
   }
 
+  .navigate-button {
+    cursor: pointer;
+  }
+
   div.section-header {
     display: flex;
     position: relative;
@@ -489,6 +496,12 @@ div.splitter {
     resize: none;
     font-family: var(--font-famliy);
   }
+}
+
+/* Index Viewer */
+
+.index-viewer {
+  user-select: none;
 }
 
 /* Patch list */

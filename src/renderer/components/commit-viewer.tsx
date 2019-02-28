@@ -95,7 +95,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
 
   createNavigationButton(commit: Git.Commit) {
     return (
-      <span className='tooltip-bottom sha-button' key={commit.sha()} onClick={() => this.props.onCommitSelect(commit)}>
+      <span className='tooltip-bottom sha-button navigate-button' key={commit.sha()} onClick={() => this.props.onCommitSelect(commit)}>
         {shortenSha(commit.sha())}
         <span className='tooltip-text'>Navigate</span>
       </span>

@@ -245,7 +245,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
 
   render() {
     return (
-      <form className='commit-viewer' ref={this.form} onSubmit={this.handleSubmit}>
+      <form className='commit-viewer index-viewer' ref={this.form} onSubmit={this.handleSubmit}>
         <div className='commit-message'>
           <h2>Index</h2>
         </div>

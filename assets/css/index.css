@@ -34,6 +34,7 @@ body {
   color: var(--font-color);
   font-family: var(--font-famliy);
   font-size: var(--font-size);
+  user-select: none;
 }
 div#container {
   height: 100vh;
@@ -247,6 +248,7 @@ div.patch-viewer div.patch-header {
 div.patch-viewer div.patch-header h2 {
   margin: 0px;
   padding: 6px 8px;
+  user-select: text;
 }
 div.patch-viewer div.patch-toolbar {
   height: 30px;
@@ -336,6 +338,7 @@ div.splitter {
   flex-direction: column;
   background: var(--background-color);
   z-index: 4;
+  user-select: text;
 }
 .commit-viewer h3 {
   margin: 4px 0;
@@ -365,6 +368,9 @@ div.splitter {
 .commit-viewer .sha-button {
   border-bottom: 1px dotted var(--font-color);
 }
+.commit-viewer .navigate-button {
+  cursor: pointer;
+}
 .commit-viewer div.section-header {
   display: flex;
   position: relative;
@@ -386,6 +392,10 @@ div.splitter {
   margin: 4px 8px;
   resize: none;
   font-family: var(--font-famliy);
+}
+/* Index Viewer */
+.index-viewer {
+  user-select: none;
 }
 /* Patch list */
 ul.patch-list {

@@ -214,6 +214,9 @@ div.commit-list li span.reference {
   user-select: none;
   filter: brightness(0.8);
 }
+div.commit-list li span.reference.tag {
+  border-radius: 0px;
+}
 div.commit-list li span.reference:hover {
   filter: brightness(1);
 }

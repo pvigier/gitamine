@@ -34,6 +34,9 @@ export class ReferenceBadge extends React.PureComponent<ReferenceBadgeProps, {}>
     const style = {};
     style['--branch-color'] = this.props.color; 
     const classNames = ['reference'];
+    if (this.props.reference.isTag()) {
+      classNames.push('tag');
+    }
     if (this.props.selected) {
       classNames.push('selected');
     }

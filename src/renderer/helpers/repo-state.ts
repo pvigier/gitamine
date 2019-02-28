@@ -24,7 +24,7 @@ const diffOptions = {
 }
 
 const findSimilarOptions = {
-  flags: Git.Diff.FIND.ALL
+  flags: Git.Diff.FIND.RENAMES | Git.Diff.FIND.COPIES | Git.Diff.FIND.FOR_UNTRACKED
 }
 
 export enum PatchType {
@@ -629,5 +629,18 @@ export class RepoState {
   isIgnored(path: string) {
     // .gitignore is never ignored
     return path && path !== '.gitignore' && this.ig.ignores(path);
+  }
+
+  // Commit
+
+  async getPatches(commit: Git.Commit) {
+    const diffs = await commit.getDiff();
+    if (diffs.length > 0) {
+      const diff = diffs[0];
+      await diff.findSimilar(findSimilarOptions);
+      return await diff.patches();
+    } else {
+      return [];
+    }
   }
 }

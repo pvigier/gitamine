@@ -64,16 +64,7 @@ export class CommitViewer extends React.PureComponent<CommitViewerProps, CommitV
   }
 
   async updatePatches() {
-    this.patchesPromise = makeCancellable((async () => {
-      const diffs = await this.props.commit.getDiff();
-      if (diffs.length > 0) {
-        const diff = diffs[0];
-        await diff.findSimilar({});
-        return await diff.patches();
-      } else {
-        return [];
-      }
-    })());
+    this.patchesPromise = makeCancellable(this.props.repo.getPatches(this.props.commit));
     try {
       this.setState({
         patches: await this.patchesPromise.promise

@@ -31,12 +31,25 @@ export class ReferenceExplorer extends React.PureComponent<ReferenceExplorerProp
   }
 
   render() {
+    const references = [...this.props.repo.references.values()];
     return (
       <div className='reference-explorer' ref={this.div}>
         <li onClick={this.props.onIndexSelect}>Index</li>
-        <h3>Branches</h3>
+        <h3>Local branches</h3>
         <ReferenceList repo={this.props.repo}
-          references={[...this.props.repo.references.values()]} 
+          references={references.filter((reference) => reference.isBranch())} 
+          head={this.props.repo.head}
+          onOpenInputDialog={this.props.onOpenInputDialog}
+          onClick={this.props.onCommitSelect} />
+        <h3>Remote branches</h3>
+        <ReferenceList repo={this.props.repo}
+          references={references.filter((reference) => reference.isRemote())} 
+          head={this.props.repo.head}
+          onOpenInputDialog={this.props.onOpenInputDialog}
+          onClick={this.props.onCommitSelect} />
+        <h3>Tags</h3>
+        <ReferenceList repo={this.props.repo}
+          references={references.filter((reference) => reference.isTag())} 
           head={this.props.repo.head}
           onOpenInputDialog={this.props.onOpenInputDialog}
           onClick={this.props.onCommitSelect} />

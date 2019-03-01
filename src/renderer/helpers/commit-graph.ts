@@ -52,14 +52,6 @@ export class CommitGraph {
   }
 
   computePositions(repo: RepoState) {
-    function mergeSets(sets: Set<number>[]) {
-      return new Set<number>(function*() { 
-        for (let set of sets) {
-          yield* set;
-        }
-      }());
-    }
-
     function insertCommit(commitSha: string, j: number, forbiddenIndices: Set<number>) {
       // Try to insert as close as possible to i 
       // replace i by j
@@ -94,7 +86,17 @@ export class CommitGraph {
       const commitSha = commit.sha();
       const children = repo.children.get(commit.sha())!;
       // Compute forbidden indices
-      const forbiddenIndices = mergeSets(children.filter((childSha) => repo.parents.get(childSha)![0] !== commitSha).map((childSha) => activeNodes.get(childSha)!));
+      const mergeChildren = children.filter((childSha) => repo.parents.get(childSha)![0] !== commitSha);
+      let highestChild: string | undefined = undefined;
+      let iMin = Infinity;
+      for (let childSha of mergeChildren) {
+        const iChild = this.positions.get(childSha)![0];
+        if (iChild < iMin) {
+          iMin = i;
+          highestChild = childSha;
+        }
+      }
+      const forbiddenIndices = highestChild ? activeNodes.get(highestChild)! : new Set();
       // Find a commit to replace
       let commitToReplace: string | null = null;
       let jCommitToReplace = Infinity;

@@ -66,7 +66,7 @@ export class CommitGraph {
         }
         ++dj;
       }
-      // If it is not possible to find an available position, insert at the end
+      // If it is not possible to find an available position, append
       branches.push(commitSha);
       return branches.length - 1;
     }
@@ -85,8 +85,9 @@ export class CommitGraph {
       let j = -1;
       const commitSha = commit.sha();
       const children = repo.children.get(commit.sha())!;
-      // Compute forbidden indices
+      const branchChildren = children.filter((childSha) => repo.parents.get(childSha)![0] === commitSha);
       const mergeChildren = children.filter((childSha) => repo.parents.get(childSha)![0] !== commitSha);
+      // Compute forbidden indices
       let highestChild: string | undefined = undefined;
       let iMin = Infinity;
       for (let childSha of mergeChildren) {
@@ -104,10 +105,10 @@ export class CommitGraph {
         commitToReplace = 'index';
         jCommitToReplace = 0;
       } else {
-        for (let childSha of children) {
+        // The commit can only replace a child whose first parent is this commit
+        for (let childSha of branchChildren) {
           const jChild = this.positions.get(childSha)![1]!;
-          // Do we want commit to be the first parent of child?
-          if (repo.parents.get(childSha)![0] === commitSha && !forbiddenIndices.has(jChild) && jChild < jCommitToReplace) {
+          if (!forbiddenIndices.has(jChild) && jChild < jCommitToReplace) {
             commitToReplace = childSha;
             jCommitToReplace = jChild;
           }
@@ -135,7 +136,7 @@ export class CommitGraph {
         activeNodes.delete(sha);
       }
       // Upddate the active nodes
-      const jToAdd = [j, ...children.filter((childSha) => repo.parents.get(childSha)![0] === commitSha).map((childSha) => this.positions.get(childSha)![1])];
+      const jToAdd = [j, ...branchChildren.map((childSha) => this.positions.get(childSha)![1])];
       for (let activeNode of activeNodes.values()) {
         jToAdd.forEach((j) => activeNode.add(j));
       }
@@ -143,9 +144,9 @@ export class CommitGraph {
       const iRemove = Math.max(...repo.parents.get(commitSha)!.map((parentSha) => repo.shaToIndex.get(parentSha)!));
       activeNodesQueue.add([iRemove, commitSha]);
       // Remove children from active branches
-      for (let childSha of children) {
-        if (childSha != commitToReplace && repo.parents.get(childSha)![0] === commitSha) {
-          branches[branches.indexOf(childSha)] = null; // Use positions
+      for (let childSha of branchChildren) {
+        if (childSha != commitToReplace) {
+          branches[this.positions.get(childSha)![1]] = null;
         }
       }
       // If the commit has no parent, remove it from active branches

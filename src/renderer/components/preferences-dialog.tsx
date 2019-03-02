@@ -4,6 +4,7 @@ import * as React from 'react';
 import { makeModal } from './make-modal';
 import { PatchViewerOptions } from './patch-viewer';
 import { Settings, Field } from '../../shared/settings';
+import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
 
 enum Section {
   Profile,
@@ -21,30 +22,44 @@ export class PreferencesProps {
 export class PreferencesState {
   section: Section;
   themes: string[];
+  name: string;
+  email: string;
+  theme: string;
+  fontSize: number;
 }
 
 class Preferences extends React.PureComponent<PreferencesProps, PreferencesState> {
-  settings: any;
+  themesPromise: CancellablePromise<string[]>;
 
   constructor(props: PreferencesProps) {
     super(props);
-    this.settings = Settings.exists() ? Settings.getAll() : {};
+    const settings = Settings.exists() ? Settings.getAll() : {};
     this.state = {
       section: Section.Profile,
-      themes: []
+      themes: [],
+      name: settings[Field.Name] || '',
+      email: settings[Field.Email] || '',
+      theme: settings[Field.Theme] || 'light',
+      fontSize: settings[Field.FontSize] || 14
     }
+    // Maybe we should refactor that when there will be more fields
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handleThemeChange = this.handleThemeChange.bind(this);
+    this.handleFontSizeChange = this.handleFontSizeChange.bind(this);
     this.handleEditorPreferencesChange = this.handleEditorPreferencesChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
-    this.loadSettings();
     this.loadThemes();
   }
 
   componentWillUnmount() {
     this.saveSettings();
+    if (this.themesPromise) {
+      this.themesPromise.cancel();
+    }
   }
 
   handleTabClick(section: Section) {
@@ -53,8 +68,22 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
     });
   }
 
+  handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({name: event.target.value});
+  }
+
+  handleEmailChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({email: event.target.value});
+  }
+
   handleThemeChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    const theme = event.target.selectedOptions[0].text;
+    this.setState({theme: theme});
     this.props.onThemeUpdate(event.target.selectedOptions[0].text);
+  }
+
+  handleFontSizeChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({fontSize: Number(event.target.value)});
   }
 
   handleEditorPreferencesChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -67,55 +96,35 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
     event.preventDefault();
   }
 
-  loadSettings() {
-    // This does not conform to React's style
-    const setInputValuesFromStore = (ids: string[], keys: string[]) => {
-      for (let i = 0; i < ids.length; ++i) {
-        if (this.settings[keys[i]]) {
-          const element = document.getElementById(ids[i]) as HTMLInputElement;
-          element.value = this.settings[keys[i]];
-        }
-      }
-    }
-
-    setInputValuesFromStore(['name', 'email', 'font-size'], 
-      [Field.Name, Field.Email, Field.FontSize]);
-  }
-
-  loadThemes() {
+  async loadThemes() {
     const path = Path.join(__dirname, '../../../assets/themes/');
-    fs.readdir(path, {withFileTypes: true}, (error, files) => {
-      if (files) {
-        const themes = files.filter((file) => file.endsWith('.json'))
-          .map((file) => file.substr(0, file.length - 5));
-        this.setState({
-          themes: themes
-        });
-      }
-    });
+    this.themesPromise = makeCancellable(new Promise<string[]>((resolve, reject) => {
+      fs.readdir(path, {withFileTypes: true}, (error, files) => {
+        if (files) {
+          const themes = files.filter((file) => file.name.endsWith('.json'))
+            .map((file) => file.name.substr(0, file.name.length - 5));
+          resolve(themes);
+        } else {
+          reject(error);
+        }
+      });
+    }));
+    try {
+      this.setState({
+        themes: await this.themesPromise.promise
+      });
+    } catch (e) {
+    }
   }
 
   saveSettings() {
-    // This does not conform to React's style
-    function saveInputValuesInStore(ids: string[], keys: string[]) {
-      const values = {};
-      for (let i = 0; i < ids.length; ++i) {
-        const element = document.getElementById(ids[i]) as HTMLInputElement;
-        values[keys[i]] = element.value;
-      }
-      Settings.setAll(values);
-    }
-
-    saveInputValuesInStore(['name', 'email', 'font-size'], 
-      [Field.Name, Field.Email, Field.FontSize]);
-    
-    const themeSelect = document.getElementById('theme') as HTMLSelectElement;
-    Settings.set(Field.Theme, themeSelect.selectedOptions[0].text);
+    Settings.set(Field.Name, this.state.name);
+    Settings.set(Field.Email, this.state.email);
+    Settings.set(Field.Theme, this.state.theme);
+    Settings.set(Field.FontSize, this.state.fontSize);
   }
 
   render() {
-    const selectedTheme = this.settings[Field.Theme];
-    const fontSize = this.settings[Field.FontSize];
     const themeOptions = this.state.themes.map((theme) => (
       <option value={theme} key={theme}>
         {theme}
@@ -149,11 +158,20 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
             <form onSubmit={this.handleSubmit}>
               <div>
                 <label htmlFor="name">Name:</label>
-                <input type="text" id="name" name="profile-name" autoFocus={true} />
+                <input type="text" 
+                  id="name" 
+                  name="profile-name" 
+                  autoFocus={true} 
+                  value={this.state.name}
+                  onChange={this.handleNameChange} />
               </div>
               <div>
                 <label htmlFor="path">Email:</label>
-                <input type="text" id="email" name="profile-email" />
+                <input type="text" 
+                  id="email" 
+                  name="profile-email" 
+                  value={this.state.email} 
+                  onChange={this.handleEmailChange} />
               </div>
             </form>
           </section>
@@ -166,7 +184,7 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
             <form onSubmit={this.handleSubmit}>
               <div>
                 <label htmlFor="theme">Theme:</label>
-                <select id="theme" defaultValue={selectedTheme} onChange={this.handleThemeChange}>
+                <select id="theme" value={this.state.theme} onChange={this.handleThemeChange}>
                   {themeOptions}
                 </select>
               </div>
@@ -177,7 +195,11 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
             <form onSubmit={this.handleSubmit}>
               <div>
                 <label htmlFor="font-size">Font size:</label>
-                <input type="number" id="font-size" name="font-size" defaultValue={fontSize} onChange={this.handleEditorPreferencesChange}/>
+                <input type="number" 
+                  id="font-size" 
+                  name="font-size" 
+                  value={this.state.fontSize}
+                  onChange={this.handleFontSizeChange}/>
               </div>
             </form>
           </section>

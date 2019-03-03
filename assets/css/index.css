@@ -106,6 +106,31 @@ div.repo-content {
   flex: 1;
   display: flex;
 }
+/* Loading screen */
+div.loading-screen {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+div.loading-screen div.spinner {
+  border: 16px solid #f3f3f3;
+  border-top: 16px solid dodgerblue;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 2s linear infinite;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 /* Reference explorer */
 div.reference-explorer {
   width: 200px;

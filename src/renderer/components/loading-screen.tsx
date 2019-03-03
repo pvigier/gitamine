@@ -12,8 +12,9 @@ export interface LoadingScreenProps {
 export class LoadingScreen extends React.PureComponent<LoadingScreenProps, {}> {
   render() {
     return (
-      <div className='patch-viewer'>
-        Loading...
+      <div className='loading-screen'>
+        <div className='spinner' />
+        <p>Loading...</p>
       </div>
     );
   }

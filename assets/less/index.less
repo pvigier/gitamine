@@ -137,9 +137,33 @@ div.repo-content {
   display: flex;
 }
 
-.middle-viewer() {
+.left-viewer() {
   flex: 1;
   min-width: @middle-viewer-min-width;
+}
+
+/* Loading screen */
+
+div.loading-screen {
+  .left-viewer();
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  div.spinner {
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid dodgerblue;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    animation: spin 2s linear infinite;
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  }
 }
 
 /* Reference explorer */
@@ -197,7 +221,7 @@ div.reference-explorer {
 @commit-list-min-width: 100px;
 
 div.graph-viewer {
-  .middle-viewer();
+  .left-viewer();
   display: flex;
 
   div.graph-container {
@@ -308,7 +332,7 @@ div.commit-list li span.reference {
 @patch-toolbar-height: 30px;
 
 div.patch-viewer {
-  .middle-viewer();
+  .left-viewer();
   z-index: 1;
   background: var(--background-color);
 

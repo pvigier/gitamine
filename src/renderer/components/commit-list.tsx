@@ -27,7 +27,7 @@ export interface CommitListState {
 
 export class CommitList extends React.PureComponent<CommitListProps, CommitListState> {
   div: React.RefObject<HTMLDivElement>;
-  resizeObserver: any;
+  resizeObserver: ResizeObserver;
 
   constructor(props: CommitListProps) {
     super(props);

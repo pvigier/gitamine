@@ -1,7 +1,7 @@
 {
   "name": "gitamine",
   "productName": "gitamine",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "gitamine is a modern graphical user interface for git ",
   "main": "src/main/main.ts",
   "scripts": {

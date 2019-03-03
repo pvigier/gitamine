@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { GraphCanvas } from './graph-canvas';
+import { GraphCanvas, OFFSET_X } from './graph-canvas';
 import { CommitList } from './commit-list';
 import { Splitter } from './splitter';
 import { ReferenceExplorer } from './reference-explorer'
@@ -81,7 +81,7 @@ export class GraphViewer extends React.PureComponent<GraphViewerProps, {}> {
 
   shrinkCanvas() {
     if (this.canvas.current) {
-      const canvasWidth = this.canvas.current.getWidth();
+      const canvasWidth = this.props.repo.graph.width * OFFSET_X;
       // 32px is the min width of the graph canvas
       // 20px is the padding around the canvas
       // 98px is the width to display 4 branches

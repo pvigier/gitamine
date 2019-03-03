@@ -9,8 +9,10 @@ import { IndexViewer } from './index-viewer';
 import { PatchViewer, PatchViewerOptions } from './patch-viewer';
 import { Splitter } from './splitter';
 import { Toolbar } from './toolbar';
+import { LoadingScreen, LoadingState } from './loading-screen';
 import { InputDialogHandler } from './input-dialog';
 import { RepoState, PatchType } from '../helpers/repo-state';
+import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
 
 export interface RepoDashboardProps { 
   repo: RepoState;
@@ -22,14 +24,20 @@ export interface RepoDashboardProps {
 }
 
 export interface RepoDashboardState { 
+  loadingState: LoadingState;
   selectedCommit: Git.Commit | null;
   selectedPatch: Git.ConvenientPatch | null;
   patchType: PatchType;
 }
 
 export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoDashboardState> {
+  // Loading
+  loadingPromise: CancellablePromise<void>;
+  graphShrunk: boolean;
+  // References
   graphViewer: React.RefObject<GraphViewer>;
   rightViewer: React.RefObject<CommitViewer | IndexViewer>;
+  // Watches
   repositoryWatcher: fs.FSWatcher;
   dirtyWorkingDirectory: boolean;
   workingDirectoryWatcher: chokidar.FSWatcher;
@@ -38,6 +46,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
 
   constructor(props: RepoDashboardProps) {
     super(props);
+    this.graphShrunk = false;
     this.graphViewer = React.createRef();
     this.rightViewer = React.createRef();
     this.dirtyWorkingDirectory = false;
@@ -47,6 +56,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     this.exitPatchViewer = this.exitPatchViewer.bind(this);
     this.handleRightPanelResize = this.handleRightPanelResize.bind(this);
     this.state = {
+      loadingState: LoadingState.NotLoading,
       selectedCommit: null,
       selectedPatch: null,
       patchType: PatchType.Committed
@@ -54,15 +64,28 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   }
 
   async componentDidMount() {
-    await this.props.repo.init();
-    if (this.graphViewer.current) {
-      this.graphViewer.current.updateGraph();
+    this.loadingPromise = makeCancellable(this.props.repo.init());
+    try {
+      await this.loadingPromise.promise;
+      this.setState({
+        loadingState: LoadingState.Loaded
+      });
+      this.setWatchers();
+    } catch (e) {
+    }
+  }
+
+  componentDidUpdate() {
+    if (!this.graphShrunk && this.graphViewer.current) {
+      this.graphShrunk = true;
       this.graphViewer.current.shrinkCanvas();
     }
-    this.setWatchers();
   }
 
   componentWillUnmount() {
+    if (this.loadingPromise) {
+      this.loadingPromise.cancel();
+    }
     this.removeWatchers();
   }
 
@@ -205,13 +228,17 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         options={this.props.patchViewerOptions}
         onClose={this.exitPatchViewer} /> 
     } else {
-      leftViewer = <GraphViewer repo={this.props.repo} 
-        selectedCommit={this.state.selectedCommit} 
-        onCommitSelect={this.handleCommitSelect}
-        onIndexSelect={this.handleIndexSelect} 
-        onCreateBranch={this.props.onCreateBranch}
-        onOpenInputDialog={this.props.onOpenInputDialog}
-        ref={this.graphViewer} />
+      if (this.state.loadingState !== LoadingState.Loaded) {
+        leftViewer = <LoadingScreen state={this.state.loadingState} />
+      } else {
+        leftViewer = <GraphViewer repo={this.props.repo} 
+          selectedCommit={this.state.selectedCommit} 
+          onCommitSelect={this.handleCommitSelect}
+          onIndexSelect={this.handleIndexSelect} 
+          onCreateBranch={this.props.onCreateBranch}
+          onOpenInputDialog={this.props.onOpenInputDialog}
+          ref={this.graphViewer} />
+      }
     }
     let rightViewer;
     if (this.state.selectedCommit) {

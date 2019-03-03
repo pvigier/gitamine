@@ -3,7 +3,7 @@ import { RepoState } from '../helpers/repo-state';
 import { getBranchColor, EdgeType, NodeType } from '../helpers/commit-graph';
 
 const RADIUS = 11;
-const OFFSET_X = 2 * RADIUS;
+export const OFFSET_X = 2 * RADIUS;
 const OFFSET_Y = 28;
 const LINE_WIDTH = 2;
 const INNER_RADIUS = RADIUS - LINE_WIDTH / 2;
@@ -44,10 +44,6 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
     this.start = start;
     this.end = end;
     this.drawGraph();
-  }
-
-  getWidth() {
-    return this.canvas.current ? this.canvas.current.width : 0;
   }
 
   drawGraph() {

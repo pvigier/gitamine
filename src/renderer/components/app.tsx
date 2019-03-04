@@ -9,7 +9,7 @@ import { NotificationType } from './notification-item';
 import { CreateBranchDialog } from './create-branch-dialog';
 import { CloneRepoDialog } from './clone-repo-dialog';
 import { InitRepoDialog } from './init-repo-dialog';
-import { PatchViewerOptions } from './patch-viewer';
+import { TextPatchViewerOptions } from './text-patch-viewer';
 import { PreferencesDialog } from './preferences-dialog';
 import { Field, Settings } from '../../shared/settings';
 import { ThemeManager } from '../../shared/theme-manager';
@@ -18,7 +18,7 @@ import { InputDialog } from './input-dialog';
 export interface AppState {
   repos: RepoState[]; 
   editorTheme: string;
-  patchViewerOptions: PatchViewerOptions;
+  patchViewerOptions: TextPatchViewerOptions;
   modalWindow: JSX.Element | null;
 }
 
@@ -65,7 +65,7 @@ export class App extends React.PureComponent<{}, AppState> {
     });
   }
 
-  async updatePatchViewer(options?: PatchViewerOptions) {
+  async updatePatchViewer(options?: TextPatchViewerOptions) {
     options = options || {fontSize: Settings.get(Field.FontSize)};
     this.setState({
       patchViewerOptions: options!

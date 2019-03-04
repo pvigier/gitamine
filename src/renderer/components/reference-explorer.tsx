@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { RepoState } from '../helpers/repo-state';
-import { ReferenceItem } from './reference-item';
 import { ReferenceList } from './reference-list';
 import { StashList } from './stash-list';
 import { InputDialogHandler } from './input-dialog';

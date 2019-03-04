@@ -2,7 +2,7 @@ import * as Path from 'path';
 import * as fs from 'fs';
 import * as React from 'react';
 import { makeModal } from './make-modal';
-import { PatchViewerOptions } from './patch-viewer';
+import { TextPatchViewerOptions } from './text-patch-viewer';
 import { Settings, Field } from '../../shared/settings';
 import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
 
@@ -16,7 +16,7 @@ enum Section {
 export class PreferencesProps {
   onClose: () => void;
   onThemeUpdate: (theme: string) => void;
-  onEditorPreferencesUpdate: (options: PatchViewerOptions) => void;
+  onEditorPreferencesUpdate: (options: TextPatchViewerOptions) => void;
 }
 
 export class PreferencesState {

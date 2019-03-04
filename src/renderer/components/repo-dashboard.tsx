@@ -6,7 +6,8 @@ import * as Git from 'nodegit';
 import { GraphViewer } from './graph-viewer';
 import { CommitViewer } from './commit-viewer';
 import { IndexViewer } from './index-viewer';
-import { PatchViewer, PatchViewerOptions } from './patch-viewer';
+import { PatchViewer } from './patch-viewer';
+import { TextPatchViewerOptions } from './text-patch-viewer';
 import { Splitter } from './splitter';
 import { Toolbar } from './toolbar';
 import { LoadingScreen, LoadingState } from './loading-screen';
@@ -17,7 +18,7 @@ import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable
 export interface RepoDashboardProps { 
   repo: RepoState;
   editorTheme: string;
-  patchViewerOptions: PatchViewerOptions;
+  patchViewerOptions: TextPatchViewerOptions;
   onRepoClose: () => void;
   onCreateBranch: (commit: Git.Commit) => void;
   onOpenInputDialog: InputDialogHandler;

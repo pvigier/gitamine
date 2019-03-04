@@ -317,7 +317,12 @@ export class RepoState {
   }
 
   async reset(target: Git.Commit, resetType: Git.Reset.TYPE) {
-    Git.Reset.reset(this.repo, target, resetType, {});
+    try {
+      const commit = await this.repo.getCommit(target); // We need to reload the commit otherwise "Repository and target commit's repository does not match" is thrown
+      await Git.Reset.reset(this.repo, commit, resetType, {});
+    } catch(e) {
+      this.onNotification(`Unable to reset to ${target.sha()}: ${e.message}`, NotificationType.Error);
+    }
   }
 
   // Index operations

@@ -263,12 +263,15 @@ div.patch-viewer {
   min-width: 300px;
   z-index: 1;
   background: var(--background-color);
+  display: flex;
+  flex-direction: column;
 }
 div.patch-viewer div.patch-header {
   height: 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 div.patch-viewer div.patch-header h2 {
   margin: 0px;
@@ -287,6 +290,13 @@ div.patch-viewer div.patch-editor {
 }
 div.patch-viewer div.patch-editor.hidden {
   visibility: hidden;
+}
+div.patch-viewer div.image-viewer {
+  overflow: auto;
+  padding: 0px 8px;
+}
+div.patch-viewer div.binary-viewer {
+  padding: 0px 8px;
 }
 /* Hunk widget */
 div.hunk-widget {

@@ -277,7 +277,6 @@ export class TextPatchViewer extends React.PureComponent<TextPatchViewerProps, {
     }
     
     const patch = this.props.patch;
-    console.log(this.props.oldString);
     const originalModel = updateOrCreateModel('a', patch.oldFile().path(), this.props.oldString);
     const modifiedModel = updateOrCreateModel('b', patch.newFile().path(), this.props.newString);
     this.editor.setModel({

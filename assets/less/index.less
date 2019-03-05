@@ -335,12 +335,15 @@ div.patch-viewer {
   .left-viewer();
   z-index: 1;
   background: var(--background-color);
+  display: flex;
+  flex-direction: column;
 
   div.patch-header {
     height: @patch-header-height;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 
     h2 {
       margin: 0px;
@@ -363,6 +366,15 @@ div.patch-viewer {
     &.hidden {
       visibility: hidden;
     }
+  }
+
+  div.image-viewer {
+    overflow: auto;
+    padding: 0px 8px;
+  }
+
+  div.binary-viewer {
+    padding: 0px 8px;
   }
 }
 

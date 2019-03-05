@@ -224,7 +224,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     if (this.state.selectedPatch) {
       leftViewer = <PatchViewer repo={this.props.repo} 
         patch={this.state.selectedPatch!} 
-        type={this.state.patchType}
+        patchType={this.state.patchType}
         editorTheme={this.props.editorTheme}
         options={this.props.patchViewerOptions}
         onClose={this.exitPatchViewer} /> 

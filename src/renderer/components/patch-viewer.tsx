@@ -2,37 +2,49 @@ import * as Path from 'path';
 import * as fs from 'fs';
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { isBinaryFile } from 'isbinaryfile';
+import * as fileType  from 'file-type';
 import { RepoState, PatchType } from '../helpers/repo-state'
 import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
 import { TextPatchViewer, TextPatchViewerOptions } from './text-patch-viewer';
+import { BinaryPatchViewer } from './binary-patch-viewer';
+import { ImagePatchViewer } from './image-patch-viewer';
 
-type Blob = [string, boolean];
-
-enum PatchViewerType {
+enum BlobType {
+  Void,
   Text,
-  Binary
+  Binary,
+  Image
 }
+
+type Blob = [Buffer, BlobType];
 
 // Util
 
+function isImage(type: fileType.FileTypeResult | null) {
+  return type !== null && type.mime.startsWith('image');
+}
+
 async function getBlob(repo: Git.Repository, file: Git.DiffFile) {
+  let buffer: Buffer;
   try {
     const blob = await repo.getBlob(file.id());
-    return [blob.isBinary() ? '' : blob.toString(), blob.isBinary() === 1] as Blob;
+    buffer = blob.content();
   } catch (e) {
-    return new Promise<Blob>((resolve, reject) => {
+    buffer = await new Promise<Buffer>((resolve, reject) => {
       fs.readFile(Path.join(Path.dirname(repo.path()), file.path()), (error, data) => {
         if (!error) {
-          isBinaryFile(data).then((binary) => {
-            resolve([binary ? '': data.toString(), binary]);
-          });
+          resolve(data);
         } else {
           reject(error);
         }
       });
-    })
+    });
   }
+  let type = BlobType.Text;
+  if ((file.flags() & Git.Diff.FLAG.BINARY) > 0) {
+    type = isImage(fileType(buffer)) ? BlobType.Image : BlobType.Binary;
+  }
+  return [buffer, type] as Blob;
 }
 
 function arePatchesEqual(lhs: Git.ConvenientPatch, rhs: Git.ConvenientPatch) {
@@ -42,12 +54,25 @@ function arePatchesEqual(lhs: Git.ConvenientPatch, rhs: Git.ConvenientPatch) {
     lhs.size() === rhs.size();
 }
 
+function getViewerType(oldType: BlobType, newType: BlobType) {
+  switch (oldType) {
+    case BlobType.Void:
+      return newType;
+    case BlobType.Image:
+      return newType === BlobType.Image || newType === BlobType.Void ? BlobType.Image : BlobType.Binary;
+    case BlobType.Text:
+      return newType === BlobType.Text || newType === BlobType.Void ? BlobType.Text : BlobType.Binary;
+    default:
+      return BlobType.Binary;
+  }
+}
+
 // PatchViewer
 
 export interface PatchViewerProps { 
   repo: RepoState;
   patch: Git.ConvenientPatch;
-  type: PatchType;
+  patchType: PatchType;
   editorTheme: string;
   options: TextPatchViewerOptions;
   onClose: () => void;
@@ -55,9 +80,9 @@ export interface PatchViewerProps {
 
 export interface PatchViewerState {
   loadedPatch: Git.ConvenientPatch | null;
-  oldBlob: string;
-  newBlob: string;
-  type: PatchViewerType;
+  oldBlob: Buffer;
+  newBlob: Buffer;
+  viewerType: BlobType;
 }
 
 export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchViewerState> {
@@ -67,9 +92,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
     super(props);
     this.state = {
       loadedPatch: null,
-      oldBlob: '',
-      newBlob: '',
-      type: PatchViewerType.Text
+      oldBlob: Buffer.from(''),
+      newBlob: Buffer.from(''),
+      viewerType: BlobType.Text
     };
     this.handleKeyUp = this.handleKeyUp.bind(this);
   }
@@ -107,14 +132,14 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
     // Load old blob
     let oldPromise: Promise<Blob>;
     if (this.props.patch.isAdded()) {
-      oldPromise = new Promise((resolve) => resolve(['', false]));
+      oldPromise = new Promise((resolve) => resolve([Buffer.from(''), BlobType.Void]));
     } else {
       oldPromise = getBlob(repo, patch.oldFile());
     }
     // Load new blob
     let newPromise: Promise<Blob>;
     if (this.props.patch.isDeleted()) {
-      newPromise = new Promise((resolve) => resolve(['', false]));
+      newPromise = new Promise((resolve) => resolve([Buffer.from(''), BlobType.Void]));
     } else {
       newPromise = getBlob(repo, patch.newFile());
     }
@@ -124,12 +149,12 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
     }
     this.blobsPromise = makeCancellable(Promise.all([oldPromise, newPromise]));
     try {
-      const [[oldBlob, oldBinary], [newBlob, newBinary]] = await this.blobsPromise.promise;
+      const [[oldBlob, oldType], [newBlob, newType]] = await this.blobsPromise.promise;
       this.setState({
         loadedPatch: this.props.patch,
         oldBlob: oldBlob,
         newBlob: newBlob,
-        type: oldBinary || newBinary ? PatchViewerType.Binary : PatchViewerType.Text
+        viewerType: getViewerType(oldType, newType)
       });
     } catch (e) {
     }
@@ -140,16 +165,21 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
     const i = Math.max(path.lastIndexOf('/'), 0);
     let viewer: JSX.Element | null = null;
     if (this.state.loadedPatch) {
-      if (this.state.type === PatchViewerType.Text) {
+      if (this.state.viewerType === BlobType.Text) {
         viewer = <TextPatchViewer repo={this.props.repo}
           patch={this.state.loadedPatch}
-          oldString={this.state.oldBlob}
-          newString={this.state.newBlob}
-          type={this.props.type}
+          oldString={this.state.oldBlob.toString()}
+          newString={this.state.newBlob.toString()}
+          type={this.props.patchType}
           editorTheme={this.props.editorTheme}
           options={this.props.options} />
+      } else if (this.state.viewerType === BlobType.Image) {
+        viewer = <ImagePatchViewer repo={this.props.repo} 
+          patch={this.props.patch}
+          oldBuffer={this.state.oldBlob}
+          newBuffer={this.state.newBlob} />
       } else {
-        viewer = <p>Binary patch</p>
+        viewer = <BinaryPatchViewer />;
       }
     }
     return (

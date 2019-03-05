@@ -17,7 +17,7 @@ function getPatchIcon(patch: Git.ConvenientPatch) {
     return <span className='icon patch-add' />;
   } else if (patch.isDeleted()) {
     return <span className='icon patch-delete' />;
-  } else if (patch.isModified()) {
+  } else if (patch.isModified() || patch.isCopied()) {
     return <span className='icon patch-modify' />;
   } else if (patch.isRenamed()) {
     return <span className='icon patch-rename' />;

@@ -226,11 +226,13 @@ export class TextPatchViewer extends React.PureComponent<TextPatchViewerProps, {
     this.resetEditor();
     // Update models
     this.setModels();
-    if (this.viewMode === ViewMode.Hunk && this.props.patch.isModified()) {
+    if (this.viewMode === ViewMode.Hunk && this.hunks.length > 0) {
       await this.customizeHunkView(); 
     }
     // Scroll
     this.editor.getModifiedEditor().setScrollTop(scrollTop);
+    // Show
+    this.show();
   }
 
   resetEditor() {

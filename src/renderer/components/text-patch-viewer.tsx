@@ -92,6 +92,8 @@ export class TextPatchViewer extends React.PureComponent<TextPatchViewerProps, {
         this.editor.getModifiedEditor().getScrollTop() :
         0;
       this.loadAndUpdate(scrollTop);
+    } else if (this.props.type !== prevProps.type) {
+      this.updateEditor(this.editor.getModifiedEditor().getScrollTop());
     }
     if (this.props.editorTheme !== prevProps.editorTheme) {
       monaco.editor.setTheme(this.props.editorTheme); 
@@ -198,7 +200,6 @@ export class TextPatchViewer extends React.PureComponent<TextPatchViewerProps, {
       if (this.editor) {
         await this.updateEditor(scrollTop);
       }
-      this.show();
     } catch (e) {
     }
   }
@@ -218,6 +219,8 @@ export class TextPatchViewer extends React.PureComponent<TextPatchViewerProps, {
   }
 
   async updateEditor(scrollTop: number) {
+    // Hide
+    this.hide();
     // Update editor options
     this.editor.updateOptions({
       renderSideBySide: this.viewMode === ViewMode.Split

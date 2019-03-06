@@ -22,10 +22,6 @@ export interface IndexViewerState {
 export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexViewerState> {
   form: React.RefObject<HTMLFormElement>;
   iSelectedPatch: number;
-  iAnchorPatch: number;
-  iShiftPatch: number | null;
-  handleUnstagedPatchSelect: (patch: Git.ConvenientPatch, ctrlKey: boolean, shiftKey: boolean) =>void;
-  handleStagedPatchSelect: (patch: Git.ConvenientPatch, ctrlKey: boolean, shiftKey: boolean) =>void;
 
   constructor(props: IndexViewerProps) {
     super(props);
@@ -39,8 +35,10 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       selectedUnstagedPatches: new Set(),
       selectedStagedPatches: new Set()
     }
-    this.handleUnstagedPatchSelect = this.generatePatchSelectHandler('unstagedPatches', 'selectedUnstagedPatches', 'selectedStagedPatches', PatchType.Unstaged);
-    this.handleStagedPatchSelect = this.generatePatchSelectHandler('stagedPatches', 'selectedStagedPatches', 'selectedUnstagedPatches', PatchType.Staged);
+    this.handleUnstagedPatchSelect = this.handleUnstagedPatchSelect.bind(this);
+    this.handleSelectedUnstagedPatchesChange = this.handleSelectedUnstagedPatchesChange.bind(this);
+    this.handleStagedPatchSelect = this.handleStagedPatchSelect.bind(this);
+    this.handleSelectedStagedPatchesChange = this.handleSelectedStagedPatchesChange.bind(this);
     this.handlePatchesStage = this.handlePatchesStage.bind(this);
     this.handlePatchesUnstage = this.handlePatchesUnstage.bind(this);
     this.handleAmendChange = this.handleAmendChange.bind(this);
@@ -52,66 +50,39 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   componentDidMount() {
     this.getPatches();
   }
+   
+  handleUnstagedPatchSelect(patch: Git.ConvenientPatch) {
+    this.setState({
+      selectedUnstagedPatches: new Set([patch]),
+      selectedStagedPatches: new Set()
+    });
+    this.iSelectedPatch = this.state.unstagedPatches.indexOf(patch);
+    this.props.onPatchSelect(patch, PatchType.Unstaged);
+  }
 
-  generatePatchSelectHandler(targetedPatchesKey: string, targetedSelectedPatchesKey: string, otherSelectedPatchesKey: string, type: PatchType) {
-    return (patch: Git.ConvenientPatch, ctrlKey: boolean, shiftKey: boolean) => {
-      this.setState((prevState) => {
-        const patches = (prevState as any)[targetedPatchesKey] as Git.ConvenientPatch[];
-        const selectedPatches = new Set((prevState as any)[targetedSelectedPatchesKey] as Set<Git.ConvenientPatch>);
+  handleSelectedUnstagedPatchesChange(selectedPatches: Set<Git.ConvenientPatch>) {
+    this.setState({
+      selectedUnstagedPatches: selectedPatches,
+      selectedStagedPatches: new Set()
+    });
+    this.props.onPatchSelect(null, PatchType.Staged);
+  }
 
-        function addOrDelete(patch: Git.ConvenientPatch) {
-          if (selectedPatches.has(patch)) {
-            selectedPatches.delete(patch);
-          } else {
-            selectedPatches.add(patch);
-          }
-        }
+  handleStagedPatchSelect(patch: Git.ConvenientPatch) {
+    this.setState({
+      selectedUnstagedPatches: new Set(),
+      selectedStagedPatches: new Set([patch])
+    });
+    this.iSelectedPatch = this.state.stagedPatches.indexOf(patch);
+    this.props.onPatchSelect(patch, PatchType.Staged);
+  }
 
-        function addRange(start: number, end: number) {
-          if (start > end) {
-            [start, end] = [end, start];
-          }
-          patches.slice(start, end + 1).forEach((patch) => selectedPatches.add(patch));
-        }
-
-        function deleteRange(start: number, end: number) {
-          if (start > end) {
-            [start, end] = [end, start];
-          }
-          patches.slice(start, end + 1).forEach((patch) => selectedPatches.delete(patch));
-        }
-
-        function generateNewState(targetedSelectedPatches: Set<Git.ConvenientPatch>) {
-          const state = {};
-          state[targetedSelectedPatchesKey] = targetedSelectedPatches;
-          state[otherSelectedPatchesKey] = new Set<Git.ConvenientPatch>();
-          return state as IndexViewerState;
-        }
-
-        const iPatch = patches.indexOf(patch);
-        if (selectedPatches.size > 0 && ctrlKey) {
-          addOrDelete(patch);
-          this.iAnchorPatch = iPatch;
-          this.iShiftPatch = null;
-          this.props.onPatchSelect(null, PatchType.Committed);
-          return generateNewState(selectedPatches);
-        } else if (selectedPatches.size > 0 && shiftKey) {
-          if (this.iShiftPatch !== null) {
-            deleteRange(this.iAnchorPatch, this.iShiftPatch);
-          }
-          addRange(this.iAnchorPatch, iPatch);
-          this.iShiftPatch = iPatch;
-          this.props.onPatchSelect(null, PatchType.Committed);
-          return generateNewState(selectedPatches);
-        } else {
-          this.iSelectedPatch = iPatch; 
-          this.iAnchorPatch = this.iSelectedPatch;
-          this.iShiftPatch = null;
-          this.props.onPatchSelect(patch, type);
-          return generateNewState(new Set([patch]));
-        }
-      });
-    }
+  handleSelectedStagedPatchesChange(selectedPatches: Set<Git.ConvenientPatch>) {
+    this.setState({
+      selectedUnstagedPatches: new Set(),
+      selectedStagedPatches: selectedPatches
+    });
+    this.props.onPatchSelect(null, PatchType.Staged);
   }
 
   handlePatchesStage() {
@@ -263,7 +234,8 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           type={PatchType.Unstaged}
           selectedPatch={this.props.selectedPatch}
           selectedPatches={this.state.selectedUnstagedPatches}
-          onPatchSelect={this.handleUnstagedPatchSelect} />
+          onPatchSelect={this.handleUnstagedPatchSelect} 
+          onSelectedPatchesChange={this.handleSelectedUnstagedPatchesChange} />
         <div className='section-header'>
           <p>Staged files ({this.state.stagedPatches.length})</p>
           <button className='red-button'
@@ -278,7 +250,8 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           type={PatchType.Staged}
           selectedPatch={this.props.selectedPatch}
           selectedPatches={this.state.selectedStagedPatches}
-          onPatchSelect={this.handleStagedPatchSelect} />
+          onPatchSelect={this.handleStagedPatchSelect}
+          onSelectedPatchesChange={this.handleSelectedStagedPatchesChange} />
         <div className='section-header'>
           <p>Commit message</p>
           {this.props.repo.headCommit ?

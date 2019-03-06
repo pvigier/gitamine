@@ -33,28 +33,30 @@ export class ReferenceExplorer extends React.PureComponent<ReferenceExplorerProp
     const references = [...this.props.repo.references.values()];
     return (
       <div className='reference-explorer' ref={this.div}>
-        <li onClick={this.props.onIndexSelect}>Index</li>
-        <ReferenceList title="Local branches"
-          repo={this.props.repo}
-          references={references.filter((reference) => reference.isBranch())} 
-          head={this.props.repo.head}
-          onOpenInputDialog={this.props.onOpenInputDialog}
-          onClick={this.props.onCommitSelect} />
-        <ReferenceList title="Remote branches"
-          repo={this.props.repo}
-          references={references.filter((reference) => reference.isRemote())} 
-          head={this.props.repo.head}
-          onOpenInputDialog={this.props.onOpenInputDialog}
-          onClick={this.props.onCommitSelect} />
-        <ReferenceList title="Tags"
-          repo={this.props.repo}
-          references={references.filter((reference) => reference.isTag())} 
-          head={this.props.repo.head}
-          onOpenInputDialog={this.props.onOpenInputDialog}
-          onClick={this.props.onCommitSelect} />
-        <StashList repo={this.props.repo}
-          stashes={[...this.props.repo.stashes.values()]}
-          onClick={this.props.onCommitSelect} />
+        <div>
+          <li onClick={this.props.onIndexSelect}>Index</li>
+          <ReferenceList title="Local branches"
+            repo={this.props.repo}
+            references={references.filter((reference) => reference.isBranch())} 
+            head={this.props.repo.head}
+            onOpenInputDialog={this.props.onOpenInputDialog}
+            onClick={this.props.onCommitSelect} />
+          <ReferenceList title="Remote branches"
+            repo={this.props.repo}
+            references={references.filter((reference) => reference.isRemote())} 
+            head={this.props.repo.head}
+            onOpenInputDialog={this.props.onOpenInputDialog}
+            onClick={this.props.onCommitSelect} />
+          <ReferenceList title="Tags"
+            repo={this.props.repo}
+            references={references.filter((reference) => reference.isTag())} 
+            head={this.props.repo.head}
+            onOpenInputDialog={this.props.onOpenInputDialog}
+            onClick={this.props.onCommitSelect} />
+          <StashList repo={this.props.repo}
+            stashes={[...this.props.repo.stashes.values()]}
+            onClick={this.props.onCommitSelect} />
+        </div>
       </div>
     );
   }

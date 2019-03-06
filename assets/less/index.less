@@ -173,7 +173,11 @@ div.loading-screen {
 div.reference-explorer {
   width: @reference-explorer-initial-width;
   padding-top: 8px;
-  overflow-y: auto;
+
+  & > div {
+    overflow-y: auto;
+    height: 100%;
+  }
 
   li {
     list-style: none;
@@ -206,11 +210,12 @@ div.reference-explorer {
     margin: 0px;
     padding: 4px;
     background: var(--reference-section-background-color);
-    position: relative;
+    display: flex;
+    justify-content: space-between;
+    white-space: nowrap;
 
     span {
-      position: absolute;
-      right: 8px;
+      padding: 0px 4px;
     }
   }
 }

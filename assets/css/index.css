@@ -135,7 +135,10 @@ div.loading-screen div.spinner {
 div.reference-explorer {
   width: 200px;
   padding-top: 8px;
+}
+div.reference-explorer > div {
   overflow-y: auto;
+  height: 100%;
 }
 div.reference-explorer li {
   list-style: none;
@@ -163,11 +166,12 @@ div.reference-explorer h3 {
   margin: 0px;
   padding: 4px;
   background: var(--reference-section-background-color);
-  position: relative;
+  display: flex;
+  justify-content: space-between;
+  white-space: nowrap;
 }
 div.reference-explorer h3 span {
-  position: absolute;
-  right: 8px;
+  padding: 0px 4px;
 }
 /* Graph viewer */
 div.graph-viewer {

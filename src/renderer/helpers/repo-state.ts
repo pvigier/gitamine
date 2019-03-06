@@ -535,6 +535,27 @@ export class RepoState {
     }
   }
 
+  // Remote operations
+
+  async removeRemoteReference(reference: Git.Reference) {
+    if (reference.isRemote()) {
+      const remoteName = await Git.Branch.remoteName(this.repo, reference.name());
+      const remote = await this.repo.getRemote(remoteName);
+      const refspecs: string[] = await remote.getFetchRefspecs();
+      console.log(refspecs);
+      const parsedRefSpecs = refspecs.map((refspec) => refspec.split(':'))
+        .map(([src, dst]) => [src, new RegExp(dst)] as [string, RegExp]);
+      console.log(parsedRefSpecs); 
+      const refspec = parsedRefSpecs.find(([src, dst]) => dst.test(reference.name()));
+      console.log(refspec);
+      try {
+        await remote.push([`:${refspec![0]}`], RepoState.getCredentialsCallback());
+      } catch (e) {
+        this.onNotification(`Unable to remove: ${reference.name()}`, NotificationType.Error);
+      }
+    }
+  }
+
   async fetchAll() {
     try {
       await this.repo.fetchAll(RepoState.getCredentialsCallback());

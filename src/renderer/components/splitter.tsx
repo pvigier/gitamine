@@ -6,11 +6,12 @@ export interface SplitterProps {
 
 export class Splitter extends React.PureComponent<SplitterProps, {}> {
   dragging: boolean; 
-  anchorX: number;
+  div: React.RefObject<HTMLDivElement>;
 
   constructor(props: SplitterProps) {
     super(props);
     this.dragging = false;
+    this.div = React.createRef();
     this.startDragging = this.startDragging.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.endDragging = this.endDragging.bind(this);
@@ -28,16 +29,15 @@ export class Splitter extends React.PureComponent<SplitterProps, {}> {
 
   startDragging(event: React.MouseEvent<HTMLDivElement>) {
     this.dragging = true;
-    this.anchorX = event.clientX;
     document.documentElement.style.cursor = 'col-resize';
     document.documentElement.style.userSelect = 'none';
   }
 
   handleMouseMove(event: MouseEvent) {
-    if (this.dragging) {
+    if (this.dragging && this.div.current) {
       const mouseX = event.clientX;
-      this.props.onDrag(mouseX - this.anchorX);
-      this.anchorX = mouseX;
+      const rect = this.div.current.getBoundingClientRect();
+      this.props.onDrag(mouseX - rect.left);
     }
   }
 
@@ -49,7 +49,7 @@ export class Splitter extends React.PureComponent<SplitterProps, {}> {
 
   render() {
     return (
-      <div className='splitter' onMouseDown={this.startDragging} />
+      <div className='splitter' onMouseDown={this.startDragging} ref={this.div}/>
     );
   }
 }

@@ -311,9 +311,9 @@ export class RepoState {
   async checkoutReference(reference: Git.Reference) {
     try {
       await this.repo.checkoutRef(reference);
-      this.onNotification(`Checkout successfully to ${name}`, NotificationType.Information);
+      this.onNotification(`Checkout successfully to ${reference.shorthand()}`, NotificationType.Information);
     } catch(e) {
-      this.onNotification(`Unable to checkout to ${name}: ${e.message}`, NotificationType.Error);
+      this.onNotification(`Unable to checkout to ${reference.shorthand()}: ${e.message}`, NotificationType.Error);
     }
   }
 

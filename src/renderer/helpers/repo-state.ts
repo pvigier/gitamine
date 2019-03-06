@@ -30,6 +30,7 @@ const findSimilarOptions = {
 export enum PatchType {
   Unstaged,
   Staged,
+  Conflicted,
   Committed
 }
 

@@ -140,7 +140,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
     // Select visible commits and add index if necessary
     const items: JSX.Element[] = [];
     if (this.state.start === -1) {
-      items.push(<IndexItem selected={this.props.selectedCommit === null}
+      items.push(<IndexItem state={this.props.repo.repo.state()} selected={this.props.selectedCommit === null}
         onIndexSelect={this.props.onIndexSelect} 
         key='index' />);
     }

@@ -2,7 +2,8 @@ import * as Path from 'path';
 import * as fs from 'fs';
 import * as React from 'react';
 import * as Git from 'nodegit';
-import * as fileType  from 'file-type';
+import fileType, { FileTypeResult }  from 'file-type';
+import { isBinaryFile } from 'isbinaryfile';
 import { RepoState, PatchType } from '../helpers/repo-state'
 import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
 import { TextPatchViewer, TextPatchViewerOptions } from './text-patch-viewer';
@@ -20,7 +21,7 @@ type Blob = [Buffer, BlobType];
 
 // Util
 
-function isImage(type: fileType.FileTypeResult | null) {
+function isImage(type: FileTypeResult | null) {
   return type !== null && type.mime.startsWith('image');
 }
 
@@ -41,7 +42,11 @@ async function getBlob(repo: Git.Repository, file: Git.DiffFile) {
     });
   }
   let type = BlobType.Text;
-  if ((file.flags() & Git.Diff.FLAG.BINARY) > 0) {
+  const flags = file.flags();
+  const binary = (flags & Git.Diff.FLAG.VALID_ID) > 0 ? 
+    (flags & Git.Diff.FLAG.BINARY) > 0 :
+    await isBinaryFile(buffer);
+  if (binary) {
     type = isImage(fileType(buffer)) ? BlobType.Image : BlobType.Binary;
   }
   return [buffer, type] as Blob;
@@ -131,7 +136,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
     const patch = this.props.patch;
     // Load old blob
     let oldPromise: Promise<Blob>;
-    if (this.props.patch.isAdded()) {
+    if (this.props.patch.isAdded() || this.props.patch.isUntracked()) {
       oldPromise = new Promise((resolve) => resolve([Buffer.from(''), BlobType.Void]));
     } else {
       oldPromise = getBlob(repo, patch.oldFile());

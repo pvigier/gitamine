@@ -16,6 +16,8 @@
     "green-button-background-color": "#008000",
     "red-button-border-color": "#8b0000",
     "red-button-background-color": "#a70000",
+    "yellow-button-border-color": "#b8860b",
+    "yellow-button-background-color": "#daa520",
     "notification-font-color": "#ffffff",
     "info-notification-border-color": "#006400",
     "info-notification-background-color": "#008000",

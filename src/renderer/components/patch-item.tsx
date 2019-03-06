@@ -56,29 +56,31 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
     const path = this.props.patch.newFile().path();
     const template: Electron.MenuItemConstructorOptions[] = [];
     if (this.props.type === PatchType.Unstaged) {
-      template.push({
-        label: 'Stage',
-        click: () => this.props.repo!.stagePatch(this.props.patch)
-      });
-    }
-    if (this.props.type === PatchType.Staged) {
-      template.push({
-        label: 'Unstage',
-        click: () => this.props.repo!.unstagePatch(this.props.patch)
-      });
-    }
-    if (this.props.type === PatchType.Unstaged) {
       template.push(
+        {
+          label: 'Stage',
+          click: () => this.props.repo!.stagePatch(this.props.patch)
+        },
         {
           label: 'Discard changes',
           click: () => this.props.repo!.discardPatch(this.props.patch)
         },
-        {
-          type: 'separator'
-        },
       );
+    } else if (this.props.type === PatchType.Staged) {
+      template.push({
+        label: 'Unstage',
+        click: () => this.props.repo!.unstagePatch(this.props.patch)
+      });
+    } else if (this.props.type === PatchType.Conflicted) {
+      template.push({
+        label: 'Mark resolved',
+        click: () => this.props.repo!.stagePatch(this.props.patch)
+      });
     }
     template.push(
+      {
+        type: 'separator'
+      },
       {
         label: 'Copy file path to clipboard',
         click: () => clipboard.writeText(path)
@@ -103,12 +105,16 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
         type='button'
         onClick={this.handleStageClick} 
         key='stage'>Stage</button>);
-    }
-    if (this.props.type === PatchType.Staged) {
+    } else if (this.props.type === PatchType.Staged) {
       buttons.push(<button className='red-button'
         type='button'
         onClick={this.handleUnstageClick} 
         key='unstage'>Unstage</button>);
+    } else if (this.props.type === PatchType.Conflicted) {
+      buttons.push(<button className='yellow-button'
+        type='button'
+        onClick={this.handleStageClick} 
+        key='unstage'>Mark resolved</button>);
     }
     const buttonDiv = buttons.length > 0 ? 
       <div className='buttons'>{buttons}</div> : 

@@ -708,6 +708,19 @@ button:disabled {
   background-color: var(--red-button-border-color);
   border-color: var(--red-button-background-color);
 }
+.yellow-button {
+  color: var(--button-font-color);
+  background-color: var(--yellow-button-background-color);
+  border-color: var(--yellow-button-border-color);
+}
+.yellow-button:hover {
+  background-color: var(--yellow-button-background-color);
+  border-color: var(--yellow-button-background-color);
+}
+.yellow-button:active {
+  background-color: var(--yellow-button-border-color);
+  border-color: var(--yellow-button-background-color);
+}
 /* Modal windows */
 div.modal-container {
   position: absolute;

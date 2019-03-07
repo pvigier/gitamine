@@ -60,7 +60,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "electron-unhandled": "^2.1.0",
     "fastpriorityqueue": "^0.6.1",
-    "file-type": "^10.8.0",
+    "file-type": "^10.9.0",
     "ignore": "^5.0.5",
     "isbinaryfile": "^4.0.0",
     "launch-editor": "^2.2.1",
@@ -86,7 +86,7 @@
     "electron": "^4.0.7",
     "electron-forge": "^5.2.4",
     "electron-prebuilt-compile": "4.0.0",
-    "tslint": "^5.13.0",
+    "tslint": "^5.13.1",
     "typescript": "^3.3.3"
   }
 }

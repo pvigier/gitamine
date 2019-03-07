@@ -329,15 +329,15 @@ export class RepoState {
   // Index operations
 
   async getUnstagedPatches() {
-    const unstagedDiff = await Git.Diff.indexToWorkdir(this.repo, null, diffOptions);
+    const unstagedDiff = await Git.Diff.indexToWorkdir(this.repo, undefined, diffOptions);
     await unstagedDiff.findSimilar(findSimilarOptions);
     return await unstagedDiff.patches();
   }
 
   async getStagedPatches() {
     const headCommit = await this.repo.getHeadCommit(); // Retrieve the head
-    const oldTree = headCommit ? await headCommit.getTree() : null;
-    const stagedDiff = await Git.Diff.treeToIndex(this.repo, oldTree, null, diffOptions);
+    const oldTree = headCommit ? await headCommit.getTree() : undefined;
+    const stagedDiff = await Git.Diff.treeToIndex(this.repo, oldTree, undefined, diffOptions);
     await stagedDiff.findSimilar(findSimilarOptions);
     return await stagedDiff.patches();
   }
@@ -387,15 +387,19 @@ export class RepoState {
   }
 
   async unstagePatch(patch: Git.ConvenientPatch) {
-    await Git.Reset.default(this.repo, this.headCommit, patch.newFile().path());
-    if (patch.isRenamed()) {
-      await Git.Reset.default(this.repo, this.headCommit, patch.oldFile().path());
+    if (this.headCommit) {
+      await Git.Reset.default(this.repo, this.headCommit, patch.newFile().path());
+      if (patch.isRenamed()) {
+        await Git.Reset.default(this.repo, this.headCommit, patch.oldFile().path());
+      }
     }
   }
 
   async unstageAll(patches: Git.ConvenientPatch[]) {
-    const paths = patches.map((patch) => patch.newFile().path());
-    await Git.Reset.default(this.repo, this.headCommit, paths);
+    if (this.headCommit) {
+      const paths = patches.map((patch) => patch.newFile().path());
+      await Git.Reset.default(this.repo, this.headCommit, paths);
+    }
   }
 
   async discardLines(patch: Git.ConvenientPatch, lines: Git.DiffLine[]) {
@@ -459,7 +463,7 @@ export class RepoState {
 
   async revert(commit: Git.Commit) {
     try {
-      await Git.Revert.revert(this.repo, commit, null);
+      await Git.Revert.revert(this.repo, commit);
       await this.commit(`Revert "${commit.message()}"`);
     } catch (e) {
       this.onNotification(`Unable to cherrypick: ${e.message}`, NotificationType.Error);

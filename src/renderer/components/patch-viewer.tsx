@@ -44,7 +44,7 @@ async function getBlob(repo: Git.Repository, file: Git.DiffFile) {
   let type = BlobType.Text;
   const flags = file.flags();
   const binary = (flags & Git.Diff.FLAG.VALID_ID) > 0 ? 
-    (flags & Git.Diff.FLAG.BINARY) > 0 :
+    (flags & Git.Diff.FLAG.BINARY) > 0  || (flags & Git.Diff.FLAG.NOT_BINARY) === 0:
     await isBinaryFile(buffer);
   if (binary) {
     type = isImage(fileType(buffer)) ? BlobType.Image : BlobType.Binary;

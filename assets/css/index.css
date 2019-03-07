@@ -288,6 +288,9 @@ div.patch-viewer div.patch-toolbar {
   justify-content: space-between;
   align-items: center;
 }
+div.patch-viewer div.patch-toolbar button {
+  margin: 4px;
+}
 div.patch-viewer div.patch-editor {
   height: calc(100% - 30px - 30px);
   align-items: center;
@@ -322,6 +325,28 @@ div.hunk-widget p {
   margin: 0px;
 }
 div.hunk-widget button {
+  margin: 0px 2px;
+}
+/* Conflict widget */
+div.conflict-widget {
+  width: 100%;
+}
+div.conflict-widget > div {
+  display: flex;
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  border-bottom: 1px solid;
+}
+div.conflict-widget > div > div {
+  position: absolute;
+  right: 18px;
+  bottom: 2px;
+}
+div.conflict-widget p {
+  margin: 0px 8px;
+}
+div.conflict-widget button {
   margin: 0px 2px;
 }
 /* Margin buttons */
@@ -362,6 +387,19 @@ div.hunk-widget button {
 }
 .unstage-line-button:hover::before {
   content: '-';
+}
+/* Inline decorations */
+.conflict-start {
+  background: lightgreen;
+}
+.conflict-current {
+  background: #bcf5bc;
+}
+.conflict-end {
+  background: lightblue;
+}
+.conflict-incoming {
+  background: #d4ebf2;
 }
 /* Splitter */
 div.splitter {

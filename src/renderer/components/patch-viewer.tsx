@@ -10,6 +10,7 @@ import { arePatchesEqual } from '../helpers/patch-comparison';
 import { TextPatchViewer, TextPatchViewerOptions } from './text-patch-viewer';
 import { BinaryPatchViewer } from './binary-patch-viewer';
 import { ImagePatchViewer } from './image-patch-viewer';
+import { ConflictViewer } from './conflict-viewer';
 
 enum BlobType {
   Void,
@@ -165,13 +166,21 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
     let viewer: JSX.Element | null = null;
     if (this.state.loadedPatch) {
       if (this.state.viewerType === BlobType.Text) {
-        viewer = <TextPatchViewer repo={this.props.repo}
-          patch={this.state.loadedPatch}
-          oldString={this.state.oldBlob.toString()}
-          newString={this.state.newBlob.toString()}
-          type={this.props.patchType}
-          editorTheme={this.props.editorTheme}
-          options={this.props.options} />
+        if (this.props.patch.isConflicted()) {
+          viewer = <ConflictViewer repo={this.props.repo}
+            patch={this.props.patch}
+            content={this.state.newBlob.toString()}
+            editorTheme={this.props.editorTheme}
+            options={this.props.options} />
+        } else {
+          viewer = <TextPatchViewer repo={this.props.repo}
+            patch={this.state.loadedPatch}
+            oldString={this.state.oldBlob.toString()}
+            newString={this.state.newBlob.toString()}
+            type={this.props.patchType}
+            editorTheme={this.props.editorTheme}
+            options={this.props.options} />
+        }
       } else if (this.state.viewerType === BlobType.Image) {
         viewer = <ImagePatchViewer repo={this.props.repo} 
           patch={this.props.patch}

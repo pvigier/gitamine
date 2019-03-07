@@ -100,7 +100,10 @@ export class TextPatchViewer extends React.PureComponent<TextPatchViewerProps, {
     if (this.loadingPromise) {
       this.loadingPromise.cancel();
     }
-    this.editor.dispose();
+    if (this.editor) {
+      this.disposeModels();
+      this.editor.dispose();
+    }
   }
 
   handleViewModeChange(viewMode: ViewMode) {
@@ -258,24 +261,31 @@ export class TextPatchViewer extends React.PureComponent<TextPatchViewerProps, {
   }
 
   setModels() {
-    function updateOrCreateModel(prefix: string, path: string, value: string) {
+    function createModel(prefix: string, path: string, value: string) {
       const uri = monaco.Uri.parse(`file://${prefix}/${path}`);
-      let model = monaco.editor.getModel(uri);
-      if (model) {
-        model.setValue(value);
-      } else {
-        model = monaco.editor.createModel(value, undefined, uri);
-      }
-      return model;
+      return monaco.editor.createModel(value, undefined, uri);
     }
     
     const patch = this.props.patch;
-    const originalModel = updateOrCreateModel('a', patch.oldFile().path(), this.props.oldString);
-    const modifiedModel = updateOrCreateModel('b', patch.newFile().path(), this.props.newString);
+    this.disposeModels();
+    const originalModel = createModel('a', patch.oldFile().path(), this.props.oldString);
+    const modifiedModel = createModel('b', patch.newFile().path(), this.props.newString);
     this.editor.setModel({
       original: originalModel, 
       modified: modifiedModel
     });
+  }
+
+  disposeModels() {
+    const model = this.editor.getModel();
+    if (model) {
+      if (model.original) {
+        model.original.dispose();
+      }
+      if (model.modified) {
+        model.modified.dispose();
+      }
+    }
   }
 
   customizeHunkView() {

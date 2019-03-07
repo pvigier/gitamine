@@ -106,13 +106,13 @@ export class ConflictViewer extends React.PureComponent<ConflictViewerProps, {}>
     }
   }
 
-  async updateEditor(scrollTop: number) {
+  updateEditor(scrollTop: number) {
     // Hide
     this.hide();
     // Reset editor
     this.resetEditor();
     // Update models
-    this.setModel();
+    this.editor.setValue(this.props.content);
     this.createConflictWidgets(); 
     // Scroll
     this.editor.setScrollTop(scrollTop);
@@ -133,23 +133,6 @@ export class ConflictViewer extends React.PureComponent<ConflictViewerProps, {}>
       this.editor.removeOverlayWidget(overlayWidget);
     }
     this.overlayWidgets = [];
-  }
-
-  setModel() {
-    // Can be shared
-    function updateOrCreateModel(prefix: string, path: string, value: string) {
-      const uri = monaco.Uri.parse(`file://${prefix}/${path}`);
-      let model = monaco.editor.getModel(uri);
-      if (model) {
-        model.setValue(value);
-      } else {
-        model = monaco.editor.createModel(value, undefined, uri);
-      }
-      return model;
-    }
-    
-    const model = updateOrCreateModel('b', this.props.patch.newFile().path(), this.props.content);
-    this.editor.setModel(model);
   }
 
   createConflictWidgets() {

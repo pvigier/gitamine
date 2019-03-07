@@ -2,7 +2,6 @@ import { ipcRenderer } from 'electron';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as unhandled from 'electron-unhandled';
-import { AppContainer } from 'react-hot-loader';
 import { App } from './components/app';
 
 let app: App;
@@ -12,11 +11,10 @@ function setAppRef(a: App) {
 }
 
 function render() {
-  ReactDOM.render(<AppContainer><App ref={setAppRef} /></AppContainer>, document.getElementById('container'));
+  ReactDOM.render(<App ref={setAppRef} />, document.getElementById('container'));
 }
 
 render();
-if (module.hot) { module.hot.accept(render); }
 
 // Events
 

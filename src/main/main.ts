@@ -6,8 +6,6 @@ import { ThemeManager } from '../shared/theme-manager';
 const isDevMode = process.execPath.match(/[\\/]electron/);
 
 async function initDevTools() {
-  const { enableLiveReload } = await import('electron-compile');
-  enableLiveReload({strategy: 'react-hmr'});
   const installExtension = await import('electron-devtools-installer');
   mainWindow!.webContents.openDevTools();
   await installExtension.default(installExtension.REACT_DEVELOPER_TOOLS);

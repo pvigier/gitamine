@@ -6,6 +6,7 @@ import fileType, { FileTypeResult }  from 'file-type';
 import { isBinaryFile } from 'isbinaryfile';
 import { RepoState, PatchType } from '../helpers/repo-state'
 import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
+import { arePatchesEqual } from '../helpers/patch-comparison';
 import { TextPatchViewer, TextPatchViewerOptions } from './text-patch-viewer';
 import { BinaryPatchViewer } from './binary-patch-viewer';
 import { ImagePatchViewer } from './image-patch-viewer';
@@ -50,13 +51,6 @@ async function getBlob(repo: Git.Repository, file: Git.DiffFile) {
     type = isImage(fileType(buffer)) ? BlobType.Image : BlobType.Binary;
   }
   return [buffer, type] as Blob;
-}
-
-function arePatchesEqual(lhs: Git.ConvenientPatch, rhs: Git.ConvenientPatch) {
-  return lhs.oldFile().id().equal(rhs.oldFile().id()) &&
-    lhs.newFile().id().equal(rhs.newFile().id()) &&
-    lhs.status() === rhs.status() &&
-    lhs.size() === rhs.size();
 }
 
 function getViewerType(oldType: BlobType, newType: BlobType) {

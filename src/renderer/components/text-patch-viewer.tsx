@@ -3,6 +3,7 @@ import * as Git from 'nodegit';
 import { RepoState, PatchType } from '../helpers/repo-state'
 import { openInEditor } from '../helpers/open-in-editor';
 import { makeCancellable, CancellablePromise } from '../helpers/make-cancellable';
+import { arePatchesSimilar } from '../helpers/patch-comparison';
 
 // Load Monaco
 
@@ -11,14 +12,6 @@ let monaco: any;
 loadMonaco().then((m: any) => {
   monaco = m;
 });
-
-// Util
-
-function arePatchesSimilar(lhs: Git.ConvenientPatch, rhs: Git.ConvenientPatch) {
-  return lhs.oldFile().path() === rhs.oldFile().path() &&
-    lhs.newFile().path() === rhs.newFile().path() &&
-    lhs.status() === rhs.status()
-}
 
 // TextPatchViewer
 
@@ -59,7 +52,7 @@ export class TextPatchViewer extends React.PureComponent<TextPatchViewerProps, {
   actionDisposables: any[];
   hunks: Git.ConvenientHunk[];
   lines: Git.DiffLine[];
-  loadingPromise: CancellablePromise<[Git.ConvenientHunk[], Git.DiffLine[]]>; // Should change to CancellablePromise
+  loadingPromise: CancellablePromise<[Git.ConvenientHunk[], Git.DiffLine[]]>;
   marginButtonsDirty: boolean;
 
   constructor(props: TextPatchViewerProps) {

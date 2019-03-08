@@ -166,7 +166,7 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
     let viewer: JSX.Element | null = null;
     if (this.state.loadedPatch) {
       if (this.state.viewerType === BlobType.Text) {
-        if (this.props.patch.isConflicted()) {
+        if (this.props.patchType === PatchType.Unstaged && this.props.patch.isConflicted()) {
           viewer = <ConflictViewer repo={this.props.repo}
             patch={this.props.patch}
             content={this.state.newBlob.toString()}

@@ -14,7 +14,6 @@ import { LoadingScreen, LoadingState } from './loading-screen';
 import { InputDialogHandler } from './input-dialog';
 import { RepoState, PatchType } from '../helpers/repo-state';
 import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
-import { MergeViewer } from './merge-viewer';
 
 export interface RepoDashboardProps { 
   repo: RepoState;
@@ -38,7 +37,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
   graphShrunk: boolean;
   // References
   graphViewer: React.RefObject<GraphViewer>;
-  rightViewer: React.RefObject<CommitViewer | IndexViewer | MergeViewer>;
+  rightViewer: React.RefObject<CommitViewer | IndexViewer>;
   // Watches
   repositoryWatcher: fs.FSWatcher;
   dirtyWorkingDirectory: boolean;
@@ -251,17 +250,10 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         onPatchSelect={this.handlePatchSelect} 
         ref={this.rightViewer as React.RefObject<CommitViewer>} />
     } else {
-      if (this.props.repo.repo.isMerging()) {
-        rightViewer = <MergeViewer repo={this.props.repo}
-          selectedPatch={this.state.selectedPatch}
-          onPatchSelect={this.handlePatchSelect}
-          ref={this.rightViewer as React.RefObject<MergeViewer>} />
-      } else {
-        rightViewer = <IndexViewer repo={this.props.repo} 
-          selectedPatch={this.state.selectedPatch} 
-          onPatchSelect={this.handlePatchSelect} 
-          ref={this.rightViewer as React.RefObject<IndexViewer>} />
-      }
+      rightViewer = <IndexViewer repo={this.props.repo} 
+        selectedPatch={this.state.selectedPatch} 
+        onPatchSelect={this.handlePatchSelect} 
+        ref={this.rightViewer as React.RefObject<IndexViewer>} />
     }
     return (
       <div className='repo-dashboard'>

@@ -71,11 +71,6 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
         label: 'Unstage',
         click: () => this.props.repo!.unstagePatch(this.props.patch)
       });
-    } else if (this.props.type === PatchType.Conflicted) {
-      template.push({
-        label: 'Mark resolved',
-        click: () => this.props.repo!.stagePatch(this.props.patch)
-      });
     }
     template.push(
       {
@@ -110,11 +105,6 @@ export class PatchItem extends React.PureComponent<PatchItemProps, {}> {
         type='button'
         onClick={this.handleUnstageClick} 
         key='unstage'>Unstage</button>);
-    } else if (this.props.type === PatchType.Conflicted) {
-      buttons.push(<button className='yellow-button'
-        type='button'
-        onClick={this.handleStageClick} 
-        key='unstage'>Mark resolved</button>);
     }
     const buttonDiv = buttons.length > 0 ? 
       <div className='buttons'>{buttons}</div> : 

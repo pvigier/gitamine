@@ -214,6 +214,31 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     }
   }
 
+  getSubmitButton() {
+    if (this.props.repo.repo.isMerging()) {
+      return (
+        <>
+          <button className='green-button'
+            type='submit'
+            disabled={this.state.unstagedPatches.length === 0}>
+            Commit and merge
+          </button>
+          <button className='red-button' type='submit'>
+            Abort merge
+          </button>
+        </>
+      );
+    } else {
+      return (
+        <button className='green-button'
+          type='submit'
+          disabled={this.state.summary.length === 0}>
+          {this.state.amend ? 'Amend' : 'Commit'}
+        </button>
+      );
+    }
+  }
+
   render() {
     return (
       <form className='commit-viewer index-viewer' ref={this.form} onSubmit={this.handleSubmit}>
@@ -254,7 +279,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           onSelectedPatchesChange={this.handleSelectedStagedPatchesChange} />
         <div className='section-header'>
           <p>Commit message</p>
-          {this.props.repo.headCommit ?
+          {this.props.repo.headCommit && !this.props.repo.repo.isMerging() ?
           <div className='amend-container'>
             <input type='checkbox' id='amend' name='amend' checked={this.state.amend} onChange={this.handleAmendChange} />
             <label htmlFor='amend'>Amend</label> 
@@ -267,11 +292,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           placeholder='Description'
           value={this.state.description}
           onChange={this.handleDescriptionChange} />
-        <button className='green-button'
-          type='submit'
-          disabled={this.state.summary.length === 0}>
-          {this.state.amend ? 'Amend' : 'Commit'}
-        </button>
+        {this.getSubmitButton()}
       </form>
     );
   }

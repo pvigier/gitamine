@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as Path from 'path';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { RepoState } from '../helpers/repo-state'
@@ -15,6 +17,11 @@ loadMonaco().then((m: any) => {
 
 // ConflictViewer
 
+enum Version {
+  Current = 1,
+  Incoming = 2,
+  Both = 3
+}
 export interface ConflictViewerOptions {
   fontSize: number;
 }
@@ -44,6 +51,7 @@ export class ConflictViewer extends React.PureComponent<ConflictViewerProps, {}>
     this.decorations = [];
     this.setUpEditor = this.setUpEditor.bind(this);
     this.handleOpenInEditor = this.handleOpenInEditor.bind(this);
+    this.handleResolve = this.handleResolve.bind(this);
   }
 
   componentDidMount() {
@@ -54,7 +62,7 @@ export class ConflictViewer extends React.PureComponent<ConflictViewerProps, {}>
 
   componentDidUpdate(prevProps: ConflictViewerProps) {
     // Only load if the patch has changed
-    if (this.props.patch !== prevProps.patch) {
+    if (this.props.patch !== prevProps.patch || this.props.content !== prevProps.content) {
       const scrollTop = arePatchesSimilar(prevProps.patch, this.props.patch) ? this.editor.getScrollTop() : 0;
       this.conflicts = findConflictHunks(this.props.content.toString());
       console.log(this.conflicts);
@@ -76,6 +84,10 @@ export class ConflictViewer extends React.PureComponent<ConflictViewerProps, {}>
 
   handleOpenInEditor() {
     openInEditor(this.props.patch.newFile().path());
+  }
+
+  handleResolve() {
+    this.props.repo.stagePatch(this.props.patch);
   }
 
   hide() {
@@ -191,17 +203,17 @@ export class ConflictViewer extends React.PureComponent<ConflictViewerProps, {}>
       // Current change button
       const currentChangeButton = document.createElement('button');
       currentChangeButton.textContent = 'Accept current change';
-      currentChangeButton.addEventListener('click', () => console.log('current'));
+      currentChangeButton.addEventListener('click', () => this.acceptChange(this.conflicts[i], Version.Current));
       buttonsNode.appendChild(currentChangeButton);
       // Incoming change button
       const incomingChangeButton = document.createElement('button');
       incomingChangeButton.textContent = 'Accept incoming change';
-      incomingChangeButton.addEventListener('click', () => console.log('incoming'));
+      incomingChangeButton.addEventListener('click', () => this.acceptChange(this.conflicts[i], Version.Incoming));
       buttonsNode.appendChild(incomingChangeButton);
       // Incoming change button
       const bothChangesButton = document.createElement('button');
       bothChangesButton.textContent = 'Accept both changes';
-      bothChangesButton.addEventListener('click', () => console.log('both'));
+      bothChangesButton.addEventListener('click', () => this.acceptChange(this.conflicts[i], Version.Both));
       buttonsNode.appendChild(bothChangesButton);
 
       contentNode.appendChild(buttonsNode);
@@ -235,11 +247,56 @@ export class ConflictViewer extends React.PureComponent<ConflictViewerProps, {}>
     });
   }
 
+  removeLines(linesToRemove: Set<number>) {
+    const lines = this.props.content.split('\n');
+    const value = lines.filter((line, i) => !linesToRemove.has(i + 1)).join('\n');
+    const path = Path.join(this.props.repo.repo.workdir(), this.props.patch.newFile().path());
+    return new Promise((resolve, reject) => {
+      fs.writeFile(path, value, (error) => {
+        if (!error) {
+          resolve();
+        } else {
+          reject(error);
+        }
+      });
+    });
+  }
+
+  addConflictChange(linesToRemove: Set<number>, conflict: ConflictHunk, version: Version) {
+    function addRange(start: number, end: number) {
+      for (let i = start; i < end; ++i) {
+        linesToRemove.add(i);
+      }
+    }
+    
+    // Start line
+    linesToRemove.add(conflict.start);
+    // Incoming changes
+    const currentEnd = conflict.ancestors.length > 0 ? conflict.ancestors[0] : conflict.separator;
+    if ((version & Version.Current) === 0) {
+      addRange(conflict.start + 1, currentEnd);
+    }
+    // Ancestors and separator
+    addRange(currentEnd, conflict.separator + 1);
+    // Current changes
+    if ((version & Version.Incoming) === 0) {
+      addRange(conflict.separator + 1, conflict.end);
+    }
+    // End line
+    linesToRemove.add(conflict.end);
+  }
+
+  acceptChange(conflict: ConflictHunk, version: Version) {
+    const linesToRemove = new Set<number>();
+    this.addConflictChange(linesToRemove, conflict, version);
+    this.removeLines(linesToRemove);
+  }
+
   render() {
     const rightButtons = [
       <button className='red-button' onClick={() => console.log('current')} key='current'>Keep current version</button>,
       <button className='green-button' onClick={() => console.log('incoming')} key='incoming'>Take incoming version</button>,
-      <button className='yellow-button' onClick={() => console.log('incoming')} key='resolve'>Mark as resolved</button>
+      <button className='yellow-button' onClick={this.handleResolve} key='resolve'>Mark as resolved</button>
     ];
     return (
       <>

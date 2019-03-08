@@ -106,9 +106,9 @@ export class PatchViewer extends React.PureComponent<PatchViewerProps, PatchView
 
   componentDidUpdate(prevProps: PatchViewerProps) {
     // If the patch objects are the same, we do not load a second time
-    // If the pach is untracked or the patches are not exactly the same, we update
+    // If the pach is untracked, conflicted or the patches are not exactly the same, we update
     if (this.props.patch !== prevProps.patch && 
-      (this.props.patch.isUntracked() || !arePatchesEqual(this.props.patch, prevProps.patch))) {
+      (this.props.patch.isUntracked() || this.props.patch.isConflicted() || !arePatchesEqual(this.props.patch, prevProps.patch))) {
       this.loadData();
     } 
   }

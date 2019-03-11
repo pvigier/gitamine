@@ -18,12 +18,16 @@
   --green-button-background-color: #008000;
   --red-button-border-color: #8b0000;
   --red-button-background-color: #a70000;
+  --yellow-button-border-color: #b8860b;
+  --yellow-button-background-color: #daa520;
   --notification-font-color: #ffffff;
   --info-notification-border-color: #006400;
   --info-notification-background-color: #008000;
   --error-notification-border-color: #8b0000;
   --error-notification-background-color: #a70000;
   --reference-section-background-color: #c8c8c8;
+  --spinner-color: #1e90ff;
+  --spinner-border: #f3f3f3;
 }
 /* Body */
 html,
@@ -116,8 +120,8 @@ div.loading-screen {
   align-items: center;
 }
 div.loading-screen div.spinner {
-  border: 16px solid #f3f3f3;
-  border-top: 16px solid dodgerblue;
+  border: 16px solid var(--spinner-border);
+  border-top: 16px solid var(--spinner-color);
   border-radius: 50%;
   width: 80px;
   height: 80px;

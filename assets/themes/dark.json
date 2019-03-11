@@ -23,7 +23,9 @@
     "info-notification-background-color": "#006400",
     "error-notification-border-color": "#a70000",
     "error-notification-background-color": "#8b0000",
-    "reference-section-background-color": "#373737"
+    "reference-section-background-color": "#373737",
+    "spinner-color": "#1e90ff",
+    "spinner-border": "#f3f3f3"
   },
   "monaco": {
     "theme": "vs-dark"

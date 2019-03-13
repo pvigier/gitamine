@@ -55,7 +55,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     this.handleCommitSelect = this.handleCommitSelect.bind(this);
     this.handleIndexSelect = this.handleIndexSelect.bind(this);
     this.handlePatchSelect = this.handlePatchSelect.bind(this);
-    this.exitPatchViewer = this.exitPatchViewer.bind(this);
+    this.handlePatchUnselect = this.handlePatchUnselect.bind(this);
     this.handleRightPanelResize = this.handleRightPanelResize.bind(this);
     this.state = {
       repoState: this.props.repo.getState(),
@@ -70,6 +70,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     this.loadingPromise = makeCancellable(this.props.repo.init());
     try {
       await this.loadingPromise.promise;
+      this.updateIndexViewer();
       this.setState({
         loadingState: LoadingState.Loaded
       });
@@ -115,7 +116,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     });
   }
 
-  exitPatchViewer() {
+  handlePatchUnselect() {
     this.setState({
       selectedPatch: null
     });
@@ -132,11 +133,12 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     // Watch index and head 
     // fs.watch seems sufficient for that, I should try with chokidar
     this.repositoryWatcher = fs.watch(path, async (error: string, filename: string) => {
+      this.handleStateUpdate();
       if (filename === 'index') {
-        this.refreshIndex();
+        this.handleIndexUpdate();
       } else if (filename === 'HEAD') {
-        await this.refreshHead();
-        this.refreshIndex();
+        await this.handleHeadUpdate();
+        this.handleIndexUpdate();
       }
     });
 
@@ -156,7 +158,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     // To prevent from updating too often
     this.workingDirectoryTimer = setInterval(async () => {
       if (this.dirtyWorkingDirectory) {
-        this.refreshIndex();
+        this.handleIndexUpdate();
         this.dirtyWorkingDirectory = false;
       }
     }, 200);
@@ -168,8 +170,9 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
       followSymlinks: false
     });
     this.referencesWatcher.on('all', async (event: string, path: string) => {
-      await this.refreshReferences();
-      this.refreshIndex();
+      await this.handleReferencesUpdate();
+      this.handleStateUpdate();
+      this.handleIndexUpdate();
     });
   }
 
@@ -188,20 +191,18 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
   }
 
-  async refreshIndex() {
-    if (!this.state.selectedCommit && this.rightViewer.current) {
-      this.setState({
-        repoState: this.props.repo.getState()
-      });
-      const indexViewer = this.rightViewer.current as IndexViewer;
-      await indexViewer.refresh();
-      if (this.state.selectedPatch && this.state.patchType !== PatchType.Committed) {
-        indexViewer.refreshSelectedPatch(this.state.patchType === PatchType.Unstaged);
-      }
-    }
+  handleStateUpdate() {
+    this.setState({
+      repoState: this.props.repo.getState()
+    });
   }
 
-  async refreshHead() {
+  async handleIndexUpdate() {
+    await this.props.repo.updateIndex();
+    this.updateIndexViewer();
+  }
+
+  async handleHeadUpdate() {
     await this.props.repo.updateHead();
     await this.props.repo.updateGraph();
     if (this.graphViewer.current) {
@@ -209,7 +210,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
   }
 
-  async refreshReferences() {
+  async handleReferencesUpdate() {
     // TODO: update only references that changed
     await this.props.repo.requestUpdateCommits();
     await this.props.repo.updateHead();
@@ -224,6 +225,16 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     }
   }
 
+  updateIndexViewer() {
+    if (!this.state.selectedCommit && this.rightViewer.current) {
+      const indexViewer = this.rightViewer.current as IndexViewer;
+      indexViewer.forceUpdate();
+      if (this.state.selectedPatch && this.state.patchType !== PatchType.Committed) {
+        indexViewer.refreshSelectedPatch(this.state.patchType === PatchType.Unstaged);
+      }
+    }
+  }
+
   render() {
     let leftViewer; 
     if (this.state.selectedPatch) {
@@ -232,7 +243,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         patchType={this.state.patchType}
         editorTheme={this.props.editorTheme}
         options={this.props.patchViewerOptions}
-        onClose={this.exitPatchViewer} /> 
+        onClose={this.handlePatchUnselect} /> 
     } else {
       if (this.state.loadingState !== LoadingState.Loaded) {
         leftViewer = <LoadingScreen state={this.state.loadingState} />

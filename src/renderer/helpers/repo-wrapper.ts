@@ -67,8 +67,11 @@ export class RepoWrapper {
   head: string | null;
   headCommit: Git.Commit | null;
   graph: CommitGraph;
+  unstagedPatches: Git.ConvenientPatch[];
+  stagedPatches: Git.ConvenientPatch[];
   onNotification: (message: string, type: NotificationType) => void;
-  updatePromise: Promise<void>; // Used to queue updates
+  // Internals
+  updateCommitsPromise: Promise<void>; // Used to queue commit updates
   ig: any;
 
   constructor(repo: Git.Repository, onNotification: (message: string, type: NotificationType) => void) {
@@ -86,7 +89,7 @@ export class RepoWrapper {
     this.children = new Map<string, string[]>();
     this.graph = new CommitGraph();
     this.onNotification = onNotification;
-    this.updatePromise = new Promise<void>((resolve) => resolve());
+    this.updateCommitsPromise = new Promise<void>((resolve) => resolve());
     this.ig = ignore();
   }
 
@@ -99,8 +102,8 @@ export class RepoWrapper {
 
   async requestUpdateCommits() {
     // Start an update only if the previous ones have finished
-    this.updatePromise = this.updatePromise.then(() => this.updateCommits());
-    await this.updatePromise;
+    this.updateCommitsPromise = this.updateCommitsPromise.then(() => this.updateCommits());
+    await this.updateCommitsPromise;
   }
 
   async updateCommits() {
@@ -294,6 +297,11 @@ export class RepoWrapper {
 
   updateGraph() {
     this.graph.computePositions(this);
+  }
+
+  async updateIndex() {
+    this.stagedPatches = await this.getStagedPatches();
+    this.unstagedPatches = await this.getUnstagedPatches();
   }
 
   // Repo creation
@@ -561,6 +569,15 @@ export class RepoWrapper {
     } catch (e) {
       this.onNotification(`Unable to merge ${from} into ${to}: ${e.message}`, NotificationType.Error);
     }
+  }
+
+  async getMergeHeads() {
+    const mergeHeads: string[] = [];
+    await this.repo.mergeheadForeach((mergeHead: Git.Oid) => {
+      mergeHeads.push(mergeHead.tostrS());
+      return 0;
+    });
+    return mergeHeads;
   }
 
   async getMergeMessage() {

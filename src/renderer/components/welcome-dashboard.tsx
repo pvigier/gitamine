@@ -2,7 +2,7 @@ import * as os from 'os';
 import * as Path from 'path';
 import * as React from 'react';
 import { Field, Settings } from '../../shared/settings';
-import { getRepoName } from '../helpers/repo-state';
+import { getRepoName } from '../helpers/repo-wrapper';
 
 function getWorkingDirectory(path: string) {
   if (path.endsWith('.git')) {

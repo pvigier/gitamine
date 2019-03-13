@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchItem } from './patch-item';
-import { RepoState, PatchType } from '../helpers/repo-state';
+import { RepoWrapper, PatchType } from '../helpers/repo-wrapper';
 
 // Util
 
@@ -34,7 +34,7 @@ function deleteRange(patches: Git.ConvenientPatch[], selectedPatches: Set<Git.Co
 // Patch list
 
 export interface PatchListProps { 
-  repo?: RepoState
+  repo?: RepoWrapper
   patches: Git.ConvenientPatch[];
   type: PatchType;
   selectedPatch: Git.ConvenientPatch | null;

@@ -43,7 +43,7 @@ export class Stash {
   }
 }
 
-export class RepoState {
+export class RepoWrapper {
   repo: Git.Repository;
   path: string;
   name: string;
@@ -292,7 +292,7 @@ export class RepoState {
 
   static async clone(url: string, path: string) {
     const options = { 
-      fetchOpts: RepoState.getCredentialsCallback()
+      fetchOpts: RepoWrapper.getCredentialsCallback()
     };
     return await Git.Clone.clone(url, path, options);
   }
@@ -370,6 +370,7 @@ export class RepoState {
   async stageAll(patches: Git.ConvenientPatch[]) {
     const index = await this.repo.index();
     const paths = patches.map((patch) => patch.newFile().path());
+    // Does not work for renamed patches
     await index.addAll(paths, Git.Index.ADD_OPTION.ADD_DEFAULT);
     await index.write();
   }
@@ -537,7 +538,7 @@ export class RepoState {
 
   async fetchAll() {
     try {
-      await this.repo.fetchAll(RepoState.getCredentialsCallback());
+      await this.repo.fetchAll(RepoWrapper.getCredentialsCallback());
     } catch (e) {
       this.onNotification(`Unable to fetch all: ${e.message}`, NotificationType.Error);
     }
@@ -550,7 +551,7 @@ export class RepoState {
   async push() {
     try {
       const remote = await this.repo.getRemote('origin');
-      await remote.push([`${this.head}:${this.head}`], RepoState.getCredentialsCallback())
+      await remote.push([`${this.head}:${this.head}`], RepoWrapper.getCredentialsCallback())
       this.onNotification('Pushed successfully', NotificationType.Information);
     } catch (e) {
       this.onNotification(`Unable to push: ${e.message}`, NotificationType.Error);

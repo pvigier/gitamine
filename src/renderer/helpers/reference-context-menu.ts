@@ -1,9 +1,9 @@
 import { remote, clipboard } from 'electron';
 import * as Git from 'nodegit';
-import { RepoState } from './repo-state';
+import { RepoWrapper } from './repo-wrapper';
 import { InputDialogHandler } from '../components/input-dialog';
 
-function createBranchContextMenu(repo: RepoState, 
+function createBranchContextMenu(repo: RepoWrapper, 
   reference: Git.Reference, 
   currentBranch: boolean, 
   onOpenInputDialog: InputDialogHandler) {
@@ -39,7 +39,7 @@ function createBranchContextMenu(repo: RepoState,
   return remote.Menu.buildFromTemplate(template);
 }
 
-function createTagContextMenu(repo: RepoState, 
+function createTagContextMenu(repo: RepoWrapper, 
   reference: Git.Reference, 
   onOpenInputDialog: InputDialogHandler) {
   function openRenameTagDialog() {
@@ -67,7 +67,7 @@ function createTagContextMenu(repo: RepoState,
   return remote.Menu.buildFromTemplate(template);
 }
 
-export function createReferenceContextMenu(repo: RepoState, 
+export function createReferenceContextMenu(repo: RepoWrapper, 
   reference: Git.Reference, 
   currentBranch: boolean, 
   onOpenInputDialog: InputDialogHandler) {

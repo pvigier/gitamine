@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as Path from 'path';
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { RepoState } from '../helpers/repo-state'
+import { RepoWrapper } from '../helpers/repo-wrapper'
 import { openInEditor } from '../helpers/open-in-editor';
 import { arePatchesSimilar } from '../helpers/patch-comparison';
 import { ConflictHunk, findConflictHunks } from '../helpers/conflict-parser';
@@ -27,7 +27,7 @@ export interface ConflictViewerOptions {
 }
 
 export interface ConflictViewerProps { 
-  repo: RepoState;
+  repo: RepoWrapper;
   patch: Git.ConvenientPatch;
   content: string;
   editorTheme: string;

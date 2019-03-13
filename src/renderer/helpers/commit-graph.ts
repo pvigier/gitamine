@@ -1,4 +1,4 @@
-import { RepoState } from './repo-state'
+import { RepoWrapper } from './repo-wrapper'
 import IntervalTree from 'node-interval-tree';
 import * as FastPriorityQueue from 'fastpriorityqueue';
 
@@ -51,7 +51,7 @@ export class CommitGraph {
     this.edges = new IntervalTree<Edge>();
   }
 
-  computePositions(repo: RepoState) {
+  computePositions(repo: RepoWrapper) {
     function insertCommit(commitSha: string, j: number, forbiddenIndices: Set<number>) {
       // Try to insert as close as possible to i 
       // replace i by j
@@ -161,7 +161,7 @@ export class CommitGraph {
     this.updateIntervalTree(repo);
   }
 
-  updateIntervalTree(repo: RepoState) {
+  updateIntervalTree(repo: RepoWrapper) {
     this.edges = new IntervalTree<Edge>();
     for (let [commitSha, [i0, j0]] of this.positions) {
       const parents = repo.parents.get(commitSha)!;

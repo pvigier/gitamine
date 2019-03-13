@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RepoState } from '../helpers/repo-state';
+import { RepoWrapper } from '../helpers/repo-wrapper';
 import { getBranchColor, EdgeType, NodeType } from '../helpers/commit-graph';
 
 const RADIUS = 11;
@@ -10,7 +10,7 @@ const INNER_RADIUS = RADIUS - LINE_WIDTH / 2;
 const DASH_LENGTH = 2 * Math.PI * INNER_RADIUS / 32;
 
 export interface GraphCanvasProps { 
-  repo: RepoState; 
+  repo: RepoWrapper; 
 }
 
 export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {

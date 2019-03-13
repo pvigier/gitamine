@@ -12,11 +12,11 @@ import { Splitter } from './splitter';
 import { Toolbar } from './toolbar';
 import { LoadingScreen, LoadingState } from './loading-screen';
 import { InputDialogHandler } from './input-dialog';
-import { RepoState, PatchType } from '../helpers/repo-state';
+import { RepoWrapper, PatchType } from '../helpers/repo-wrapper';
 import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
 
 export interface RepoDashboardProps { 
-  repo: RepoState;
+  repo: RepoWrapper;
   editorTheme: string;
   patchViewerOptions: TextPatchViewerOptions;
   onRepoClose: () => void;

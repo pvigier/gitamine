@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { RepoState } from '../helpers/repo-state';
+import { RepoWrapper } from '../helpers/repo-wrapper';
 import { makeModal } from './make-modal';
 import * as Git from 'nodegit';
 
 export class CreateBranchFormProps {
-  repo: RepoState;
+  repo: RepoWrapper;
   commit: Git.Commit;
   onClose: () => void;
 }

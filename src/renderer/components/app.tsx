@@ -2,7 +2,7 @@ import { remote } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { RepoDashboard } from './repo-dashboard';
-import { RepoState } from '../helpers/repo-state';
+import { RepoWrapper } from '../helpers/repo-wrapper';
 import { NotificationQueue } from './notification-queue';
 import { WelcomeDashboard } from './welcome-dashboard';
 import { NotificationType } from './notification-item';
@@ -16,7 +16,7 @@ import { ThemeManager } from '../../shared/theme-manager';
 import { InputDialog } from './input-dialog';
 
 export interface AppState {
-  repos: RepoState[]; 
+  repos: RepoWrapper[]; 
   editorTheme: string;
   patchViewerOptions: TextPatchViewerOptions;
   modalWindow: JSX.Element | null;
@@ -74,7 +74,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
   async cloneRepo(url: string, path: string) {
     try {
-      this.addRepo(await RepoState.clone(url, path));
+      this.addRepo(await RepoWrapper.clone(url, path));
     } catch (e) {
       this.showNotification(`Unable to clone repo: ${e.message}`, NotificationType.Error);
     }
@@ -82,7 +82,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
   async initRepo(path: string) {
     try {
-      this.addRepo(await RepoState.init(path));
+      this.addRepo(await RepoWrapper.init(path));
     } catch (e) {
       this.showNotification(`Unable to init repo: ${e.message}`, NotificationType.Error);
     }
@@ -90,14 +90,14 @@ export class App extends React.PureComponent<{}, AppState> {
 
   async openRepo(path: string) {
     try {
-      this.addRepo(await RepoState.open(path));
+      this.addRepo(await RepoWrapper.open(path));
     } catch (e) {
       this.showNotification(`Unable to open repo: ${e.message}`, NotificationType.Error);
     }
   }
 
   addRepo(repo: Git.Repository) {
-    const repoState = new RepoState(repo, this.showNotification);
+    const repoState = new RepoWrapper(repo, this.showNotification);
     this.setState({
       repos: [repoState]
     });

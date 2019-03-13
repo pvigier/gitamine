@@ -2,11 +2,11 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { ReferenceItem } from './reference-item';
 import { InputDialogHandler } from './input-dialog';
-import { RepoState } from '../helpers/repo-state';
+import { RepoWrapper } from '../helpers/repo-wrapper';
 
 export interface ReferenceListProps { 
   title: string;
-  repo: RepoState;
+  repo: RepoWrapper;
   head: string | null;
   references: Git.Reference[];
   onOpenInputDialog: InputDialogHandler;

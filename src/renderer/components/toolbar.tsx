@@ -1,9 +1,9 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { RepoState, removeReferencePrefix } from '../helpers/repo-state';
+import { RepoWrapper, removeReferencePrefix } from '../helpers/repo-wrapper';
 
 export class ToolbarProps {
-  repo: RepoState;
+  repo: RepoWrapper;
   selectedCommit: Git.Commit | null;
   onRepoClose: () => void;
   onCreateBranch: (commit: Git.Commit) => void;

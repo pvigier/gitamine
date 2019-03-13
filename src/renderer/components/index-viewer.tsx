@@ -1,10 +1,10 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
-import { RepoState, PatchType } from '../helpers/repo-state';
+import { RepoWrapper, PatchType } from '../helpers/repo-wrapper';
 
 export interface IndexViewerProps { 
-  repo: RepoState;
+  repo: RepoWrapper;
   selectedPatch: Git.ConvenientPatch | null;
   onPatchSelect: (patch: Git.ConvenientPatch | null, type: PatchType) => void;
 }

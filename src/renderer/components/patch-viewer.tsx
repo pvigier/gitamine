@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import fileType, { FileTypeResult }  from 'file-type';
 import { isBinaryFile } from 'isbinaryfile';
-import { RepoState, PatchType } from '../helpers/repo-state'
+import { RepoWrapper, PatchType } from '../helpers/repo-wrapper'
 import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
 import { arePatchesEqual } from '../helpers/patch-comparison';
 import { TextPatchViewer, TextPatchViewerOptions } from './text-patch-viewer';
@@ -70,7 +70,7 @@ function getViewerType(oldType: BlobType, newType: BlobType) {
 // PatchViewer
 
 export interface PatchViewerProps { 
-  repo: RepoState;
+  repo: RepoWrapper;
   patch: Git.ConvenientPatch;
   patchType: PatchType;
   editorTheme: string;

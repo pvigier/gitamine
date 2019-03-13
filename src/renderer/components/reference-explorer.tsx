@@ -1,12 +1,12 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { RepoState } from '../helpers/repo-state';
+import { RepoWrapper } from '../helpers/repo-wrapper';
 import { ReferenceList } from './reference-list';
 import { StashList } from './stash-list';
 import { InputDialogHandler } from './input-dialog';
 
 export interface ReferenceExplorerProps { 
-  repo: RepoState;
+  repo: RepoWrapper;
   onCommitSelect: (commit: Git.Commit) => void;
   onIndexSelect: () => void;
   onOpenInputDialog: InputDialogHandler;

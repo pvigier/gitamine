@@ -1,10 +1,10 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { StashItem } from './stash-item';
-import { RepoState, Stash } from '../helpers/repo-state';
+import { RepoWrapper, Stash } from '../helpers/repo-wrapper';
 
 export interface StashListProps { 
-  repo: RepoState;
+  repo: RepoWrapper;
   stashes: Stash[];
   onClick: (commit: Git.Commit) => void;
 }

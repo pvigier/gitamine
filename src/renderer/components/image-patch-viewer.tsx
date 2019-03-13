@@ -1,9 +1,9 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { RepoState } from '../helpers/repo-state';
+import { RepoWrapper } from '../helpers/repo-wrapper';
 
 export interface ImagePatchViewerProps { 
-  repo: RepoState;
+  repo: RepoWrapper;
   patch: Git.ConvenientPatch;
   oldBuffer: Buffer;
   newBuffer: Buffer;

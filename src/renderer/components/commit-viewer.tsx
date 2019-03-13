@@ -2,7 +2,7 @@ import { clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
-import { PatchType, RepoState, shortenSha } from '../helpers/repo-state';
+import { PatchType, RepoWrapper, shortenSha } from '../helpers/repo-wrapper';
 import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
 
 function formatDate(date: Date) {
@@ -10,7 +10,7 @@ function formatDate(date: Date) {
 }
 
 export interface CommitViewerProps { 
-  repo: RepoState;
+  repo: RepoWrapper;
   commit: Git.Commit;
   selectedPatch: Git.ConvenientPatch | null;
   onCommitSelect: (commit: Git.Commit) => void;

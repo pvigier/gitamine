@@ -1,11 +1,11 @@
 import { remote, clipboard } from 'electron';
 import * as React from 'react';
 import * as Git from 'nodegit';
-import { RepoState, PatchType } from '../helpers/repo-state';
+import { RepoWrapper, PatchType } from '../helpers/repo-wrapper';
 import { openInEditor } from '../helpers/open-in-editor';
 
 export interface PatchItemProps { 
-  repo?: RepoState;
+  repo?: RepoWrapper;
   patch: Git.ConvenientPatch;
   type: PatchType;
   selected: boolean;

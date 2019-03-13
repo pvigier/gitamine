@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { RepoState } from '../helpers/repo-state';
+import { RepoWrapper } from '../helpers/repo-wrapper';
 import { createStashContextMenu } from '../helpers/stash-context-menu';
 
 export interface StashItemProps { 
-  repo: RepoState;
+  repo: RepoWrapper;
   name: string;
   index: number;
   onClick: () => void;

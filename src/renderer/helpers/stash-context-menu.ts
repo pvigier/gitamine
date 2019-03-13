@@ -1,7 +1,7 @@
 import { remote } from 'electron';
-import { RepoState } from './repo-state';
+import { RepoWrapper } from './repo-wrapper';
 
-export function createStashContextMenu(repo: RepoState, stashIndex: number) {
+export function createStashContextMenu(repo: RepoWrapper, stashIndex: number) {
   const template: Electron.MenuItemConstructorOptions[] = [];
   template.push(
     {

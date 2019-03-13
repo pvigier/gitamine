@@ -2,12 +2,12 @@ import * as React from 'react';
 import * as Git from 'nodegit';
 import { ReferenceBadge } from './reference-badge';
 import { InputDialogHandler } from './input-dialog';
-import { RepoState, Stash } from '../helpers/repo-state';
+import { RepoWrapper, Stash } from '../helpers/repo-wrapper';
 import { createStashContextMenu } from '../helpers/stash-context-menu';
 import { createCommitContextMenu } from '../helpers/commit-context-menu';
 
 export interface CommitItemProps { 
-  repo: RepoState;
+  repo: RepoWrapper;
   commit: Git.Commit;
   head: string | null;
   references: string[];

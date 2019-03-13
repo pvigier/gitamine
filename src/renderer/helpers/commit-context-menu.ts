@@ -1,9 +1,9 @@
 import * as Git from 'nodegit';
 import { remote, clipboard } from 'electron';
-import { RepoState, removeReferencePrefix } from './repo-state';
+import { RepoWrapper, removeReferencePrefix } from './repo-wrapper';
 import { InputDialogHandler } from '../components/input-dialog';
 
-export function createCommitContextMenu(repo: RepoState, 
+export function createCommitContextMenu(repo: RepoWrapper, 
   commit: Git.Commit, 
   onCreateBranch: (commit: Git.Commit) => void,
   onOpenInputDialog: InputDialogHandler) {

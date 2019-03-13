@@ -48,8 +48,21 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.getPatches();
+    if (this.props.repoState === RepoState.Merge) {
+      this.setState({
+        summary: await this.props.repo.getMergeMessage()
+      });
+    }
+  }
+
+  async componentDidUpdate(prevProps: IndexViewerProps) {
+    if (prevProps.repoState !== this.props.repoState) {
+      this.setState({
+        summary: this.props.repoState === RepoState.Merge ? await this.props.repo.getMergeMessage() : ''
+      });
+    } 
   }
    
   handleUnstagedPatchSelect(patch: Git.ConvenientPatch) {

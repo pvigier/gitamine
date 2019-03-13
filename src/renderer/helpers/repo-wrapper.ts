@@ -563,6 +563,18 @@ export class RepoWrapper {
     }
   }
 
+  async getMergeMessage() {
+    return new Promise<string>((resolve, reject) => {
+      fs.readFile(Path.join(this.path, 'MERGE_MSG'), (error, data) => {
+        if (!error) {
+          resolve(data.toString().split('\n')[0]);
+        } else {
+          reject(error);
+        }
+      });
+    });
+  }
+
   async finishMerge(message: string) {
     try {
       const author = this.getSignature();

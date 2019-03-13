@@ -1,10 +1,11 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { PatchList } from './patch-list';
-import { RepoWrapper, PatchType } from '../helpers/repo-wrapper';
+import { RepoWrapper, PatchType, RepoState } from '../helpers/repo-wrapper';
 
 export interface IndexViewerProps { 
   repo: RepoWrapper;
+  repoState: RepoState;
   selectedPatch: Git.ConvenientPatch | null;
   onPatchSelect: (patch: Git.ConvenientPatch | null, type: PatchType) => void;
 }
@@ -215,7 +216,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
   }
 
   getSubmitButton() {
-    if (this.props.repo.repo.isMerging()) {
+    if (this.props.repoState === RepoState.Merge) {
       return (
         <>
           <button className='green-button'
@@ -279,7 +280,7 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
           onSelectedPatchesChange={this.handleSelectedStagedPatchesChange} />
         <div className='section-header'>
           <p>Commit message</p>
-          {this.props.repo.headCommit && !this.props.repo.repo.isMerging() ?
+          {this.props.repo.headCommit && this.props.repoState !== RepoState.Merge ?
           <div className='amend-container'>
             <input type='checkbox' id='amend' name='amend' checked={this.state.amend} onChange={this.handleAmendChange} />
             <label htmlFor='amend'>Amend</label> 

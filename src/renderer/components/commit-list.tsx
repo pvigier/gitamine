@@ -3,13 +3,14 @@ import * as Git from 'nodegit';
 import { CommitItem } from './commit-item';
 import { IndexItem } from './index-item';
 import { InputDialogHandler } from './input-dialog';
-import { RepoWrapper } from '../helpers/repo-wrapper';
+import { RepoWrapper, RepoState } from '../helpers/repo-wrapper';
 import { getBranchColor } from '../helpers/commit-graph';
 
 const ITEM_HEIGHT = 28;
 
 export interface CommitListProps { 
   repo: RepoWrapper;
+  repoState: RepoState;
   selectedCommit: Git.Commit | null;
   onCommitSelect: (commit: Git.Commit) => void;
   onIndexSelect: () => void;
@@ -140,7 +141,7 @@ export class CommitList extends React.PureComponent<CommitListProps, CommitListS
     // Select visible commits and add index if necessary
     const items: JSX.Element[] = [];
     if (this.state.start === -1) {
-      items.push(<IndexItem state={this.props.repo.repo.state()} selected={this.props.selectedCommit === null}
+      items.push(<IndexItem repoState={this.props.repoState} selected={this.props.selectedCommit === null}
         onIndexSelect={this.props.onIndexSelect} 
         key='index' />);
     }

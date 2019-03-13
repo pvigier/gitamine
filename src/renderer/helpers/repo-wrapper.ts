@@ -33,6 +33,14 @@ export enum PatchType {
   Committed
 }
 
+export enum RepoState {
+  Cherrypick,
+  Commit,
+  Merge,
+  Rebase,
+  Revert
+}
+
 export class Stash {
   index: number;
   commit: Git.Commit;
@@ -303,6 +311,25 @@ export class RepoWrapper {
 
   static async open(path: string) {
     return await Git.Repository.open(path);
+  }
+
+  // State
+
+  getState() {
+    switch (this.repo.state()) {
+      case Git.Repository.STATE.CHERRYPICK:
+        return RepoState.Cherrypick;
+      case Git.Repository.STATE.MERGE:
+        return RepoState.Merge;
+      case Git.Repository.STATE.REBASE:
+      case Git.Repository.STATE.REBASE_INTERACTIVE:
+      case Git.Repository.STATE.REBASE_MERGE:
+        return RepoState.Rebase;
+      case Git.Repository.STATE.REVERT:
+        return RepoState.Revert;
+      default:
+        return RepoState.Commit;
+    }
   }
 
   // Head operations

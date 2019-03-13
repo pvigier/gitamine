@@ -12,7 +12,7 @@ import { Splitter } from './splitter';
 import { Toolbar } from './toolbar';
 import { LoadingScreen, LoadingState } from './loading-screen';
 import { InputDialogHandler } from './input-dialog';
-import { RepoWrapper, PatchType } from '../helpers/repo-wrapper';
+import { RepoWrapper, PatchType, RepoState } from '../helpers/repo-wrapper';
 import { CancellablePromise, makeCancellable } from '../helpers/make-cancellable';
 
 export interface RepoDashboardProps { 
@@ -25,6 +25,7 @@ export interface RepoDashboardProps {
 }
 
 export interface RepoDashboardState { 
+  repoState: RepoState;
   loadingState: LoadingState;
   selectedCommit: Git.Commit | null;
   selectedPatch: Git.ConvenientPatch | null;
@@ -57,6 +58,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
     this.exitPatchViewer = this.exitPatchViewer.bind(this);
     this.handleRightPanelResize = this.handleRightPanelResize.bind(this);
     this.state = {
+      repoState: this.props.repo.getState(),
       loadingState: LoadingState.NotLoading,
       selectedCommit: null,
       selectedPatch: null,
@@ -188,6 +190,9 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
 
   async refreshIndex() {
     if (!this.state.selectedCommit && this.rightViewer.current) {
+      this.setState({
+        repoState: this.props.repo.getState()
+      });
       const indexViewer = this.rightViewer.current as IndexViewer;
       await indexViewer.refresh();
       if (this.state.selectedPatch && this.state.patchType !== PatchType.Committed) {
@@ -233,6 +238,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         leftViewer = <LoadingScreen state={this.state.loadingState} />
       } else {
         leftViewer = <GraphViewer repo={this.props.repo} 
+          repoState={this.state.repoState}
           selectedCommit={this.state.selectedCommit} 
           onCommitSelect={this.handleCommitSelect}
           onIndexSelect={this.handleIndexSelect} 
@@ -251,6 +257,7 @@ export class RepoDashboard extends React.PureComponent<RepoDashboardProps, RepoD
         ref={this.rightViewer as React.RefObject<CommitViewer>} />
     } else {
       rightViewer = <IndexViewer repo={this.props.repo} 
+        repoState={this.state.repoState}
         selectedPatch={this.state.selectedPatch} 
         onPatchSelect={this.handlePatchSelect} 
         ref={this.rightViewer as React.RefObject<IndexViewer>} />

@@ -1,8 +1,9 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
+import { RepoState } from '../helpers/repo-wrapper';
 
 export interface IndexItemProps { 
-  state: number;
+  repoState: RepoState;
   selected: boolean;
   onIndexSelect: () => void;
 }
@@ -20,19 +21,17 @@ export class IndexItem extends React.PureComponent<IndexItemProps, {}> {
   render() {
     //console.log(this.props.state);
     let suffix = ''
-    switch (this.props.state) {
-      case Git.Repository.STATE.CHERRYPICK:
+    switch (this.props.repoState) {
+      case RepoState.Cherrypick:
         suffix = 'cherrypicking'
         break;
-      case Git.Repository.STATE.MERGE:
+      case RepoState.Merge:
         suffix = 'merging';
         break;
-      case Git.Repository.STATE.REBASE:
-      case Git.Repository.STATE.REBASE_INTERACTIVE:
-      case Git.Repository.STATE.REBASE_MERGE:
+      case RepoState.Rebase:
         suffix = 'rebasing';
         break;
-      case Git.Repository.STATE.REVERT:
+      case RepoState.Revert:
         suffix = 'reverting';
         break;
     }

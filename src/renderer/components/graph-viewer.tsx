@@ -5,10 +5,11 @@ import { CommitList } from './commit-list';
 import { Splitter } from './splitter';
 import { ReferenceExplorer } from './reference-explorer'
 import { InputDialogHandler } from './input-dialog';
-import { RepoWrapper } from "../helpers/repo-wrapper";
+import { RepoWrapper, RepoState } from "../helpers/repo-wrapper";
 
 export interface GraphViewerProps { 
   repo: RepoWrapper;
+  repoState: RepoState;
   selectedCommit: Git.Commit | null;
   onCommitSelect: (commit: Git.Commit) => void;
   onIndexSelect: () => void;

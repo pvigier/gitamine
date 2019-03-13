@@ -187,10 +187,14 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
       const message = this.state.description ? 
         `${this.state.summary}\n\n${this.state.description}` :
         this.state.summary;
-      if (this.state.amend) {
-        await this.props.repo.amend(message);
+      if (this.props.repoState === RepoState.Merge) {
+        await this.props.repo.finishMerge(message);
       } else {
-        await this.props.repo.commit(message);
+        if (this.state.amend) {
+          await this.props.repo.amend(message);
+        } else {
+          await this.props.repo.commit(message);
+        }
       }
       // Close path viewer if it is open
       this.props.onPatchSelect(null, PatchType.Committed);
@@ -224,7 +228,9 @@ export class IndexViewer extends React.PureComponent<IndexViewerProps, IndexView
             disabled={this.state.unstagedPatches.length === 0}>
             Commit and merge
           </button>
-          <button className='red-button' type='submit'>
+          <button className='red-button'
+            type='button'
+            onClick={() => this.props.repo.abortMerge()}>
             Abort merge
           </button>
         </>

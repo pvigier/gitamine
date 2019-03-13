@@ -563,6 +563,31 @@ export class RepoWrapper {
     }
   }
 
+  async finishMerge(message: string) {
+    try {
+      const author = this.getSignature();
+      const index = await this.repo.index();
+      const oid = await index.writeTree();
+      const mergeHeads = await this.getMergeHeads();
+      if (this.headCommit === null) {
+        throw new Error('Head not valid');
+      }
+      if (mergeHeads.length === 0) {
+        throw new Error('No merge head found');
+      }
+      await this.repo.createCommit('HEAD', author, author, message, oid, [this.headCommit, ...mergeHeads]);
+      await this.repo.stateCleanup();
+    } catch (e) {
+      this.onNotification(`Unable to merge: ${e.message}`, NotificationType.Error);
+    }
+  }
+
+  async abortMerge() {
+    if (this.repo.isMerging() && this.headCommit) {
+      await this.reset(this.headCommit, Git.Reset.TYPE.HARD);
+    }
+  }
+
   async fetchAll() {
     try {
       await this.repo.fetchAll(RepoWrapper.getCredentialsCallback());

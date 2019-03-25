@@ -566,9 +566,9 @@ export class RepoWrapper {
     }
   }
 
-  async merge(from: string, to: string) {
+  async merge(to: string, from: string) {
     try {
-      await this.repo.mergeBranches(from, to);
+      await this.repo.mergeBranches(to, from);
       this.onNotification('Merge successfully', NotificationType.Information);
     } catch (e) {
       this.onNotification(`Unable to merge ${from} into ${to}: ${e.message}`, NotificationType.Error);

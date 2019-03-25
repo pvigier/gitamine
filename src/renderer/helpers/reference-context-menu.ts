@@ -1,6 +1,6 @@
 import { remote, clipboard } from 'electron';
 import * as Git from 'nodegit';
-import { RepoWrapper } from './repo-wrapper';
+import { RepoWrapper, removeReferencePrefix } from './repo-wrapper';
 import { InputDialogHandler } from '../components/input-dialog';
 
 function createBranchContextMenu(repo: RepoWrapper, 
@@ -27,6 +27,14 @@ function createBranchContextMenu(repo: RepoWrapper,
       label: `Remove ${shortName}`,
       click: () => repo.removeReference(reference),
       enabled: reference.isBranch() === 1 && !currentBranch
+    },
+    {
+      type: 'separator'
+    },
+    {
+      label: `Merge ${shortName} into ${removeReferencePrefix(repo.head!.name())}`,
+      click: () => repo.merge(repo.head!.name(), reference.name()),
+      enabled: reference.isBranch() === 1 && !currentBranch && repo.head !== null
     },
     {
       type: 'separator'

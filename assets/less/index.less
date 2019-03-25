@@ -79,6 +79,20 @@ a {
   color: var(--link-color);
 }
 
+.spinner(@size) {
+  border: @size/5 solid var(--spinner-border);
+  border-top: @size/5 solid var(--spinner-color);
+  border-radius: 50%;
+  width: @size;
+  height: @size;
+  animation: spin 2s linear infinite;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+}
+
 /* Repo dashboard */
 
 div.repo-dashboard {
@@ -123,11 +137,19 @@ div.repo-toolbar {
 
   div.toolbar-buttons {
     flex: 1;
+    display: flex;
+    justify-content: center;
     padding: 4px 0px;
     
     button {
-      height: 100%;
-      margin: 0px 4px;
+      margin: 0px 2px;
+      padding: 0px;
+      width: 48px;
+
+      div.spinner {
+        .spinner(15px);
+        margin: auto;
+      }
     }
   }
 }
@@ -156,17 +178,7 @@ div.loading-screen {
   align-items: center;
 
   div.spinner {
-    border: 16px solid var(--spinner-border);
-    border-top: 16px solid var(--spinner-color);
-    border-radius: 50%;
-    width: 80px;
-    height: 80px;
-    animation: spin 2s linear infinite;
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    .spinner(80px);
   }
 }
 

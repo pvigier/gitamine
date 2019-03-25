@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as Git from 'nodegit';
 import { RepoWrapper, removeReferencePrefix } from '../helpers/repo-wrapper';
+import { SpinnerButton } from './spinner-button';
 
 export class ToolbarProps {
   repo: RepoWrapper;
@@ -20,18 +21,18 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
     this.handlePopButtonClick = this.handlePopButtonClick.bind(this);
   }
 
-  handleFetchButtonClick() {
-    this.props.repo.fetchAll();
+  async handleFetchButtonClick() {
+    await this.props.repo.fetchAll();
   }
 
-  handlePullButtonClick() {
+  async handlePullButtonClick() {
     if (this.props.repo.head) {
-      this.props.repo.pull(removeReferencePrefix(this.props.repo.head.name()));
+      await this.props.repo.pull(removeReferencePrefix(this.props.repo.head.name()));
     }
   }
 
-  handlePushButtonClick() {
-    this.props.repo.push();
+  async handlePushButtonClick() {
+    await this.props.repo.push();
   }
 
   handleBranchButtonClick() {
@@ -43,12 +44,12 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
     }
   }
 
-  handleStashButtonClick() {
-    this.props.repo.stash();
+  async handleStashButtonClick() {
+    await this.props.repo.stash();
   }
 
-  handlePopButtonClick() {
-    this.props.repo.popStash();
+  async handlePopButtonClick() {
+    await this.props.repo.popStash();
   }
 
   render() {
@@ -59,12 +60,12 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
         </div>
         <div className='separator' />
         <div className='toolbar-buttons'>
-          <button onClick={this.handleFetchButtonClick}>Fetch</button>
-          <button onClick={this.handlePullButtonClick}>Pull</button>
-          <button onClick={this.handlePushButtonClick}>Push</button>
+          <SpinnerButton value='Fetch' onClick={this.handleFetchButtonClick} />
+          <SpinnerButton value='Pull' onClick={this.handlePullButtonClick} />
+          <SpinnerButton value='Push' onClick={this.handlePushButtonClick} />
           <button onClick={this.handleBranchButtonClick}>Branch</button>
-          <button onClick={this.handleStashButtonClick}>Stash</button>
-          <button onClick={this.handlePopButtonClick}>Pop</button>
+          <SpinnerButton value='Stash' onClick={this.handleStashButtonClick} />
+          <SpinnerButton value='Pop' onClick={this.handlePopButtonClick} />
         </div>
         <button onClick={this.props.onRepoClose}>Close</button>
       </div>

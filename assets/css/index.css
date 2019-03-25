@@ -99,11 +99,31 @@ div.repo-toolbar div.separator {
 }
 div.repo-toolbar div.toolbar-buttons {
   flex: 1;
+  display: flex;
+  justify-content: center;
   padding: 4px 0px;
 }
 div.repo-toolbar div.toolbar-buttons button {
-  height: 100%;
-  margin: 0px 4px;
+  margin: 0px 2px;
+  padding: 0px;
+  width: 48px;
+}
+div.repo-toolbar div.toolbar-buttons button div.spinner {
+  border: 3px solid var(--spinner-border);
+  border-top: 3px solid var(--spinner-color);
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  animation: spin 2s linear infinite;
+  margin: auto;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 /* Repo content */
 div.repo-content {

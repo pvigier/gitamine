@@ -83,12 +83,12 @@ class Preferences extends React.PureComponent<PreferencesProps, PreferencesState
   }
 
   handleFontSizeChange(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({fontSize: Number(event.target.value)});
+    this.setState({fontSize: Number(event.target.value)}, this.handleEditorPreferencesChange);
   }
 
-  handleEditorPreferencesChange(event: React.ChangeEvent<HTMLInputElement>) {
+  handleEditorPreferencesChange() {
     this.props.onEditorPreferencesUpdate({
-      fontSize: Number(event.target.value)
+      fontSize: this.state.fontSize
     });
   }
 

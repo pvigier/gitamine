@@ -26,7 +26,7 @@ export class Toolbar extends React.PureComponent<ToolbarProps, {}> {
 
   handlePullButtonClick() {
     if (this.props.repo.head) {
-      this.props.repo.pull(removeReferencePrefix(this.props.repo.head));
+      this.props.repo.pull(removeReferencePrefix(this.props.repo.head.name()));
     }
   }
 

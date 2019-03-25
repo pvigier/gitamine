@@ -24,7 +24,7 @@ export function createCommitContextMenu(repo: RepoWrapper,
   if (repo.head) {
     template.push(
       {
-        label: `Reset ${removeReferencePrefix(repo.head)} to this commit`,
+        label: `Reset ${removeReferencePrefix(repo.head.name())} to this commit`,
         submenu: [
           {
             label: 'Soft',

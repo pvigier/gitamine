@@ -64,7 +64,7 @@ export class RepoWrapper {
   tags: Map<string, Git.Tag>; // Annotated tags
   parents: Map<string, string[]>;
   children: Map<string, string[]>;
-  head: string | null;
+  head: Git.Reference | null;
   headCommit: Git.Commit | null;
   graph: CommitGraph;
   unstagedPatches: Git.ConvenientPatch[];
@@ -291,7 +291,8 @@ export class RepoWrapper {
 
   async updateHead() {
     try  {
-      this.head = (await this.repo.head()).name();
+      // Check what happens when HEAD is detached
+      this.head = await this.repo.head();
     } catch (e) {
       this.head = null;
     }

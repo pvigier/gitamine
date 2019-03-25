@@ -86,8 +86,8 @@ export class GraphCanvas extends React.PureComponent<GraphCanvasProps, {}> {
       const node = positions.get(repo.headCommit.sha())!;
       if (!node) {
         console.error(`Unable to draw index edge: position of head is undefined.\n` + 
-          `Head\'s sha: ${repo.headCommit.sha()}.\n` + 
-          `Branch: ${repo.head}`);
+          `Head\'s commit: ${repo.headCommit.sha()}.\n` + 
+          `Heads's branch: ${repo.head ? repo.head.name() : ''}`);
         return;
       }
       const [x1, y1] = this.computeNodeCenterCoordinates(node[0], node[1]);

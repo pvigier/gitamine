@@ -7,7 +7,7 @@ import { RepoWrapper } from '../helpers/repo-wrapper';
 export interface ReferenceListProps { 
   title: string;
   repo: RepoWrapper;
-  head: string | null;
+  head: Git.Reference | null;
   references: Git.Reference[];
   onOpenInputDialog: InputDialogHandler;
   onClick: (commit: Git.Commit) => void;
@@ -39,7 +39,7 @@ export class ReferenceList extends React.PureComponent<ReferenceListProps, Refer
         const name = reference.name();
         return <ReferenceItem repo={this.props.repo}
           reference={reference} 
-          selected={this.props.head === reference.name()}
+          selected={this.props.head !== null && this.props.head.name() === reference.name()}
           onOpenInputDialog={this.props.onOpenInputDialog}
           onClick={() => this.props.onClick(this.props.repo.getReferenceCommit(name, reference))} 
           key={name} />;

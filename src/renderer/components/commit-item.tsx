@@ -9,7 +9,7 @@ import { createCommitContextMenu } from '../helpers/commit-context-menu';
 export interface CommitItemProps { 
   repo: RepoWrapper;
   commit: Git.Commit;
-  head: string | null;
+  head: Git.Reference | null;
   references: string[];
   selected: boolean;
   color: string;
@@ -48,7 +48,7 @@ export class CommitItem extends React.PureComponent<CommitItemProps, {}> {
     const badges = this.props.references.map((name) => (
       <ReferenceBadge reference={this.props.repo.references.get(name)!} 
         color={this.props.color} 
-        selected={name === this.props.head} 
+        selected={this.props.head !== null && name === this.props.head.name()} 
         repo={this.props.repo}
         onOpenInputDialog={this.props.onOpenInputDialog}
         key={name} />

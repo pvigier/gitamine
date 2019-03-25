@@ -1,16 +1,18 @@
 import * as React from 'react';
 
-interface ModalComponentProps {
-  onClose: () => void
-};
+interface WrappedComponentProps {
+  onClose: () => void;
+}
+
+type ModalComponentProps<P> = P & {title: string};
 
 interface ComponentConstructor<P, S> {
   new(props: P): React.PureComponent<P, S>;
 }
 
-export function makeModal<P extends ModalComponentProps, S>(Component: ComponentConstructor<P, S>) {
-  return class extends React.PureComponent<P, S> {
-    constructor(props: P) {
+export function makeModal<P extends WrappedComponentProps, S>(Component: ComponentConstructor<P, S>) {
+  return class extends React.PureComponent<ModalComponentProps<P>, S> {
+    constructor(props: ModalComponentProps<P>) {
       super(props);
       this.handleKeyUp = this.handleKeyUp.bind(this);
     }
@@ -25,10 +27,13 @@ export function makeModal<P extends ModalComponentProps, S>(Component: Component
     render() {
       return (
         <div className='modal-container' onKeyUp={this.handleKeyUp} tabIndex={-1}>
-          <button className='modal-close-button' onClick={this.props.onClose}>
-            Close
-          </button>
           <div className='modal-background'>
+            <div className='modal-header'>
+              <h2>{this.props.title}</h2>
+              <button onClick={this.props.onClose}>
+                X
+              </button>
+            </div>
             <Component {...this.props} />
           </div>
         </div>

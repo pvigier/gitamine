@@ -134,7 +134,8 @@ export class App extends React.PureComponent<{}, AppState> {
   // Modal components
 
   openCloneRepoDialog() {
-    const element = <CloneRepoDialog onCloneRepo={this.cloneRepo} 
+    const element = <CloneRepoDialog title='Clone a repo' 
+      onCloneRepo={this.cloneRepo} 
       onClose={this.closeModalWindow} />
     this.setState({
       modalWindow: element
@@ -142,7 +143,8 @@ export class App extends React.PureComponent<{}, AppState> {
   }
 
   openInitRepoDialog() {
-    const element = <InitRepoDialog onInitRepo={this.initRepo} 
+    const element = <InitRepoDialog title='Initialize a repo'
+      onInitRepo={this.initRepo} 
       onClose={this.closeModalWindow} />
     this.setState({
       modalWindow: element
@@ -161,7 +163,8 @@ export class App extends React.PureComponent<{}, AppState> {
   }
 
   openPreferencesDialog() {
-    const element = <PreferencesDialog onClose={this.closeModalWindow} 
+    const element = <PreferencesDialog title='Preferences'
+      onClose={this.closeModalWindow} 
       onThemeUpdate={this.updateTheme}
       onEditorPreferencesUpdate={this.updatePatchViewer} />
     this.setState({
@@ -170,7 +173,8 @@ export class App extends React.PureComponent<{}, AppState> {
   }
 
   openCreateBranchDialog(commit: Git.Commit) {
-    const element = <CreateBranchDialog repo={this.getCurrentRepo()}
+    const element = <CreateBranchDialog title='Create a branch'
+      repo={this.getCurrentRepo()}
       commit={commit}
       onClose={this.closeModalWindow} />;
     this.setState({
@@ -178,8 +182,9 @@ export class App extends React.PureComponent<{}, AppState> {
     });
   }
 
-  openInputDialog(label: string, button: string, onSubmit: (value: string) => void, defaultValue = '') {
-    const element = <InputDialog label={label} 
+  openInputDialog(title: string, label: string, button: string, onSubmit: (value: string) => void, defaultValue = '') {
+    const element = <InputDialog title={title}
+      label={label} 
       button={button} 
       defaultValue={defaultValue} 
       onSubmit={onSubmit}

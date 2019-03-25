@@ -1,7 +1,12 @@
 import * as React from 'react';
 import { makeModal } from './make-modal';
 
-export type InputDialogHandler = (label: string, button: string, onSubmit: (value: string) => void, defaultValue?: string) => void;
+export type InputDialogHandler = (title: string, 
+  label: string, 
+  button: string, 
+  onSubmit: (value: string) => void, 
+  defaultValue?: string)
+  => void;
 
 export class InputFormProps {
   defaultValue = '';

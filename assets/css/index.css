@@ -803,11 +803,21 @@ div.modal-container {
 div.modal-container div.modal-background {
   background-color: var(--background-color);
 }
-div.modal-container button.modal-close-button {
+div.modal-container div.modal-background div.modal-header {
+  position: relative;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+  margin: 0px 8px;
+  padding: 4px 0px;
+}
+div.modal-container div.modal-background div.modal-header h2 {
+  margin: 0px;
+}
+div.modal-container div.modal-background div.modal-header button {
   position: absolute;
   top: 0px;
-  right: 0;
-  height: 42px;
+  right: 0px;
+  margin: 4px 0px;
 }
 /* Modal forms */
 form.modal-form {
@@ -868,7 +878,7 @@ div.preferences main {
 }
 div.preferences section {
   display: none;
-  padding: 16px;
+  padding: 16px 8px;
 }
 div.preferences section.shown {
   display: block;

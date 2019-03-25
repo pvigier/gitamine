@@ -8,7 +8,7 @@ export function createCommitContextMenu(repo: RepoWrapper,
   onCreateBranch: (commit: Git.Commit) => void,
   onOpenInputDialog: InputDialogHandler) {
   function openCreateTagDialog() {
-    onOpenInputDialog('Name', 'Create tag', (value) => repo.createTag(value, commit));
+    onOpenInputDialog('Create tag', 'Name', 'Create tag', (value) => repo.createTag(value, commit));
   }
 
   const template: Electron.MenuItemConstructorOptions[] = [

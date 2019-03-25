@@ -8,7 +8,7 @@ function createBranchContextMenu(repo: RepoWrapper,
   currentBranch: boolean, 
   onOpenInputDialog: InputDialogHandler) {
   function openRenameBranchDialog() {
-    onOpenInputDialog('Name', 'Rename', (value) => repo.renameReference(reference, value), shortName);
+    onOpenInputDialog('Rename branch', 'Name', 'Rename', (value) => repo.renameReference(reference, value), shortName);
   }
 
   const shortName = reference.shorthand();
@@ -51,7 +51,7 @@ function createTagContextMenu(repo: RepoWrapper,
   reference: Git.Reference, 
   onOpenInputDialog: InputDialogHandler) {
   function openRenameTagDialog() {
-    onOpenInputDialog('Name', 'Rename', (value) => repo.renameReference(reference, value), shortName);
+    onOpenInputDialog('Rename tag', 'Name', 'Rename', (value) => repo.renameReference(reference, value), shortName);
   }
 
   const shortName = reference.shorthand();

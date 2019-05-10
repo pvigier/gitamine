@@ -20,6 +20,8 @@ gitamine is powered by awesome technologies including:
 * [libgit2](https://libgit2.org/) and [NodeGit](https://www.nodegit.org/)
 * [chokidar](https://github.com/paulmillr/chokidar)
 
+If you want to know more about the commit graph drawing algorithm, you can read this [article](https://pvigier.github.io/2019/05/06/commit-graph-drawing-algorithms.html).
+
 ## Downloads
 
 You can download the latest version of gitamine [here](https://github.com/pvigier/gitamine/releases/latest).
